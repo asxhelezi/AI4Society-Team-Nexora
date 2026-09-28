@@ -1,7 +1,7 @@
 /// <reference types="vitest/config" />
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { cpSync, readFileSync, statSync } from 'node:fs';
+import { cpSync, existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { copyRolePanels, panelBody, rolePanels } from './role-panels.mjs';
@@ -9,7 +9,15 @@ import { copyRolePanels, panelBody, rolePanels } from './role-panels.mjs';
 const root = dirname(fileURLToPath(import.meta.url));
 const loginRoot = resolve(root, '../sinjal-login');
 
-function serveExistingLogin(): Plugin {
+// The login page is plain HTML outside the bundle; /login/config.js tells it whether to
+// sign in with Supabase (the publishable key is meant to be public).
+function loginConfig(env: Record<string, string>): string {
+  const url = (env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
+  const key = env.VITE_SUPABASE_ANON_KEY || '';
+  return `window.SINJAL_SUPABASE = ${url && key ? JSON.stringify({ url, key }) : 'null'};\n`;
+}
+
+function serveExistingLogin(env: Record<string, string>): Plugin {
   return {
     name: 'serve-existing-login',
     configureServer(server) {
@@ -17,6 +25,11 @@ function serveExistingLogin(): Plugin {
         const pathname = (req.url || '').split('?', 1)[0];
         if (pathname === '/login') {
           res.statusCode = 302; res.setHeader('Location', '/login/'); res.end(); return;
+        }
+        if (pathname === '/login/config.js') {
+          res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+          res.setHeader('Cache-Control', 'no-store');
+          res.end(loginConfig(env)); return;
         }
         const panel = Object.keys(rolePanels).find((name) => pathname === `/${name}` || pathname.startsWith(`/${name}/`));
         if (panel && pathname === `/${panel}`) {
@@ -52,16 +65,20 @@ function serveExistingLogin(): Plugin {
     closeBundle() {
       const output = resolve(root, 'dist');
       cpSync(loginRoot, resolve(output, 'login'), { recursive: true });
-      copyRolePanels(root, output);
+      writeFileSync(resolve(output, 'login', 'config.js'), loginConfig(env));
+      if (Object.values(rolePanels).every((panel) => existsSync(resolve(root, panel.source)))) copyRolePanels(root, output);
     },
   };
 }
 
-export default defineConfig({
-  plugins: [react(), serveExistingLogin()],
-  server: { proxy: { '/v1': 'http://127.0.0.1:8080' } },
-  test: {
-    environment: 'jsdom',
-    include: ['tests/**/*.test.{ts,tsx}'],
-  },
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, root, 'VITE_');
+  return {
+    plugins: [react(), serveExistingLogin(env)],
+    server: { proxy: { '/v1': 'http://127.0.0.1:8080' } },
+    test: {
+      environment: 'jsdom',
+      include: ['tests/**/*.test.{ts,tsx}'],
+    },
+  };
 });

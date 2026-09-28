@@ -336,6 +336,7 @@
   <footer class="foot">© 2026 Sinjal</footer>
 </div>
 
+<script src="config.js"></script>
 <script>
 (function () {
   // ---- Background video: pick the cut that matches the layout, keep the still poster underneath ----
@@ -411,15 +412,54 @@
     window.setTimeout(function () { window.location.assign(info.path); }, 1100);
   }
 
+  // ---- Supabase (config.js sets window.SINJAL_SUPABASE when the staff app is built for it) ----
+  var SB = window.SINJAL_SUPABASE || null;
+  if (SB) {
+    // Only clerks sign in here; the staff desktop is their panel.
+    Object.keys(ROLE_ROUTES).forEach(function (role) { if (role !== 'clerk') delete ROLE_ROUTES[role]; });
+    document.querySelector('label[for="username"]').textContent = 'Email';
+    document.getElementById('u-err').textContent = 'Shkruani email-in.';
+    document.getElementById('username').setAttribute('autocomplete', 'email');
+    var google = document.querySelector('[data-sso="Google"]');
+    if (google) google.hidden = true;
+  }
+
+  async function supabaseLogin(email, password) {
+    var response = await fetch(SB.url + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { apikey: SB.key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password }),
+      cache: 'no-store'
+    });
+    if (response.status === 400 || response.status === 401) throw new Error('invalid_credentials');
+    if (!response.ok) throw new Error('service_unavailable');
+    var session = await response.json();
+    var profile = await fetch(SB.url + '/rest/v1/profiles?select=id,full_name,email,role,department_id,active&id=eq.' +
+      encodeURIComponent(session.user.id), {
+      headers: { apikey: SB.key, Authorization: 'Bearer ' + session.access_token },
+      cache: 'no-store'
+    });
+    var rows = profile.ok ? await profile.json() : [];
+    if (!rows.length || !rows[0].active) throw new Error('invalid_role');
+    return { access_token: session.access_token, refresh_token: session.refresh_token, user: rows[0] };
+  }
+
   function finishLogin(result, method, remember) {
     var user = result.user;
     if (!result.access_token || !user || !ROLE_ROUTES[user.role]) throw new Error('invalid_role');
     var storage = remember ? window.localStorage : window.sessionStorage;
     window.localStorage.removeItem('sinjal_staff_access');
     window.sessionStorage.removeItem('sinjal_staff_access');
+    window.localStorage.removeItem('sinjal_staff_refresh');
+    window.sessionStorage.removeItem('sinjal_staff_refresh');
     window.localStorage.removeItem('sinjal_session');
     window.sessionStorage.removeItem('sinjal_session');
     storage.setItem('sinjal_staff_access', result.access_token);
+    if (result.refresh_token) {
+      // The staff app turns these into its Supabase session (and then removes them).
+      storage.setItem('sinjal_staff_refresh', result.refresh_token);
+      window.localStorage.setItem('sinjal_remember', remember ? '1' : '0');
+    }
     storage.setItem('sinjal_session', JSON.stringify({
       app: ROLE_ROUTES[user.role].app, user: {
         id: user.id, name: user.full_name, email: user.email,
@@ -439,22 +479,29 @@
     if (!okP) { p.focus(); return; }
     setBusy(submit, 'Po verifikohet');
     try {
-      var response = await fetch('/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u.value.trim(), password: p.value }),
-        cache: 'no-store'
-      });
-      if (response.status === 401) throw new Error('invalid_credentials');
-      if (!response.ok) throw new Error('service_unavailable');
-      var result = await response.json();
+      var result;
+      if (SB) {
+        result = await supabaseLogin(u.value.trim(), p.value);
+      } else {
+        var response = await fetch('/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u.value.trim(), password: p.value }),
+          cache: 'no-store'
+        });
+        if (response.status === 401) throw new Error('invalid_credentials');
+        if (!response.ok) throw new Error('service_unavailable');
+        result = await response.json();
+      }
       finishLogin(result, 'password', document.getElementById('remember').checked);
       clearBusy(submit);
     } catch (err) {
       clearBusy(submit);
       alertBox.querySelector('span').textContent = err.message === 'invalid_credentials'
-        ? 'Emri i përdoruesit ose fjalëkalimi është i gabuar.'
-        : 'Hyrja nuk u krye. Ju lutemi provoni përsëri.';
+        ? (SB ? 'Email-i ose fjalëkalimi është i gabuar.' : 'Emri i përdoruesit ose fjalëkalimi është i gabuar.')
+        : err.message === 'invalid_role'
+          ? 'Kjo llogari nuk ka qasje në panelin e stafit.'
+          : 'Hyrja nuk u krye. Ju lutemi provoni përsëri.';
       alertBox.hidden = false; pW.classList.add('is-invalid'); p.value = ''; p.focus();
     }
   });

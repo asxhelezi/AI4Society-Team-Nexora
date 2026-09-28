@@ -1,5 +1,9 @@
 # Citizen app ↔ backend
 
+**Supabase (no server):** set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`, and the app
+submits, uploads photos, tracks and loads the map through Supabase (`src/api/supabaseReports.ts`). For setup,
+see `../supabase/README.md`. The rest of this page describes the FastAPI backend.
+
 The citizen site (`sinjal-citizen-react`) runs on mock data by default. This is what it
 needs from the FastAPI backend (`backend/`) to run on real data.
 

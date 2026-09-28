@@ -1,5 +1,7 @@
 # Staff backend integration
 
+**Supabase (no server):** set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`. Then sign-in, report loading, the review/assign/status/publish actions and live updates (new citizen reports appear without a reload) all go to Supabase, and `/v1` is not used. For setup, see `../supabase/README.md`. The rest of this page describes the FastAPI backend.
+
 With `npm run dev`, `/v1` is proxied to the FastAPI server on `127.0.0.1:8080`; the API and PostgreSQL must be running. Start the backend according to `backend/README.md`, then run `npm ci && npm run dev` here. Sign in with a backend clerk account. The existing login and role checks remain in place.
 
 Docker Compose builds the staff UI at `http://127.0.0.1:8013` and proxies `/v1/` to `api:8080`. By default the authenticated clerk sees the original demonstration reports, charts, pins, automations and performance screens, alongside citizen reports fetched from the backend. In this presentation mode, changes to the authored demo cases and controls are stored only in that browser's localStorage; changes to real citizen cases use the existing API and database where the backend supports the transition. No new staff demo endpoints or database migrations are included in this frontend update. For an API-only view set `VITE_STAFF_DEMO=false` **at build time** and rebuild the staff UI. To inspect the standalone demo without login set `VITE_STAFF_REAL=false` at build time; this is only for local development.
