@@ -4,6 +4,7 @@
     {
       "source": "/v1/:path*",
       "destination": "https://sinjal-backend.onrender.com/v1/:path*"
-    }
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
