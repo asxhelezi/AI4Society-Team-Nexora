@@ -133,19 +133,19 @@ create index report_status_history_report_idx on public.report_status_history (r
 -- Who is calling (security definer so RLS policies can use them without recursion)
 -- ---------------------------------------------------------------------------------------
 
-create function public.staff_role() returns text
+create or replace function public.staff_role() returns text
 language sql stable security definer set search_path = public as $$
   select role from public.profiles where id = auth.uid() and active
 $$;
 
-create function public.staff_department() returns uuid
+create or replace function public.staff_department() returns uuid
 language sql stable security definer set search_path = public as $$
   select department_id from public.profiles where id = auth.uid() and active
 $$;
 
 -- The old API's access_filter(): office roles see everything, a department manager their
 -- department, field staff what is assigned to them.
-create function public.can_see_report(p_report uuid) returns boolean
+create or replace function public.can_see_report(p_report uuid) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (
     select 1 from public.reports r
@@ -161,10 +161,10 @@ language sql stable security definer set search_path = public as $$
   )
 $$;
 
--- Statuses a citizen may see on the public map.
-create function public.is_public_status(p_status text) returns boolean
+-- Statuses a citizen may see on the public map: in progress or resolved.
+create or replace function public.is_public_status(p_status text) returns boolean
 language sql immutable as $$
-  select p_status in ('accepted', 'assigned', 'in_progress', 'blocked', 'resolved', 'published')
+  select p_status in ('assigned', 'in_progress', 'blocked', 'resolved', 'published')
 $$;
 
 -- ---------------------------------------------------------------------------------------
@@ -219,7 +219,7 @@ create policy "staff read report history" on public.report_status_history for se
 
 -- What the staff desktop loads: reports with the names it shows. security_invoker keeps
 -- the reports RLS above in force for whoever queries it.
-create view public.staff_reports with (security_invoker = true) as
+create or replace view public.staff_reports with (security_invoker = true) as
 select
   r.id, r.tracking_code, r.anonymous, r.title, r.description, r.category, r.category_code, r.subcategory,
   r.address, r.latitude, r.longitude, r.status, r.priority, r.department_id, d.name as department_name,
@@ -240,7 +240,7 @@ grant select on public.staff_reports to authenticated;
 -- ---------------------------------------------------------------------------------------
 
 -- POST /v1/reports. Returns { id, tracking_code, status }.
-create function public.create_report(payload jsonb) returns jsonb
+create or replace function public.create_report(payload jsonb) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
   v_anonymous boolean := coalesce((payload ->> 'anonymous')::boolean, true);
@@ -321,7 +321,7 @@ end;
 $$;
 
 -- Storage policy helper: a report accepts citizen uploads for one hour after submission.
-create function public.report_accepts_uploads(p_folder text) returns boolean
+create or replace function public.report_accepts_uploads(p_folder text) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (
     select 1 from public.reports
@@ -330,7 +330,7 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- POST /v1/reports/{id}/files after the browser has put the file in storage.
-create function public.register_report_photo(
+create or replace function public.register_report_photo(
   p_report_id uuid, p_tracking_code text, p_path text, p_name text, p_content_type text, p_size bigint
 ) returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -358,7 +358,7 @@ end;
 $$;
 
 -- GET /v1/reports/track/{code}. Returns null for an unknown code.
-create function public.track_report(p_code text) returns jsonb
+create or replace function public.track_report(p_code text) returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
     'tracking_code', r.tracking_code, 'title', r.title, 'category', r.category, 'address', r.address,
@@ -378,7 +378,7 @@ $$;
 
 -- GET /v1/public/reports: the map. Private fields (reporter_email, client_hash,
 -- assignee, AI analysis) are never returned. Photos are storage paths; the client signs them.
-create function public.list_public_reports() returns jsonb
+create or replace function public.list_public_reports() returns jsonb
 language sql stable security definer set search_path = public as $$
   select coalesce(jsonb_agg(item order by submitted_at desc), '[]'::jsonb) from (
     select r.submitted_at, jsonb_build_object(
@@ -408,7 +408,7 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- Storage policy helper: anyone may view the photos of a report that is on the public map.
-create function public.photo_is_public(p_path text) returns boolean
+create or replace function public.photo_is_public(p_path text) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (
     select 1 from public.report_files f join public.reports r on r.id = f.report_id
@@ -421,7 +421,7 @@ $$;
 -- Staff functions: the old /review, /assign, /status and /publish endpoints
 -- ---------------------------------------------------------------------------------------
 
-create function public.staff_review(
+create or replace function public.staff_review(
   p_report uuid, p_decision text, p_priority text default 'normal', p_department uuid default null,
   p_note text default '', p_duplicate_of uuid default null
 ) returns jsonb
@@ -460,7 +460,7 @@ begin
 end;
 $$;
 
-create function public.staff_assign(
+create or replace function public.staff_assign(
   p_report uuid, p_department uuid default null, p_assigned_to uuid default null, p_note text default ''
 ) returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -496,7 +496,7 @@ begin
 end;
 $$;
 
-create function public.staff_set_status(p_report uuid, p_status text, p_note text default '') returns jsonb
+create or replace function public.staff_set_status(p_report uuid, p_status text, p_note text default '') returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
   v_role text := coalesce(public.staff_role(), '');
@@ -535,7 +535,7 @@ begin
 end;
 $$;
 
-create function public.staff_publish(p_report uuid) returns jsonb
+create or replace function public.staff_publish(p_report uuid) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
   v_old text;
@@ -561,7 +561,7 @@ $$;
 
 -- Run from the SQL editor to make an Auth user a staff member:
 --   select public.set_staff_profile('name@example.org', 'clerk', 'Emri Mbiemri', 'infra');
-create function public.set_staff_profile(p_email text, p_role text, p_full_name text, p_department_code text default null)
+create or replace function public.set_staff_profile(p_email text, p_role text, p_full_name text, p_department_code text default null)
 returns public.profiles
 language plpgsql security definer set search_path = public as $$
 declare
