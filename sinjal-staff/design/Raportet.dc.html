@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<title>Sinjal — Nëpunësi — Raportet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="staff.css">
+<script src="mock-data.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;}</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;background:#F5F2ED;overflow:hidden;position:relative;">
+
+<sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onTogglePanel }}" style="position:absolute;inset:0;z-index:55;"></div>
+</sc-if>
+
+<dc-import name="Sidebar" active="raportet" hint-size="232px,900px"></dc-import>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto;">
+  <header class="page-header">
+    <div class="page-header-main">
+      <h1 class="page-title">Raportet</h1>
+      <p class="page-context">{{ resultsLabel }}</p>
+    </div>
+    <div class="page-actions">
+      <dc-import name="NotificationBell" hint-size="40px,40px"></dc-import>
+    </div>
+  </header>
+
+  <div style="padding:20px 28px 0;flex:0 0 auto;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+      <div style="position:relative;flex:1 1 260px;min-width:220px;max-width:420px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A847C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:11px;top:11px;pointer-events:none;"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" value="{{ search }}" onChange="{{ onSearch }}" placeholder="Kërko sipas ID, titullit, përshkrimit ose adresës…" class="staff-input" style="width:100%;padding:9px 12px 9px 32px;">
+      </div>
+
+      <div style="position:relative;flex:0 0 auto;">
+        <button type="button" onClick="{{ onTogglePanel }}" class="tap staff-btn-secondary {{ panelBtnClass }}" style="padding:9px 14px;display:inline-flex;align-items:center;gap:7px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filtra
+          <sc-if value="{{ activeFilterBadge.show }}">
+            <span class="tabular-nums" style="min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#C23B31;color:#F5F2ED;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">{{ activeFilterBadge.n }}</span>
+          </sc-if>
+        </button>
+
+        <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+          <div class="panel" style="top:44px;left:0;width:700px;max-height:600px;overflow-y:auto;padding:16px 18px;">
+
+            <div style="margin-bottom:14px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                <div class="filter-group-title" style="margin-bottom:0;">Filtrat e ruajtur</div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <button type="button" onClick="{{ onClearAll }}" class="tap" style="border:0;background:transparent;padding:2px 4px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#6B665F;">Pastro të gjitha filtrat</button>
+                  <button type="button" onClick="{{ onOpenSaving }}" class="tap" style="border:0;background:transparent;padding:2px 4px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#C23B31;">+ Ruaj filtrin aktual</button>
+                </div>
+              </div>
+              <sc-if value="{{ savingOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:10px;background:#F5F2ED;border-radius:10px;margin-bottom:8px;">
+                  <input type="text" value="{{ savingName }}" onChange="{{ onSavingNameChange }}" placeholder="Emri: p.sh. Infrastrukturë — SLA në rrezik" class="staff-input" style="width:100%;padding:7px 10px;font-size:12px;">
+                  <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <button type="button" onClick="{{ onToggleSavingDefault }}" class="tap filter-check-row" style="width:auto;padding:2px;">
+                      <span class="check-box {{ savingDefaultClass }}"><sc-if value="{{ savingDefault }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+                      Përdore si filtër të paracaktuar
+                    </button>
+                    <div style="display:flex;gap:8px;">
+                      <button type="button" onClick="{{ onCancelSaving }}" class="tap" style="border:0;background:transparent;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;">Anulo</button>
+                      <button type="button" onClick="{{ onSaveCurrent }}" class="tap staff-btn-primary" style="padding:6px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Ruaj</button>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-for list="{{ savedFilterRows }}" as="sf" hint-placeholder-count="3">
+                <div class="saved-filter-row">
+                  <button type="button" onClick="{{ sf.onApply }}" class="tap" style="flex:1;min-width:0;text-align:left;border:0;background:transparent;display:flex;align-items:center;gap:8px;">
+                    <span style="flex:0 0 auto;display:flex;" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="#C23B31" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+                    <span style="min-width:0;">
+                      <span style="display:block;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ sf.name }}</span>
+                      <span style="display:block;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">{{ sf.resultLabel }}</span>
+                    </span>
+                  </button>
+                  <button type="button" onClick="{{ sf.onDelete }}" class="tap" style="flex:0 0 auto;border:0;background:transparent;color:#B0AAA0;padding:4px;font-size:12px;">✕</button>
+                </div>
+              </sc-for>
+              <sc-if value="{{ savedFiltersEmpty }}">
+                <div style="padding:6px 8px;font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;">Ende pa filtra të ruajtur.</div>
+              </sc-if>
+            </div>
+
+            <div style="padding-top:12px;border-top:1px solid #EFEAE2;display:grid;grid-template-columns:repeat(3,1fr);gap:4px 20px;">
+              <sc-for list="{{ filterGroups }}" as="grp" hint-placeholder-count="7">
+                <div style="margin-bottom:14px;">
+                  <div class="filter-group-title">{{ grp.title }}</div>
+                  <sc-for list="{{ grp.items }}" as="it" hint-placeholder-count="6">
+                    <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+                      <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+                      {{ it.label }}
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="padding-top:8px;border-top:1px solid #EFEAE2;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+              <div>
+                <div class="filter-group-title">Data e raportimit</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                  <sc-for list="{{ reportedPresets }}" as="p" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ p.onClick }}" class="tap staff-chip {{ p.onClass }}" style="padding:5px 10px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">{{ p.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ reportedCustomShow }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+                    <input type="date" value="{{ reportedFrom }}" onChange="{{ onReportedFrom }}" class="staff-input" style="padding:6px 7px;font-size:11px;flex:1;min-width:0;">
+                    <span style="color:#8A847C;font-size:11px;flex:0 0 auto;">deri</span>
+                    <input type="date" value="{{ reportedTo }}" onChange="{{ onReportedTo }}" class="staff-input" style="padding:6px 7px;font-size:11px;flex:1;min-width:0;">
+                  </div>
+                </sc-if>
+              </div>
+              <div>
+                <div class="filter-group-title">Përditësuar</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                  <sc-for list="{{ updatedPresets }}" as="p" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ p.onClick }}" class="tap staff-chip {{ p.onClass }}" style="padding:5px 10px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">{{ p.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ updatedCustomShow }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+                    <input type="date" value="{{ updatedFrom }}" onChange="{{ onUpdatedFrom }}" class="staff-input" style="padding:6px 7px;font-size:11px;flex:1;min-width:0;">
+                    <span style="color:#8A847C;font-size:11px;flex:0 0 auto;">deri</span>
+                    <input type="date" value="{{ updatedTo }}" onChange="{{ onUpdatedTo }}" class="staff-input" style="padding:6px 7px;font-size:11px;flex:1;min-width:0;">
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="flex:1;"></div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex:0 0 auto;position:relative;">
+        <span style="font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;white-space:nowrap;">Rendit sipas:</span>
+        <button type="button" onClick="{{ onToggleSort }}" class="tap staff-select" style="padding:8px 10px;display:inline-flex;align-items:center;gap:7px;border:1px solid #D9D4CC;">
+          {{ sortLabel }}
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <sc-if value="{{ sortOpen }}" hint-placeholder-val="{{ false }}">
+          <div class="panel" style="top:38px;right:0;width:230px;padding:6px;">
+            <sc-for list="{{ sortOptions }}" as="o" hint-placeholder-count="7">
+              <button type="button" onClick="{{ o.onClick }}" class="tap sort-option-row {{ o.onClass }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+      <sc-for list="{{ quickChips }}" as="c" hint-placeholder-count="6">
+        <button type="button" onClick="{{ c.onClick }}" class="tap staff-chip {{ c.onClass }}" style="padding:6px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">{{ c.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-for list="{{ incomingChips }}" as="ic" hint-placeholder-count="1">
+      <div style="margin-top:8px;">
+        <button type="button" onClick="{{ ic.onClear }}" class="tap staff-chip is-on" style="display:inline-flex;align-items:center;gap:7px;padding:6px 6px 6px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">
+          {{ ic.label }}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+        </button>
+      </div>
+    </sc-for>
+  </div>
+
+  <main style="flex:1;padding:16px 28px 40px;">
+
+    <sc-if value="{{ exportNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-bottom:12px;padding:9px 14px;border-radius:10px;background:#E1EEE5;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <span style="font-family:'Barlow',sans-serif;font-size:13px;color:#1E5C3A;">{{ exportNoticeText }}</span>
+        <button type="button" onClick="{{ onDismissExport }}" class="tap" style="border:0;background:transparent;color:#1E5C3A;padding:2px;">✕</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ bulkBar.show }}" hint-placeholder-val="{{ false }}">
+      <div class="bulk-bar" style="margin-bottom:12px;">
+        <span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#F5F2ED;">{{ bulkBar.count }} të zgjedhura</span>
+        <span style="width:1px;height:18px;background:rgba(245,242,237,.2);flex:0 0 auto;"></span>
+        <select onChange="{{ bulkBar.onDept }}" value="{{ bulkBar.deptDraft }}" class="staff-select" style="padding:6px 8px;font-size:12px;">
+          <option value="">Cakto departamentin…</option>
+          <sc-for list="{{ bulkBar.deptOptions }}" as="o" hint-placeholder-count="5"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select onChange="{{ bulkBar.onStatus }}" value="{{ bulkBar.statusDraft }}" class="staff-select" style="padding:6px 8px;font-size:12px;">
+          <option value="">Ndrysho statusin…</option>
+          <sc-for list="{{ bulkBar.statusOptions }}" as="o" hint-placeholder-count="9"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select onChange="{{ bulkBar.onPriority }}" value="{{ bulkBar.priorityDraft }}" class="staff-select" style="padding:6px 8px;font-size:12px;">
+          <option value="">Ndrysho prioritetin…</option>
+          <sc-for list="{{ bulkBar.priorityOptions }}" as="o" hint-placeholder-count="4"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+        </select>
+        <button type="button" onClick="{{ bulkBar.onExport }}" class="tap" style="border:1px solid rgba(245,242,237,.3);background:transparent;color:#F5F2ED;border-radius:8px;padding:6px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Eksporto</button>
+        <sc-if value="{{ bulkBar.confirmShow }}" hint-placeholder-val="{{ false }}">
+          <span style="font-family:'Barlow',sans-serif;font-size:12px;color:#F5F2ED;">{{ bulkBar.confirmLabel }}</span>
+          <button type="button" onClick="{{ bulkBar.onConfirm }}" class="tap" style="background:#C23B31;color:#F5F2ED;border:0;border-radius:8px;padding:6px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;">Konfirmo</button>
+          <button type="button" onClick="{{ bulkBar.onCancelConfirm }}" class="tap" style="border:0;background:transparent;color:#F5F2ED;padding:6px 4px;font-family:'Barlow',sans-serif;font-size:12px;">Anulo</button>
+        </sc-if>
+        <span style="flex:1;"></span>
+        <button type="button" onClick="{{ bulkBar.onClearSelection }}" class="tap" style="border:0;background:transparent;color:#F5F2ED;opacity:.75;padding:4px;">✕</button>
+      </div>
+    </sc-if>
+
+    <div class="staff-card" style="overflow:hidden;" role="table" aria-label="Lista e raporteve">
+      <div style="display:flex;align-items:center;border-bottom:1px solid #E4DFD6;" role="row">
+        <span style="width:34px;flex:0 0 auto;"></span>
+        <span class="staff-th" style="width:74px;flex:0 0 auto;">ID</span>
+        <span class="staff-th" style="flex:1;min-width:200px;">Titulli</span>
+        <span class="staff-th" style="width:100px;flex:0 0 auto;">Vendndodhja</span>
+        <span class="staff-th" style="width:136px;flex:0 0 auto;">Kategoria</span>
+        <span class="staff-th" style="width:136px;flex:0 0 auto;">Departamenti</span>
+        <span class="staff-th" style="width:150px;flex:0 0 auto;">Statusi</span>
+        <span class="staff-th" style="width:112px;flex:0 0 auto;">SLA</span>
+        <span class="staff-th" style="width:104px;flex:0 0 auto;">Përditësuar</span>
+      </div>
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+        <div class="report-row-link tap" style="display:flex;align-items:center;border-bottom:1px solid #E4DFD6;">
+          <span style="width:34px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;">
+            <button type="button" onClick="{{ r.onToggleSelect }}" class="tap check-box {{ r.checkClass }}" aria-label="Zgjidh raportin"><sc-if value="{{ r.isSelected }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></button>
+          </span>
+          <a href="Raporti.dc.html" onClick="{{ r.onClick }}" role="row" style="flex:1;min-width:0;display:flex;align-items:center;text-decoration:none;">
+            <span class="staff-td tabular-nums" style="width:74px;flex:0 0 auto;color:#6B665F;font-weight:600;">{{ r.id }}</span>
+            <span class="staff-td" style="flex:1;min-width:200px;overflow:hidden;display:flex;align-items:center;gap:6px;">
+              <span style="min-width:0;font-weight:500;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.title }}</span>
+              <sc-if value="{{ r.reappeared }}">
+                <span title="Rishfaqur" style="flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(194,59,49,.13);color:#C23B31;font-size:11px;font-weight:700;">↻</span>
+              </sc-if>
+            </span>
+            <span class="staff-td" style="width:100px;flex:0 0 auto;color:#6B665F;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.address }}">{{ r.zone }}</span>
+            <span class="staff-td" style="width:136px;flex:0 0 auto;color:#6B665F;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.category }}">{{ r.category }}</span>
+            <span class="staff-td" style="width:136px;flex:0 0 auto;color:#6B665F;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.department }}">{{ r.department }}</span>
+            <span class="staff-td" style="width:150px;flex:0 0 auto;overflow:hidden;"><span class="status-pill" style="background:{{ r.statusBg }};color:{{ r.statusInk }};"><span class="status-dot" style="background:{{ r.statusDot }};"></span>{{ r.status }}</span></span>
+            <span class="staff-td" style="width:112px;flex:0 0 auto;padding-top:7px;padding-bottom:7px;white-space:nowrap;">
+              <div style="display:flex;align-items:center;gap:5px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;color:{{ r.priorityColor }};"><span class="status-dot" style="background:{{ r.priorityColor }};"></span>{{ r.priority }}</div>
+              <div class="tabular-nums" style="margin-top:2px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:{{ r.slaColor }};">{{ r.sla }}</div>
+            </span>
+            <span class="staff-td" style="width:104px;flex:0 0 auto;color:#8A847C;font-size:12px;white-space:nowrap;">{{ r.updatedLabel }}</span>
+          </a>
+        </div>
+      </sc-for>
+      <sc-if value="{{ emptyState }}">
+        <div style="padding:48px 20px;text-align:center;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;color:#1B1917;margin-bottom:4px;">Asnjë raport nuk përputhet</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:13px;color:#6B665F;margin-bottom:14px;">Provoni të hiqni disa filtra ose ndryshoni kërkimin.</div>
+          <button type="button" onClick="{{ onClearAll }}" class="tap staff-btn-secondary" style="padding:8px 16px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">Pastro filtrat</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ pagination.show }}" hint-placeholder-val="{{ false }}"><div class="pager" style="border-top:0;"><span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;">{{ pagination.label }}</span><div class="pager-btns"><button type="button" onClick="{{ pagination.onPrev }}" class="tap icon-btn {{ pagination.prevClass }}" aria-label="Faqja e mëparshme"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><sc-for list="{{ pagination.nums }}" as="pn" hint-placeholder-count="2"><sc-if value="{{ pn.isNum }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ pn.onClick }}" class="tap pager-num {{ pn.onClass }} tabular-nums">{{ pn.n }}</button></sc-if><sc-if value="{{ pn.isGap }}" hint-placeholder-val="{{ false }}"><span class="pager-gap">…</span></sc-if></sc-for><button type="button" onClick="{{ pagination.onNext }}" class="tap icon-btn {{ pagination.nextClass }}" aria-label="Faqja tjetër"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></div></sc-if>
+    </div>
+
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  state = {
+    search: '',
+    filters: null,
+    sortKey: 'newest',
+    page: 1,
+    panelOpen: false,
+    sortOpen: false,
+    selected: {},
+    overrides: {},
+    savedFilters: [],
+    savingOpen: false, savingName: '', savingDefault: false,
+    bulkDeptDraft: '', bulkStatusDraft: '', bulkPriorityDraft: '', bulkConfirmPending: null,
+    exportNotice: false,
+  };
+
+  _emptyFilters() {
+    return {
+      statuses: [], priorities: [], categories: [], departments: [], zones: [],
+      slaStates: [], flags: [], unassigned: false,
+      reportedPreset: '', reportedFrom: '', reportedTo: '',
+      updatedPreset: '', updatedFrom: '', updatedTo: '',
+    };
+  }
+
+  componentDidMount() {
+    const S = window.SINJAL;
+
+    let overrides = {};
+    try { overrides = JSON.parse(window.localStorage.getItem('sinjal_case_overrides') || '{}'); } catch (e) {}
+
+    let savedFilters = null;
+    try {
+      const raw = window.localStorage.getItem('sinjal_raportet_saved_filters');
+      if (raw) savedFilters = JSON.parse(raw);
+    } catch (e) {}
+    if (!savedFilters) {
+      savedFilters = this._defaultSavedFilters();
+      this._persistSavedFilters(savedFilters);
+    }
+    this.setState({ overrides: overrides, savedFilters: savedFilters, filters: this._emptyFilters() });
+
+    // 1) an incoming filter from Kreu (sinjal_incoming_filter) or the
+    // notification bell (sinjal_report_filter) always wins.
+    let incomingRaw = null;
+    try {
+      incomingRaw = window.localStorage.getItem('sinjal_incoming_filter') || window.localStorage.getItem('sinjal_report_filter');
+    } catch (e) {}
+    if (incomingRaw) {
+      try {
+        window.localStorage.removeItem('sinjal_incoming_filter');
+        window.localStorage.removeItem('sinjal_report_filter');
+        const incoming = JSON.parse(incomingRaw);
+        const f = this._translateIncoming(incoming);
+        this.setState({ filters: f, search: '' });
+        this._persistState(f, '', this.state.sortKey);
+        return;
+      } catch (e) {}
+    }
+
+    // 2) otherwise restore whatever was last on screen.
+    try {
+      const raw = window.localStorage.getItem('sinjal_raportet_state');
+      if (raw) {
+        const saved = JSON.parse(raw);
+        this.setState({
+          search: saved.search || '',
+          filters: Object.assign(this._emptyFilters(), saved.filters || {}),
+          sortKey: saved.sortKey || 'newest',
+        });
+        return;
+      }
+    } catch (e) {}
+
+    // 3) first-ever visit: apply the default saved filter, if one is set.
+    const def = savedFilters.filter((sf) => sf.isDefault)[0];
+    if (def) {
+      this.setState({ filters: Object.assign(this._emptyFilters(), def.filters), search: def.search || '' });
+    }
+  }
+
+  _translateIncoming(incoming) {
+    const f = this._emptyFilters();
+    if (incoming.status) f.statuses = [incoming.status];
+    if (incoming.done) f.statuses = ['Zgjidhur', 'Mbyllur'];
+    if (incoming.zone) f.zones = [incoming.zone];
+    if (incoming.department) f.departments = [incoming.department];
+    if (incoming.category) f.categories = [incoming.category];
+    if (incoming.unassigned) f.unassigned = true;
+    if (incoming.slaAtRisk) f.slaStates = ['atRisk'];
+    if (incoming.slaBreached) f.slaStates = ['breached'];
+    if (incoming.slaFlag) f.slaStates = ['atRisk', 'breached'];
+    if (incoming.duplicateCandidate) f.flags = ['duplicateCandidate'];
+    if (incoming.lowConfidence) f.flags = ['lowConfidence'];
+    if (incoming.reappeared) f.flags = ['reappeared'];
+    if (incoming.pendingClosure) f.flags = ['pendingClosure'];
+    return f;
+  }
+
+  _defaultSavedFilters() {
+    return [
+      { id: 'sf1', name: 'SLA në rrezik', filters: Object.assign(this._emptyFilters(), { slaStates: ['atRisk', 'breached'] }), search: '', isDefault: false },
+      { id: 'sf2', name: 'Infrastrukturë — Të reja', filters: Object.assign(this._emptyFilters(), { departments: ['infra'], statuses: ['I ri'] }), search: '', isDefault: false },
+      { id: 'sf3', name: 'Raporte të rishfaqura', filters: Object.assign(this._emptyFilters(), { flags: ['reappeared'] }), search: '', isDefault: false },
+    ];
+  }
+
+  _persistState(filters, search, sortKey) {
+    try {
+      window.localStorage.setItem('sinjal_raportet_state', JSON.stringify({
+        search: search !== undefined ? search : this.state.search,
+        filters: filters !== undefined ? filters : this.state.filters,
+        sortKey: sortKey !== undefined ? sortKey : this.state.sortKey,
+      }));
+    } catch (e) {}
+  }
+  _persistSavedFilters(list) {
+    try { window.localStorage.setItem('sinjal_raportet_saved_filters', JSON.stringify(list)); } catch (e) {}
+  }
+  _persistOverrides(overrides) {
+    try { window.localStorage.setItem('sinjal_case_overrides', JSON.stringify(overrides)); } catch (e) {}
+  }
+
+  _setFilters(patch) {
+    const f = Object.assign({}, this.state.filters, patch);
+    this.setState({ filters: f, page: 1 });
+    this._persistState(f, undefined, undefined);
+  }
+  _toggleInList(key, value) {
+    const cur = this.state.filters[key] || [];
+    const next = cur.indexOf(value) === -1 ? cur.concat([value]) : cur.filter((v) => v !== value);
+    this._setFilters({ [key]: next });
+  }
+  _quickSet(target) {
+    this.setState({ filters: target, search: '', page: 1 });
+    this._persistState(target, '', undefined);
+  }
+  _clearAll() {
+    const f0 = this._emptyFilters();
+    this.setState({ filters: f0, search: '', page: 1 });
+    this._persistState(f0, '', undefined);
+  }
+  _setSearch(v) {
+    this.setState({ search: v, page: 1 });
+    this._persistState(undefined, v, undefined);
+  }
+  _setSort(key) {
+    this.setState({ sortKey: key, sortOpen: false, page: 1 });
+    this._persistState(undefined, undefined, key);
+  }
+  _setPage(p) {
+    this.setState({ page: p });
+  }
+
+  _saveCurrentFilter() {
+    const name = (this.state.savingName || '').trim();
+    if (!name) return;
+    const entry = { id: 'sf' + Date.now(), name: name, filters: this.state.filters, search: this.state.search, isDefault: !!this.state.savingDefault };
+    let list = this.state.savedFilters.slice();
+    if (entry.isDefault) list = list.map((sf) => Object.assign({}, sf, { isDefault: false }));
+    list = list.concat([entry]);
+    this._persistSavedFilters(list);
+    this.setState({ savedFilters: list, savingOpen: false, savingName: '', savingDefault: false });
+  }
+  _applySavedFilter(sf) {
+    const f = Object.assign(this._emptyFilters(), sf.filters);
+    this.setState({ filters: f, search: sf.search || '', page: 1 });
+    this._persistState(f, sf.search || '', undefined);
+  }
+  _deleteSavedFilter(id) {
+    const list = this.state.savedFilters.filter((sf) => sf.id !== id);
+    this._persistSavedFilters(list);
+    this.setState({ savedFilters: list });
+  }
+
+  _toggleSelect(id) {
+    const sel = Object.assign({}, this.state.selected);
+    if (sel[id]) delete sel[id]; else sel[id] = true;
+    this.setState({ selected: sel });
+  }
+  _clearSelection() { this.setState({ selected: {} }); }
+
+  _patchOverrideMany(ids, patch) {
+    const overrides = Object.assign({}, this.state.overrides);
+    ids.forEach((id) => { overrides[id] = Object.assign({}, overrides[id], patch); });
+    this._persistOverrides(overrides);
+    this.setState({ overrides: overrides });
+  }
+  _applyBulkDept(deptId) {
+    const ids = Object.keys(this.state.selected);
+    if (!ids.length || !deptId) { this.setState({ bulkDeptDraft: '' }); return; }
+    this._patchOverrideMany(ids, { department: deptId, responsible: null });
+    this.setState({ bulkDeptDraft: '' });
+  }
+  _applyBulkPriority(pr) {
+    const ids = Object.keys(this.state.selected);
+    if (!ids.length || !pr) { this.setState({ bulkPriorityDraft: '' }); return; }
+    this._patchOverrideMany(ids, { priority: pr });
+    this.setState({ bulkPriorityDraft: '' });
+  }
+  _requestBulkStatus(status) {
+    if (!status) { this.setState({ bulkStatusDraft: '' }); return; }
+    const resolving = status === 'Zgjidhur' || status === 'Mbyllur';
+    if (resolving) { this.setState({ bulkConfirmPending: status }); return; }
+    this._applyBulkStatus(status);
+  }
+  _applyBulkStatus(status) {
+    const ids = Object.keys(this.state.selected);
+    if (ids.length) this._patchOverrideMany(ids, { status: status });
+    this.setState({ bulkStatusDraft: '', bulkConfirmPending: null });
+  }
+  _exportSelected() {
+    this.setState({ exportNotice: true });
+  }
+
+  _select(id) {
+    return () => { try { window.localStorage.setItem('sinjal_selected_report', id); } catch (e) {} };
+  }
+
+  renderVals() {
+    const S = window.SINJAL;
+    if (!S || !this.state.filters) return {};
+    const NOW = S.now || new Date();
+    const base = S.reports || [];
+    const overrides = this.state.overrides || {};
+    const f = this.state.filters;
+    const q = (this.state.search || '').trim().toLowerCase();
+
+    // Merge each report with any override (same sinjal_case_overrides
+    // layer Raporti.dc.html writes to and reads from), and precompute the
+    // few fields that need real derivation: last-activity time (from the
+    // report's own timeline — genuinely the latest event, not a guess),
+    // resolution time (matches the deterministic 75%-of-window formula
+    // buildTimeline already uses for a "Zgjidhur" event), and whether the
+    // routing ended up different from what AI originally suggested.
+    const all = base.map((r) => {
+      const ov = overrides[r.id] || {};
+      const eff = Object.assign({}, r, ov);
+      const timeline = r.timeline || [];
+      const lastActivityAt = timeline.length ? timeline[timeline.length - 1].time : r.submittedAt;
+      const resolutionHours = (eff.status === 'Zgjidhur' || eff.status === 'Mbyllur') ? ((r.slaDeadline - r.submittedAt) / 3600000) * 0.75 : null;
+      return Object.assign({}, eff, {
+        baseId: r.id,
+        departmentName: S.deptName(eff.department),
+        lastActivityAt: lastActivityAt,
+        resolutionHours: resolutionHours,
+        routingChanged: r.ai.suggestedDepartment !== S.deptName(eff.department),
+      });
+    });
+
+    const inPreset = (d, preset, fromStr, toStr) => {
+      if (!preset) return true;
+      if (preset === 'today') return d.getFullYear() === NOW.getFullYear() && d.getMonth() === NOW.getMonth() && d.getDate() === NOW.getDate();
+      if (preset === '7d') { const start = new Date(NOW); start.setDate(start.getDate() - 7); return d >= start; }
+      if (preset === '30d') { const start = new Date(NOW); start.setDate(start.getDate() - 30); return d >= start; }
+      if (preset === 'custom') {
+        if (fromStr && d < new Date(fromStr + 'T00:00:00')) return false;
+        if (toStr && d > new Date(toStr + 'T23:59:59')) return false;
+        return true;
+      }
+      return true;
+    };
+    const flagTest = {
+      reappeared: (r) => r.reappeared,
+      duplicateCandidate: (r) => !!r.duplicateCandidateId,
+      lowConfidence: (r) => r.ai.confidence < 60,
+      routingChanged: (r) => r.routingChanged,
+      pendingClosure: (r) => r.status === 'Zgjidhur' && r.resolutionEvidence && r.resolutionEvidence.length > 0,
+    };
+    const slaTest = {
+      onTrack: (r) => r.slaRemainingHours !== null && !r.slaAtRisk && !r.slaBreached,
+      atRisk: (r) => r.slaAtRisk,
+      breached: (r) => r.slaBreached,
+    };
+    const applyFilters = (list, ff, qq) => list.filter((r) => {
+      if (ff.statuses.length && ff.statuses.indexOf(r.status) === -1) return false;
+      if (ff.priorities.length && ff.priorities.indexOf(r.priority) === -1) return false;
+      if (ff.categories.length && ff.categories.indexOf(r.category) === -1) return false;
+      if (ff.departments.length && ff.departments.indexOf(r.department) === -1) return false;
+      if (ff.zones.length && ff.zones.indexOf(r.zone) === -1) return false;
+      if (ff.slaStates.length && !ff.slaStates.some((s) => slaTest[s] && slaTest[s](r))) return false;
+      if (ff.flags.length && !ff.flags.some((fl) => flagTest[fl] && flagTest[fl](r))) return false;
+      if (ff.unassigned && (r.responsible || r.status === 'Dublikatë' || r.status === 'Refuzuar')) return false;
+      if (ff.reportedPreset && !inPreset(r.submittedAt, ff.reportedPreset, ff.reportedFrom, ff.reportedTo)) return false;
+      if (ff.updatedPreset && !inPreset(r.lastActivityAt, ff.updatedPreset, ff.updatedFrom, ff.updatedTo)) return false;
+      if (qq) {
+        const hay = (r.id + ' ' + r.title + ' ' + r.description + ' ' + r.zone + ' ' + r.address).toLowerCase();
+        if (hay.indexOf(qq) === -1) return false;
+      }
+      return true;
+    });
+
+    const SORTERS = {
+      urgency: (a, b) => (S.priorityMeta[b.priority].weight - S.priorityMeta[a.priority].weight) || ((a.slaRemainingHours === null ? 999999 : a.slaRemainingHours) - (b.slaRemainingHours === null ? 999999 : b.slaRemainingHours)),
+      priority: (a, b) => S.priorityMeta[b.priority].weight - S.priorityMeta[a.priority].weight,
+      newest: (a, b) => b.submittedAt.getTime() - a.submittedAt.getTime(),
+      oldest: (a, b) => a.submittedAt.getTime() - b.submittedAt.getTime(),
+      slaSoon: (a, b) => (a.slaRemainingHours === null ? 999999 : a.slaRemainingHours) - (b.slaRemainingHours === null ? 999999 : b.slaRemainingHours),
+      updated: (a, b) => b.lastActivityAt.getTime() - a.lastActivityAt.getTime(),
+      resolutionTime: (a, b) => (a.resolutionHours === null ? 999999 : a.resolutionHours) - (b.resolutionHours === null ? 999999 : b.resolutionHours),
+    };
+    const sorter = SORTERS[this.state.sortKey] || SORTERS.newest;
+    const filtered = applyFilters(all, f, q).slice().sort(sorter);
+
+    // "Rendit sipas" is a custom .panel dropdown, not a native select —
+    // a native select's opened option list is browser-chrome, outside our
+    // CSS control, and rendered visibly oversized/inconsistent against the
+    // rest of the app's typography. A button + panel of real rows (the
+    // same pattern already used for Filtra) keeps it pixel-consistent.
+    const SORT_LABELS = [
+      { value: 'urgency', label: 'Urgjenca' },
+      { value: 'priority', label: 'Prioriteti' },
+      { value: 'newest', label: 'Më i riu' },
+      { value: 'oldest', label: 'Më i vjetri' },
+      { value: 'slaSoon', label: 'SLA që skadon së shpejti' },
+      { value: 'updated', label: 'Përditësuar së fundmi' },
+      { value: 'resolutionTime', label: 'Koha e zgjidhjes' },
+    ];
+    const sortOptions = SORT_LABELS.map((o) => ({ value: o.value, label: o.label, onClass: o.value === this.state.sortKey ? 'is-on' : '', onClick: () => this._setSort(o.value) }));
+    const currentSortLabel = (SORT_LABELS.filter((o) => o.value === this.state.sortKey)[0] || SORT_LABELS[2]).label;
+
+    const relTime = (d) => {
+      const mins = Math.max(0, Math.round((NOW - d) / 60000));
+      if (mins < 1) return 'tani';
+      if (mins < 60) return mins + ' min më parë';
+      const hrs = Math.round(mins / 60);
+      if (hrs < 24) return hrs + ' orë më parë';
+      const days = Math.round(hrs / 24);
+      return days + ' ditë më parë';
+    };
+
+    const PAGE_SIZE = 12;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const currentPage = Math.min(Math.max(1, this.state.page || 1), totalPages);
+    const pagedFiltered = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    const rows = pagedFiltered.map((r) => {
+      const isSelected = !!this.state.selected[r.baseId];
+      return {
+        id: r.displayId, title: r.title, zone: r.zone, address: r.address,
+        category: r.categoryLabel, department: r.departmentName,
+        status: r.status, statusBg: S.statusMeta[r.status].bg, statusInk: S.statusMeta[r.status].ink, statusDot: S.statusMeta[r.status].dot,
+        priority: r.priority, priorityColor: S.priorityMeta[r.priority].color,
+        sla: r.slaLabel, slaColor: r.slaBreached ? '#C23B31' : (r.slaAtRisk ? '#B8860B' : '#6B665F'),
+        updatedLabel: relTime(r.lastActivityAt),
+        reappeared: r.reappeared,
+        isSelected: isSelected, checkClass: isSelected ? 'is-on' : '',
+        onToggleSelect: () => this._toggleSelect(r.baseId),
+        onClick: this._select(r.baseId),
+      };
+    });
+
+    const allIds = filtered.map((r) => r.baseId);
+    const allSelected = allIds.length > 0 && allIds.every((id) => !!this.state.selected[id]);
+    const onToggleSelectAll = () => {
+      const sel = Object.assign({}, this.state.selected);
+      if (allSelected) allIds.forEach((id) => { delete sel[id]; });
+      else allIds.forEach((id) => { sel[id] = true; });
+      this.setState({ selected: sel });
+    };
+
+    // ---- filter groups (advanced panel) ------------------------------
+    const mkGroup = (key, options) => options.map((o) => {
+      const isOn = (f[key] || []).indexOf(o.value) !== -1;
+      return { value: o.value, label: o.label, isOn: isOn, onClass: isOn ? 'is-on' : '', onClick: () => this._toggleInList(key, o.value) };
+    });
+    const filterGroups = [
+      { title: 'Statusi', items: mkGroup('statuses', S.statusOrder.map((s) => ({ value: s, label: s }))) },
+      { title: 'Prioriteti', items: mkGroup('priorities', S.priorityOrder.map((p) => ({ value: p, label: p }))) },
+      { title: 'Kategoria', items: mkGroup('categories', S.categories.map((c) => ({ value: c.id, label: c.label }))) },
+      { title: 'Departamenti', items: mkGroup('departments', S.departments.map((d) => ({ value: d.id, label: d.name }))) },
+      { title: 'SLA', items: mkGroup('slaStates', [{ value: 'onTrack', label: 'Brenda afatit' }, { value: 'atRisk', label: 'Në rrezik' }, { value: 'breached', label: 'Tejkaluar' }]) },
+      { title: 'Zona', items: mkGroup('zones', S.zones.map((z) => ({ value: z, label: z }))) },
+      { title: 'AI / Sinjalizime', items: mkGroup('flags', [{ value: 'reappeared', label: 'Rishfaqur' }, { value: 'duplicateCandidate', label: 'Dublikatë e mundshme' }, { value: 'lowConfidence', label: 'Kërkon verifikim njerëzor' }, { value: 'routingChanged', label: 'Routing i ndryshuar' }]) },
+    ];
+
+    const mkPreset = (key, options) => options.map((o) => ({
+      value: o.value, label: o.label, onClass: f[key] === o.value ? 'is-on' : '',
+      onClick: () => this._setFilters({ [key]: f[key] === o.value ? '' : o.value }),
+    }));
+    const reportedPresets = mkPreset('reportedPreset', [{ value: 'today', label: 'Sot' }, { value: '7d', label: '7 ditët e fundit' }, { value: '30d', label: '30 ditët e fundit' }, { value: 'custom', label: 'Personalizuar' }]);
+    const updatedPresets = mkPreset('updatedPreset', [{ value: 'today', label: 'Sot' }, { value: '7d', label: '7 ditët e fundit' }, { value: 'custom', label: 'Personalizuar' }]);
+
+    const activeFilterN = f.statuses.length + f.priorities.length + f.categories.length + f.departments.length + f.zones.length + f.slaStates.length + f.flags.length + (f.reportedPreset ? 1 : 0) + (f.updatedPreset ? 1 : 0) + (f.unassigned ? 1 : 0);
+    const hasAnyFilter = activeFilterN > 0 || !!q;
+
+    // ---- quick filter chips: each is a one-click reset to a specific,
+    // narrow filter shape (not additive with whatever else was set) ----
+    const isFiltersEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const targetAll = this._emptyFilters();
+    const targetNew = Object.assign(this._emptyFilters(), { statuses: ['I ri'] });
+    const targetInProgress = Object.assign(this._emptyFilters(), { statuses: ['Në punë'] });
+    const targetResolved = Object.assign(this._emptyFilters(), { statuses: ['Zgjidhur'] });
+    const targetReappeared = Object.assign(this._emptyFilters(), { flags: ['reappeared'] });
+    const targetSlaRisk = Object.assign(this._emptyFilters(), { slaStates: ['atRisk', 'breached'] });
+    const mkChip = (label, target) => ({ label: label, onClass: (isFiltersEqual(f, target) && !q) ? 'is-on' : '', onClick: () => this._quickSet(target) });
+    const quickChips = [
+      mkChip('Të gjitha', targetAll),
+      mkChip('Të reja', targetNew),
+      mkChip('Në punë', targetInProgress),
+      mkChip('Të zgjidhura', targetResolved),
+      mkChip('Rishfaqur', targetReappeared),
+      mkChip('SLA në rrezik', targetSlaRisk),
+    ];
+
+    const incomingChips = [];
+    if (f.unassigned) incomingChips.push({ label: 'Pa caktuar ×', onClear: () => this._setFilters({ unassigned: false }) });
+    if (f.flags.indexOf('pendingClosure') !== -1) incomingChips.push({ label: 'Pret verifikim përfundimtar ×', onClear: () => this._setFilters({ flags: f.flags.filter((x) => x !== 'pendingClosure') }) });
+
+    // ---- saved filters (with live result counts) ---------------------
+    const savedFilterRows = (this.state.savedFilters || []).map((sf) => {
+      const count = applyFilters(all, Object.assign(this._emptyFilters(), sf.filters), (sf.search || '').trim().toLowerCase()).length;
+      return {
+        id: sf.id, name: sf.name, count: count,
+        resultLabel: count === 1 ? '1 rezultat' : count + ' rezultate',
+        onApply: () => this._applySavedFilter(sf),
+        onDelete: () => this._deleteSavedFilter(sf.id),
+      };
+    });
+
+    // ---- bulk selection bar -------------------------------------------
+    const selectedIds = Object.keys(this.state.selected);
+    const selectedCount = selectedIds.length;
+    const bulkBar = {
+      show: selectedCount > 0,
+      count: selectedCount,
+      deptDraft: this.state.bulkDeptDraft,
+      onDept: (e) => { const v = e.target.value; this.setState({ bulkDeptDraft: v }); this._applyBulkDept(v); },
+      deptOptions: S.departments.map((d) => ({ value: d.id, label: d.name })),
+      statusDraft: this.state.bulkStatusDraft,
+      onStatus: (e) => { const v = e.target.value; this.setState({ bulkStatusDraft: v }); this._requestBulkStatus(v); },
+      statusOptions: S.statusOrder.map((s) => ({ value: s, label: s })),
+      priorityDraft: this.state.bulkPriorityDraft,
+      onPriority: (e) => { const v = e.target.value; this.setState({ bulkPriorityDraft: v }); this._applyBulkPriority(v); },
+      priorityOptions: S.priorityOrder.map((p) => ({ value: p, label: p })),
+      confirmShow: !!this.state.bulkConfirmPending,
+      confirmLabel: this.state.bulkConfirmPending ? ('Shëno ' + selectedCount + ' raporte si "' + this.state.bulkConfirmPending + '"?') : '',
+      onConfirm: () => this._applyBulkStatus(this.state.bulkConfirmPending),
+      onCancelConfirm: () => this.setState({ bulkConfirmPending: null, bulkStatusDraft: '' }),
+      onExport: () => this._exportSelected(),
+      onClearSelection: () => this._clearSelection(),
+    };
+
+    const total = base.length;
+    const shown = filtered.length;
+
+    const pagination = {
+      show: totalPages > 1,
+      page: currentPage,
+      totalPages: totalPages,
+      label: (filtered.length ? ((currentPage - 1) * PAGE_SIZE + 1) + '–' + Math.min(filtered.length, currentPage * PAGE_SIZE) + ' nga ' + filtered.length : '0'),
+      nums: (() => { const out = []; for (let i = 1; i <= totalPages; i++) { if (totalPages <= 7 || i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) out.push({ n: i, isNum: true, isGap: false, onClass: i === currentPage ? 'is-on' : '', onClick: () => this._setPage(i) }); else if (out.length && !out[out.length - 1].isGap) out.push({ n: '…', isNum: false, isGap: true, onClass: '', onClick: () => {} }); } return out; })(),
+      canPrev: currentPage > 1,
+      canNext: currentPage < totalPages,
+      prevClass: currentPage > 1 ? '' : 'is-disabled',
+      nextClass: currentPage < totalPages ? '' : 'is-disabled',
+      onPrev: () => this._setPage(Math.max(1, currentPage - 1)),
+      onNext: () => this._setPage(Math.min(totalPages, currentPage + 1)),
+    };
+
+    return {
+      search: this.state.search,
+      onSearch: (e) => this._setSearch(e && e.target ? e.target.value : ''),
+      onClearAll: () => this._clearAll(),
+      hasAnyFilter: hasAnyFilter,
+
+      panelOpen: this.state.panelOpen,
+      panelBtnClass: this.state.panelOpen ? 'is-on' : '',
+      onTogglePanel: () => this.setState({ panelOpen: !this.state.panelOpen }),
+      activeFilterBadge: { show: activeFilterN > 0, n: activeFilterN },
+      filterGroups: filterGroups,
+      reportedPresets: reportedPresets,
+      reportedCustomShow: f.reportedPreset === 'custom',
+      reportedFrom: f.reportedFrom, reportedTo: f.reportedTo,
+      onReportedFrom: (e) => this._setFilters({ reportedFrom: e.target.value }),
+      onReportedTo: (e) => this._setFilters({ reportedTo: e.target.value }),
+      updatedPresets: updatedPresets,
+      updatedCustomShow: f.updatedPreset === 'custom',
+      updatedFrom: f.updatedFrom, updatedTo: f.updatedTo,
+      onUpdatedFrom: (e) => this._setFilters({ updatedFrom: e.target.value }),
+      onUpdatedTo: (e) => this._setFilters({ updatedTo: e.target.value }),
+
+      savedFilterRows: savedFilterRows,
+      savedFiltersEmpty: savedFilterRows.length === 0,
+      savingOpen: this.state.savingOpen,
+      onOpenSaving: () => this.setState({ savingOpen: true }),
+      onCancelSaving: () => this.setState({ savingOpen: false, savingName: '', savingDefault: false }),
+      savingName: this.state.savingName,
+      onSavingNameChange: (e) => this.setState({ savingName: e.target.value }),
+      savingDefault: this.state.savingDefault,
+      savingDefaultClass: this.state.savingDefault ? 'is-on' : '',
+      onToggleSavingDefault: () => this.setState({ savingDefault: !this.state.savingDefault }),
+      onSaveCurrent: () => this._saveCurrentFilter(),
+
+      quickChips: quickChips,
+      incomingChips: incomingChips,
+
+      sortOptions: sortOptions,
+      sortLabel: currentSortLabel,
+      sortOpen: this.state.sortOpen,
+      onToggleSort: () => this.setState({ sortOpen: !this.state.sortOpen }),
+      sortKey: this.state.sortKey,
+
+      exportNotice: this.state.exportNotice,
+      exportNoticeText: 'U përgatit eksporti i ' + selectedCount + ' raporteve.',
+      onDismissExport: () => this.setState({ exportNotice: false }),
+      bulkBar: bulkBar,
+
+      allSelected: allSelected,
+      allSelectedClass: allSelected ? 'is-on' : '',
+      onToggleSelectAll: onToggleSelectAll,
+
+      rows: rows,
+      filteredCount: shown,
+      emptyState: filtered.length === 0,
+      resultsLabel: (shown === 1 ? '1 raport' : shown + ' raporte') + (hasAnyFilter ? ' nga ' + total : ''),
+      pagination: pagination,
+    };
+  }
+}
+</script>
+</body>
+</html>

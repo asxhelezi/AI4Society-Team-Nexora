@@ -1,0 +1,188 @@
+/*
+ * Case write-up (blog-cover-1..6.html). Phone-first styles moved 1:1 out of the static
+ * inline style="" attributes; everything is scoped under .artikulli or .artikulli-* classes.
+ * Tablet/desktop overrides stay in responsive.css (r-cover-*, r-meta, r-article, r-prose,
+ * r-ba-grid, r-cta-band, r-cards). Those overrides are all !important except
+ * `.r-cover-h1 { max-width }` and `.r-article { --r-max }`, which the static page never
+ * set inline, so single-class selectors here are safe.
+ */
+
+/* The static page's <style> had `button{font:inherit}`. */
+:where(.artikulli) button {
+  font: inherit;
+}
+
+/* ---------- Cover ---------- */
+.artikulli-hero {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--c-ink);
+  color: var(--c-paper);
+}
+.artikulli-hero__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.artikulli-hero__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(var(--c-ink-rgb) / 0.5) 0%, rgb(var(--c-ink-rgb) / 0.18) 38%, rgb(var(--c-ink-rgb) / 0.9) 100%);
+}
+.artikulli-hero__text {
+  position: relative;
+  z-index: 2;
+  padding: 120px 20px 32px;
+}
+.artikulli-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.artikulli-hero__badge {
+  background: var(--c-red);
+  padding: 5px 9px;
+}
+.artikulli-hero__date {
+  color: rgb(var(--c-paper-rgb) / 0.7);
+}
+.artikulli-hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+/* ---------- Facts grid ---------- */
+.artikulli-meta {
+  border-bottom: 1px solid var(--c-line);
+}
+.artikulli-meta__grid {
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.artikulli-meta__cell--left {
+  padding: 16px 14px 16px 0;
+  border-right: 1px solid var(--c-line);
+}
+.artikulli-meta__cell--right {
+  padding: 16px 0 16px 14px;
+}
+.artikulli-meta__cell--lower {
+  border-top: 1px solid var(--c-line);
+}
+.artikulli-meta__label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.artikulli-meta__value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1;
+}
+.artikulli-meta__value--code {
+  letter-spacing: 0.05em;
+  color: var(--c-red);
+}
+
+/* ---------- Body ---------- */
+.artikulli-body {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.artikulli-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.artikulli-prose__p {
+  margin: 0;
+}
+
+/* ---------- Before / after ---------- */
+.artikulli-ba {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.artikulli-ba__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.artikulli-ba__label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+}
+.artikulli-ba__label--after {
+  color: var(--c-red);
+}
+.artikulli-ba__frame {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--c-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--c-paper-rgb) / 0.25);
+}
+.artikulli-ba__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.artikulli-ba__image--before {
+  filter: grayscale(1) contrast(1.05) brightness(0.95);
+}
+
+/* ---------- "Të tjera të zgjidhura" ---------- */
+.artikulli-related {
+  background: var(--c-paper);
+}
+.artikulli-related__inner {
+  padding: 40px 20px;
+}
+.artikulli-related__title {
+  margin: 0 0 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+.artikulli-related__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

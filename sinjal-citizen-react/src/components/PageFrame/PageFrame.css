@@ -1,0 +1,22 @@
+.page-screen {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--c-paper);
+  position: relative;
+  overflow-x: clip;
+}
+.page-body {
+  width: 100%;
+  background: var(--c-paper);
+  overflow-x: clip;
+}
+.page-body--flow {
+  position: relative;
+}
+.page-body--fill {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}

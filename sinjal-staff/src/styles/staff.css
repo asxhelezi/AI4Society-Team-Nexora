@@ -1,0 +1,506 @@
+/* SINJAL — Nëpunësi — shared chrome styles, linked by every staff artboard
+   right after the support.js tag. Keeps the sidebar / header / table /
+   card / button vocabulary identical across screens without repeating it
+   in every <helmet>. */
+
+html, body { margin: 0; padding: 0; background: #F5F2ED; color: #1B1917; font-family: 'Barlow', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+a { color: #C23B31; text-decoration: none; }
+a:active { color: #A8302A; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #C23B31; outline-offset: 2px; border-radius: 2px; }
+a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
+button { font: inherit; cursor: pointer; }
+
+.tap { transition: background .15s cubic-bezier(.22,1,.36,1), border-color .15s cubic-bezier(.22,1,.36,1), box-shadow .15s cubic-bezier(.22,1,.36,1), opacity .15s cubic-bezier(.22,1,.36,1); }
+.tap:active { opacity: .82; }
+
+/* Sidebar */
+.staff-nav-item:not(.is-active):hover { background: rgba(245,242,237,.07); }
+
+/* Cards / rows / tables — modern elevation: a soft, generously-blurred
+   shadow plus a faint hairline reads as a raised surface without heavy
+   neumorphism. One shadow recipe, reused everywhere, so the system stays
+   coherent. Radius is deliberately generous (the reference dashboards'
+   big, soft rounded cards), not the sharper 8px corners of the first pass. */
+.staff-card { background: #FBFAF8; border: 1px solid #ECE7DE; border-radius: 18px; box-shadow: 0 2px 5px rgba(27,25,23,.03), 0 18px 34px rgba(27,25,23,.055); }
+.staff-tile:hover { background: #F5F2ED; }
+.staff-row:hover { background: #F5F2ED; }
+.staff-th { text-align: left; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0; color: #57524B; padding: 9px 12px; white-space: nowrap; }
+.staff-th-sortable { cursor: pointer; user-select: none; }
+.staff-th-sortable:hover { color: #1B1917; }
+.staff-td { padding: 10px 12px; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; border-top: 1px solid #E4DFD6; vertical-align: middle; }
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Dense list row inside a card — no per-row box, a hairline rule plus a
+   rounded hover fill so scanning stays fast without every row being a card. */
+.hl-row { border-top: 1px solid #EFEAE2; border-radius: 9px; }
+.hl-row:first-child { border-top: 0; }
+.hl-row:hover { background: #F5F2ED; border-top-color: transparent; }
+
+/* KPI tile — its own raised card (not a hairline-divided strip): rounded,
+   shadowed, brightens slightly on hover so the row reads as interactive. */
+.kpi-card { background: #FBFAF8; border: 1px solid #ECE7DE; border-radius: 16px; box-shadow: 0 1px 3px rgba(27,25,23,.03), 0 10px 20px rgba(27,25,23,.05); }
+.kpi-card:hover { box-shadow: 0 2px 5px rgba(27,25,23,.05), 0 14px 28px rgba(27,25,23,.08); border-color: #DDD7CB; }
+
+/* Colored icon chip — the small rounded-square (softened toward a squircle)
+   badge that leads a KPI tile, an attention row or a department row.
+   Background/foreground set inline per-instance from the semantic palette. */
+.icon-chip { width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+
+/* "Kërkojnë vëmendjen tuaj" exception groups — a stacked list (SLA risk,
+   unassigned, pending verification), each a clickable group header (icon +
+   count + label, filters Raportet) followed by one representative case card
+   so the clerk sees an actual example, not just a tally. */
+.exception-group + .exception-group { border-top: 1px solid #EFEAE2; }
+.exception-group-head { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 8px; }
+.exception-group-head:hover { background: #F5F2ED; }
+.exception-card { display: block; margin-top: 6px; padding: 7px 11px; border-radius: 0 8px 8px 0; background: transparent; border: 0; border-left-width: 3px; border-left-style: solid; }
+.exception-card:hover { background: #F5F2ED; }
+
+/* Small round avatar/initials chip used in list rows (e.g. assigned staff). */
+.mini-avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 11px; }
+
+/* "Çfarë po ndryshon" 7-day trend — a small fixed-height bar row (it shares
+   its card with the category-delta list and the insight line below, so it
+   doesn't need to fill the whole stretched card the way the department
+   table opposite it does). */
+.trend-chart { height: 58px; display: flex; align-items: stretch; gap: 5px; }
+.trend-bar-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.trend-bar-track { flex: 1; min-height: 0; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.trend-bar { width: 62%; max-width: 16px; border-radius: 4px 4px 2px 2px; min-height: 3px; background: #1B1917; opacity: .82; }
+.trend-bar-label { margin-top: 5px; font-family: 'Barlow', sans-serif; font-size: 11px; color: #8A847C; }
+
+/* "Ngarkesa sipas departamentit" table row + the focus-department callout
+   underneath it. */
+.dept-table-row { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-radius: 8px; }
+.dept-table-row:hover { background: #F5F2ED; }
+.focus-dept-card { background: #F5F2ED; border-radius: 12px; padding: 10px 12px; }
+
+/* "Aktiviteti i fundit" live feed row. */
+.activity-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 4px; border-radius: 8px; }
+.activity-row:hover { background: #F5F2ED; }
+
+/* Kreu map widget — same textured-grid + teardrop-pin language as the
+   citizen app's Harta screen (grid lines, a few road strips and soft block
+   tints standing in for streets/buildings), scaled down into a dashboard
+   card. Case coordinates come from mock-data.js ZONE_COORDS and are plain
+   left/top percentages of this frame — no SVG viewBox involved, so x% and
+   y% map straight to the frame's own width/height. */
+.map-frame { position: relative; width: 100%; padding-top: 54%; border-radius: 12px; overflow: hidden; background: #EAE6DE; border: 1px solid #E4DFD6; }
+.map-pin { position: absolute; transform: translate(-50%, -100%); filter: drop-shadow(0 1px 3px rgba(27,25,23,.3)); }
+.map-pin:hover { transform: translate(-50%, -100%) scale(1.15); }
+
+/* Raportet — advanced filter panel (a wide .panel dropdown under the
+   "Filtra" button), its checkbox rows, saved-filter rows, and the bulk
+   selection bar that replaces the results line once rows are checked. */
+.filter-group-title { font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; color: #8A847C; margin-bottom: 6px; }
+.filter-check-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 7px; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; border: 0; background: transparent; width: 100%; text-align: left; }
+.filter-check-row:hover { background: #F5F2ED; }
+.saved-filter-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 8px; border-radius: 8px; }
+.saved-filter-row:hover { background: #F5F2ED; }
+.bulk-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 9px 14px; border-radius: 12px; background: #1B1917; }
+
+/* Custom checkbox — a small square toggled with a class, not a native
+   <input type="checkbox">: this app has no proven pattern yet for binding
+   a native checkbox's checked state to component state (only text/select
+   value= is established), while a button + is-on class is the exact same
+   toggle mechanism already proven throughout the app (.staff-chip.is-on,
+   .panel-tab.is-on). Reusing it here avoids an unverified new binding. */
+.check-box { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #B8B2A9; background: #FBFAF8; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; padding: 0; }
+.check-box.is-on { background: #1B1917; border-color: #1B1917; }
+
+/* Raportet table row — a plain flex row (not an <a>) so a bulk-select
+   checkbox can sit beside the row's own link without nesting one
+   interactive element inside another. */
+.report-row-link:hover { background: #F5F2ED; }
+
+/* "Rendit sipas" sort control — a custom button + .panel dropdown of real
+   rows, not a native <select>, so its open state stays pixel-consistent
+   with the rest of the app instead of falling back to browser chrome. */
+.sort-option-row { display: block; width: 100%; text-align: left; border: 0; background: transparent; border-radius: 7px; padding: 8px 10px; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; }
+.sort-option-row:hover { background: #F5F2ED; }
+.sort-option-row.is-on { background: #EDEAE3; font-weight: 700; }
+
+/* Reports-list pagination (Prev/Next); reused on any disableable control. */
+.is-disabled { opacity: .4; pointer-events: none; }
+
+/* Buttons */
+.staff-btn-primary { background: #1B1917; color: #F5F2ED; border: 1px solid #1B1917; border-radius: 8px; }
+.staff-btn-primary:hover { background: #2A2724; }
+.staff-btn-secondary { background: #FBFAF8; color: #1B1917; border: 1px solid #D9D4CC; border-radius: 8px; }
+.staff-btn-secondary:hover { background: #F0EDE6; border-color: #B8B2A9; }
+.staff-btn-secondary.is-on { background: #1B1917; color: #F5F2ED; border-color: #1B1917; }
+.staff-chip { border: 1px solid #D9D4CC; border-radius: 999px; background: #FBFAF8; color: #4A4640; }
+.staff-chip:hover { border-color: #B8B2A9; }
+.staff-chip.is-on { background: #1B1917; border-color: #1B1917; color: #F5F2ED; }
+
+/* Inputs */
+.staff-input { border: 1px solid #D9D4CC; border-radius: 8px; background: #FBFAF8; color: #1B1917; font-family: 'Barlow', sans-serif; font-size: 13px; }
+.staff-input:focus { border-color: #8A847C; }
+.staff-input::placeholder { color: #8A847C; }
+.staff-select { border: 1px solid #D9D4CC; border-radius: 8px; background: #FBFAF8; color: #1B1917; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; }
+
+/* Status pill */
+.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px 4px 7px; border-radius: 999px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+
+/* Notification bell + profile menu (shared chrome components) */
+.bell-btn { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #D9D4CC; background: #FBFAF8; display: flex; align-items: center; justify-content: center; position: relative; }
+.bell-btn:hover { background: #F0EDE6; }
+.bell-badge { position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: #C23B31; color: #F5F2ED; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; border: 2px solid #F5F2ED; }
+.panel { position: absolute; background: #FBFAF8; border: 1px solid #D9D4CC; border-radius: 10px; box-shadow: 0 8px 28px rgba(27,25,23,.14); z-index: 60; }
+.panel-tab { flex: 1; text-align: center; padding: 9px 4px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; color: #6B665F; border-bottom: 2px solid transparent; }
+.panel-tab.is-on { color: #1B1917; border-bottom-color: #C23B31; }
+.notif-row:hover { background: #F5F2ED; }
+.notif-unread-dot { width: 7px; height: 7px; border-radius: 50%; background: #C23B31; flex: 0 0 auto; }
+.profile-btn { display: flex; align-items: center; gap: 9px; padding: 4px 8px 4px 4px; border-radius: 8px; border: 1px solid transparent; background: transparent; }
+.profile-btn:hover { background: #F0EDE6; border-color: #D9D4CC; }
+.avatar-chip { width: 32px; height: 32px; border-radius: 50%; background: #C23B31; color: #F5F2ED; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 13px; }
+.menu-row:hover { background: #F5F2ED; }
+
+/* HARTA — geospatial command center. The dashboard's small .map-frame
+   (padding-top aspect-ratio trick) is sized for a card inside a grid; here
+   the map IS the page content, so it fills whatever flex height the
+   header/Pamja bar leave it instead of locking an aspect ratio. Pins,
+   clusters and the draw-a-zone overlay all share the same 0–100 percentage
+   coordinate space as mapPins on Kreu (see mock-data.js ZONE_COORDS), so a
+   given report sits at the same spot on both screens. */
+.harta-map-frame { position: relative; flex: 1; min-width: 0; min-height: 0; border-radius: 14px; overflow: hidden; background: #EAE6DE; border: 1px solid #E4DFD6; box-shadow: 0 1px 2px rgba(27,25,23,.05) inset; }
+/* Real Esri World Imagery camera (useSatelliteCamera): drag/wheel/pinch-zoom
+   tile layer, the same one sinjal-citizen's Harta uses. */
+.sat-camera { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.sat-camera--interactive { cursor: grab; }
+.sat-tiles { position: absolute; inset: 0; }
+.sat-tile { position: absolute; width: 257px; height: 257px; background-color: #26241f; background-size: cover; user-select: none; pointer-events: none; }
+/* pointer-events: none so wheel/drag/click pass through this layer's empty
+   space to the .sat-camera underneath — otherwise it swallows every gesture
+   before the real map ever sees it. Pins and clusters opt back in explicitly
+   since they must stay clickable. Harta.tsx positions every child here by
+   computed pixel left/top (projected from the camera's own pan/zoom, same
+   math as sinjal-citizen's pins) — never by scaling this container, which
+   would also blow up each marker's CSS drop-shadow into a big soft smear at
+   higher zoom. */
+.harta-map-inner { position: absolute; inset: 0; pointer-events: none; }
+/* .harta-pin is a <button>; without an explicit reset it inherits the
+   browser's default button chrome (white fill + border + padding), which
+   shows through as a pale square behind the teardrop SVG. Reset it like
+   every other icon-button in this codebase. */
+.harta-pin { position: absolute; pointer-events: auto; transform: translate(-50%,-100%); background: transparent; border: 0; padding: 0; margin: 0; filter: drop-shadow(0 1px 3px rgba(27,25,23,.35)); cursor: pointer; line-height: 0; }
+.harta-pin:hover { transform: translate(-50%,-100%) scale(1.18); }
+/* A cluster is a small donut ring — one arc per status tier, proportional
+   to how many of the grouped reports are in it — with the count in the
+   center and a zone-name pill below. This replaces a flat black circle
+   with something that actually tells you what's inside the group before
+   you click it (all-red ring = trouble spot, mixed ring = routine mix). */
+.harta-cluster { position: absolute; pointer-events: auto; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; background: transparent; border: 0; padding: 0; margin: 0; }
+.harta-cluster:hover .harta-cluster-badge { transform: scale(1.07); }
+.harta-cluster-badge { position: relative; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; transition: transform .15s cubic-bezier(.22,1,.36,1); filter: drop-shadow(0 3px 8px rgba(27,25,23,.28)); }
+.harta-cluster-ring { position: absolute; inset: 0; width: 100%; height: 100%; }
+.harta-cluster-count { position: relative; z-index: 1; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: #1B1917; line-height: 1; }
+.harta-cluster-label { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 7px; border-radius: 999px; background: rgba(27,25,23,.82); color: #F5F2ED; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 11px; }
+.harta-heat-blob { position: absolute; transform: translate(-50%,-50%); border-radius: 50%; pointer-events: none; }
+/* Floating zoom control, anchored to the map's own corner (Google/Mapbox
+   convention) so it reads as part of the map rather than the page chrome —
+   this plus scroll-to-zoom and double-click-to-zoom is what makes the map
+   feel zoomable at a glance instead of hiding zoom in a toolbar. Anchored
+   bottom-LEFT (not right) so the side panel, which slides in from the
+   right, never covers it. */
+.harta-zoom-float { position: absolute; left: 14px; bottom: 14px; z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.harta-zoom-float-pill { display: flex; flex-direction: column; border-radius: 10px; background: #FBFAF8; border: 1px solid #D9D4CC; box-shadow: 0 4px 14px rgba(27,25,23,.16); overflow: hidden; }
+.harta-zoom-float-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #1B1917; background: #FBFAF8; }
+.harta-zoom-float-btn:hover { background: #F0EDE6; }
+.harta-zoom-float-divider { height: 1px; background: #E4DFD6; }
+.harta-zoom-float-label { font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 600; color: #6B665F; background: #FBFAF8; border: 1px solid #D9D4CC; border-radius: 999px; padding: 2px 8px; box-shadow: 0 2px 8px rgba(27,25,23,.1); }
+/* Layer switcher: one small icon-button in the map toolbar that opens a
+   short dropdown, instead of a full-width 4-button bar permanently
+   occupying space under the map. */
+.harta-layers-wrap { position: relative; flex: 0 0 auto; }
+.harta-layers-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #D9D4CC; background: #FBFAF8; display: flex; align-items: center; justify-content: center; color: #1B1917; }
+.harta-layers-btn:hover { background: #F0EDE6; }
+.harta-layers-btn.is-on { background: #1B1917; border-color: #1B1917; color: #F5F2ED; }
+.harta-layers-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; min-width: 190px; background: #FBFAF8; border: 1px solid #E4DFD6; border-radius: 12px; box-shadow: 0 10px 26px rgba(27,25,23,.16); padding: 6px; }
+.harta-layers-menu-item { width: 100%; display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 8px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; color: #4A4640; text-align: left; }
+.harta-layers-menu-item:hover { background: #F5F2ED; }
+.harta-layers-menu-item.is-on { background: #EFEAE2; color: #1B1917; }
+.harta-layers-menu-icon { flex: 0 0 auto; display: flex; color: #8A847C; }
+.harta-layers-menu-item.is-on .harta-layers-menu-icon { color: #1B1917; }
+.harta-layers-menu-check { margin-left: auto; flex: 0 0 auto; display: flex; color: #1B1917; }
+.harta-side-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 320px; background: #FBFAF8; border-left: 1px solid #E4DFD6; box-shadow: -10px 0 26px rgba(27,25,23,.09); overflow-y: auto; z-index: 45; }
+.harta-nearby-row { display: flex; align-items: center; gap: 8px; padding: 7px 6px; border-radius: 8px; }
+.harta-nearby-row:hover { background: #F5F2ED; }
+.harta-legend-chip { display: flex; align-items: center; gap: 6px; font-family: 'Barlow', sans-serif; font-size: 11px; color: #4A4640; white-space: nowrap; }
+.harta-filters-col { display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
+.harta-stat-chip { display: flex; align-items: baseline; gap: 5px; font-family: 'Barlow', sans-serif; font-size: 12px; color: #6B665F; white-space: nowrap; }
+.harta-stat-chip b { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; color: #1B1917; }
+
+/* Raporti — full case/ticket view: contextual action bar (header + a
+   mirrored sticky footer), the quick inline panels those actions open
+   (reopen-with-reason, request-info), the exception banner + full list,
+   the status lifecycle stepper, the resolution-verification checklist,
+   the citizen-communication thread, and the department-intervention note. */
+.case-sticky-bar { position: sticky; bottom: 0; left: 0; right: 0; display: flex; align-items: center; gap: 8px; padding: 12px 32px; background: #FBFAF8; border-top: 1px solid #E4DFD6; box-shadow: 0 -6px 20px rgba(27,25,23,.05); z-index: 20; flex: 0 0 auto; }
+.exception-banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: 12px; border-left-width: 3px; border-left-style: solid; }
+.exception-list-row { display: flex; align-items: flex-start; gap: 9px; padding: 9px 2px; border-top: 1px solid #EFEAE2; }
+.exception-list-row:first-child { border-top: 0; }
+.lifecycle-step { display: flex; align-items: center; gap: 10px; }
+.lifecycle-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; border: 2px solid #D9D4CC; background: #FBFAF8; }
+.lifecycle-step.is-done .lifecycle-dot { background: #2E7D4F; border-color: #2E7D4F; }
+.lifecycle-step.is-current .lifecycle-dot { background: #1B1917; border-color: #1B1917; }
+.lifecycle-step.is-current .lifecycle-label { font-weight: 700; color: #1B1917; }
+.lifecycle-connector { width: 2px; height: 14px; background: #E4DFD6; margin-left: 4px; }
+.lifecycle-connector.is-done { background: #2E7D4F; }
+.verify-row { display: flex; align-items: center; gap: 9px; padding: 5px 0; }
+.thread-row { display: flex; }
+.thread-row.from-clerk { justify-content: flex-end; }
+.thread-msg { max-width: 84%; padding: 8px 12px; border-radius: 12px; font-family: 'Barlow', sans-serif; font-size: 13px; line-height: 1.5; }
+.thread-msg.from-system { background: #EDEAE3; color: #1B1917; border-bottom-left-radius: 4px; }
+.thread-msg.from-clerk { background: #1B1917; color: #F5F2ED; border-bottom-right-radius: 4px; }
+.request-chip { border: 1px solid #D9D4CC; border-radius: 999px; background: #FBFAF8; color: #4A4640; padding: 6px 12px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; }
+.request-chip:hover { border-color: #B8B2A9; background: #F5F2ED; }
+.quick-panel { padding: 14px 16px; border-radius: 12px; background: #F5EBD6; border: 1px solid #E3D3A6; }
+
+/* Departamentet — org-wide overview (department cards + workload
+   distribution + assignment rules) and, per department, a drilled-down
+   workspace (tabs, team roster, workload-balancing suggestions, exceptions,
+   assignment history). Reuses the .staff-card / .hl-row / .exception-*
+   vocabulary throughout; only the shapes unique to this page live here. */
+.dept-card { display: flex; flex-direction: column; padding: 14px 16px 16px; text-align: left; }
+.dept-card:hover { background: #F5F2ED; }
+.dept-card-sla-row { display: flex; align-items: baseline; gap: 5px; margin-top: 10px; }
+.dept-card-sla-row b { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 800; color: #1B1917; }
+
+/* Workload distribution bars — one row per department, bar width scaled to
+   the busiest department so the comparison reads at a glance; the caption
+   underneath carries urgent/SLA-risk counts so "18 cases" doesn't read as
+   equivalent to "18 easy cases". */
+.workload-row { display: flex; align-items: center; gap: 12px; padding: 8px 4px; }
+.workload-row-label { width: 132px; flex: 0 0 auto; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; color: #1B1917; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.workload-track { flex: 1; min-width: 0; height: 20px; border-radius: 6px; background: #EDEAE3; overflow: hidden; display: flex; align-items: center; }
+.workload-fill { height: 100%; border-radius: 6px; background: #1B1917; transition: width .25s cubic-bezier(.22,1,.36,1); min-width: 3px; }
+.workload-row-count { width: 34px; flex: 0 0 auto; text-align: right; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; color: #1B1917; }
+
+/* Assignment rules table (org-wide, and the per-department "Rregullat" tab
+   reuses the same row). */
+.rule-row { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-top: 1px solid #EFEAE2; }
+.rule-row:first-child { border-top: 0; }
+.rule-row:hover { background: #F5F2ED; }
+.add-rule-panel { margin-top: 10px; padding: 12px 14px; border-radius: 12px; background: #F5F2ED; border: 1px solid #E4DFD6; }
+
+/* Department workspace tab bar — same underline-tab language as
+   .panel-tab, just laid out inline in the page instead of inside a
+   dropdown .panel. */
+.dept-tab-bar { display: flex; gap: 4px; border-bottom: 1px solid #E4DFD6; }
+.dept-tab { border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 10px 4px; margin-right: 18px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; color: #6B665F; }
+.dept-tab:hover { color: #1B1917; }
+.dept-tab.is-on { color: #1B1917; border-bottom-color: #C23B31; }
+
+/* Ekipi — team roster row + the employee drill-down panel underneath it. */
+.team-row { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; border: 0; border-top: 1px solid #EFEAE2; background: transparent; padding: 9px 6px; }
+.team-row:first-child { border-top: 0; }
+.team-row:hover { background: #F5F2ED; }
+.team-row.is-on { background: #EFEAE2; }
+.zone-chip { display: inline-flex; align-items: center; border: 1px solid #D9D4CC; border-radius: 999px; background: #FBFAF8; color: #4A4640; padding: 3px 9px; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 600; }
+
+/* Workload-balancing "who should get this case" candidate list — the
+   top-ranked (recommended) candidate gets a highlighted row + badge, same
+   is-on-style emphasis as everywhere else rather than a new color. */
+.candidate-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid transparent; }
+.candidate-row:hover { background: #F5F2ED; }
+.candidate-row.is-recommended { background: #F5F2ED; border-color: #D9D4CC; }
+.balance-card { padding: 12px 14px; border-radius: 12px; border: 1px solid #EFEAE2; background: #FBFAF8; }
+.balance-card + .balance-card { margin-top: 8px; }
+
+/* Generic header stat chip ("42 raste aktive"-style) — same shape as
+   .harta-stat-chip, named without the harta- prefix since header rows on
+   this page aren't map-specific. */
+.stat-chip { display: flex; align-items: baseline; gap: 5px; font-family: 'Barlow', sans-serif; font-size: 12px; color: #6B665F; white-space: nowrap; }
+.stat-chip b { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; color: #1B1917; }
+
+/* =====================================================================
+   Automatizimet — AI + automation operations center
+   Every <button>-based class below resets border/background explicitly
+   (the browser-default button chrome bug fixed on .harta-pin).
+   ===================================================================== */
+.auto-subnav { width: 228px; flex: 0 0 auto; border-right: 1px solid #E4DFD6; padding: 14px 12px 20px; overflow-y: auto; background: #F5F2ED; }
+.auto-subnav-title { font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; color: #8A847C; padding: 12px 10px 5px; }
+.auto-subnav-title:first-child { padding-top: 2px; }
+.auto-nav-item { border: 0; background: transparent; width: 100%; text-align: left; display: flex; align-items: center; gap: 8px; padding: 7px 9px; margin: 1px 0; border-radius: 8px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; color: #4A4640; cursor: pointer; }
+.auto-nav-item:hover { background: #EDEAE3; color: #1B1917; }
+.auto-nav-item.is-on { background: #1B1917; color: #F5F2ED; }
+.auto-nav-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.auto-nav-count { flex: 0 0 auto; min-width: 20px; text-align: center; padding: 1px 6px; border-radius: 999px; background: #E4DFD6; color: #4A4640; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; }
+.auto-nav-count.is-alert { background: #F6E1DE; color: #8E2A22; }
+.auto-nav-item.is-on .auto-nav-count { background: rgba(245,242,237,.16); color: #F5F2ED; }
+.auto-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; display: inline-block; }
+
+.auto-h2 { margin: 0; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0; color: #1B1917; }
+.auto-lede { margin: 4px 0 0; font-family: 'Barlow', sans-serif; font-size: 13px; color: #6B665F; line-height: 1.5; }
+.auto-section { margin-top: 20px; }
+.auto-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+.auto-muted { font-family: 'Barlow', sans-serif; font-size: 12px; color: #8A847C; }
+.auto-link { border: 0; background: transparent; padding: 0; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; color: #C23B31; cursor: pointer; white-space: nowrap; }
+.auto-link:hover { text-decoration: underline; }
+
+/* health strip */
+.health-strip { display: grid; grid-template-columns: repeat(5, 1fr); }
+.health-cell { padding: 14px 18px 14px; border-left: 1px solid #EFEAE2; min-width: 0; }
+.health-cell:first-child { border-left: 0; }
+.health-num { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; line-height: 1; font-weight: 800; color: #1B1917; white-space: nowrap; }
+.health-label { margin-top: 6px; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; color: #6B665F; }
+.health-sub { margin-top: 3px; font-family: 'Barlow', sans-serif; font-size: 12px; color: #8A847C; }
+.health-foot { display: flex; align-items: center; gap: 18px; padding: 10px 18px; border-top: 1px solid #EFEAE2; font-family: 'Barlow', sans-serif; font-size: 12px; color: #4A4640; }
+.health-meter { flex: 1; height: 6px; border-radius: 999px; background: #E4DFD6; overflow: hidden; display: flex; }
+.health-meter span { height: 100%; }
+
+/* feedback loop band — the page's signature */
+.loop-band { display: flex; align-items: stretch; gap: 0; }
+.loop-step { border: 0; background: transparent; flex: 1; min-width: 0; text-align: left; padding: 12px 14px 12px; cursor: pointer; border-radius: 12px; position: relative; }
+.loop-step:hover { background: #F0EDE6; }
+.loop-step-k { font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; color: #8A847C; display: flex; align-items: center; gap: 6px; }
+.loop-step-n { margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 24px; line-height: 1; font-weight: 800; color: #1B1917; }
+.loop-step-d { margin-top: 4px; font-family: 'Barlow', sans-serif; font-size: 12px; color: #6B665F; line-height: 1.35; }
+.loop-arrow { flex: 0 0 18px; display: flex; align-items: center; justify-content: center; color: #B8B2A9; }
+
+/* generic selectable list row */
+.auto-row { border: 0; background: transparent; width: 100%; text-align: left; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-top: 1px solid #EFEAE2; border-radius: 0; cursor: pointer; font-family: 'Barlow', sans-serif; color: #1B1917; }
+.auto-row:first-child { border-top: 0; }
+.auto-row:hover { background: #F5F2ED; }
+.auto-row.is-on { background: #F0EDE6; box-shadow: inset 3px 0 0 #1B1917; }
+.auto-cell-id { width: 64px; flex: 0 0 auto; font-size: 12px; font-weight: 700; color: #4A4640; }
+.auto-conf { display: flex; align-items: center; gap: 7px; }
+.auto-conf-track { width: 54px; height: 5px; border-radius: 999px; background: #E4DFD6; overflow: hidden; flex: 0 0 auto; }
+.auto-conf-fill { height: 100%; border-radius: 999px; }
+.auto-conf-num { font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; min-width: 30px; }
+
+/* attention + feed */
+.attn-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-top: 1px solid #EFEAE2; }
+.attn-row:first-child { border-top: 0; }
+.attn-sev { width: 3px; align-self: stretch; border-radius: 2px; flex: 0 0 auto; }
+.attn-text { flex: 1; min-width: 0; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; line-height: 1.4; }
+.attn-text b { font-weight: 700; }
+.attn-evidence { display: block; margin-top: 2px; font-size: 12px; color: #8A847C; font-weight: 500; }
+.feed-row { border: 0; background: transparent; width: 100%; text-align: left; display: flex; gap: 11px; padding: 10px 12px; border-top: 1px solid #EFEAE2; cursor: pointer; font-family: 'Barlow', sans-serif; }
+.feed-row:first-child { border-top: 0; }
+.feed-row:hover { background: #F5F2ED; }
+.feed-rail { display: flex; flex-direction: column; align-items: center; padding-top: 4px; flex: 0 0 auto; }
+.feed-kind { font-size: 11px; font-weight: 700; }
+.feed-main { flex: 1; min-width: 0; }
+.feed-title { font-size: 13px; font-weight: 700; color: #1B1917; }
+.feed-body { margin-top: 2px; font-size: 12px; color: #4A4640; line-height: 1.45; }
+.feed-meta { margin-top: 3px; font-size: 11px; color: #8A847C; }
+.feed-time { flex: 0 0 auto; font-size: 11px; color: #8A847C; font-weight: 600; }
+
+/* 7-day stacked trend */
+.trend7 { display: flex; align-items: stretch; gap: 10px; height: 118px; }
+.trend7-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.trend7-track { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.trend7-stack { width: 58%; max-width: 30px; display: flex; flex-direction: column-reverse; border-radius: 4px; overflow: hidden; }
+.trend7-seg { width: 100%; }
+.trend7-num { font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; color: #4A4640; margin-bottom: 3px; }
+.trend7-label { margin-top: 5px; font-family: 'Barlow', sans-serif; font-size: 11px; color: #8A847C; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; font-family: 'Barlow', sans-serif; font-size: 12px; color: #4A4640; }
+.legend-swatch { width: 9px; height: 9px; border-radius: 2px; flex: 0 0 auto; }
+
+/* detail panel pieces */
+.auto-panel { padding: 16px 18px; }
+.auto-kv { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid #EFEAE2; font-family: 'Barlow', sans-serif; font-size: 13px; }
+.auto-kv:first-child { border-top: 0; }
+.auto-kv-k { color: #6B665F; flex: 0 0 auto; }
+.auto-kv-v { color: #1B1917; font-weight: 600; text-align: right; min-width: 0; }
+.auto-callout { margin-top: 12px; padding: 11px 13px; border-radius: 10px; background: #EDEAE3; font-family: 'Barlow', sans-serif; font-size: 12px; color: #4A4640; line-height: 1.55; }
+.auto-callout-title { font-weight: 700; color: #1B1917; margin-bottom: 3px; font-size: 12px; }
+.auto-callout.is-human { background: #F5EBD6; }
+.auto-callout.is-risk { background: #F6E1DE; }
+.auto-callout.is-ok { background: #E1EEE5; }
+.check-line { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-top: 1px solid #EFEAE2; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; }
+.check-line:first-child { border-top: 0; }
+.check-ico { width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.check-state { margin-left: auto; font-size: 12px; font-weight: 700; }
+.auto-textarea { width: 100%; box-sizing: border-box; min-height: 120px; resize: vertical; padding: 10px 12px; border: 1px solid #D9D4CC; border-radius: 8px; background: #FBFAF8; color: #1B1917; font-family: 'Barlow', sans-serif; font-size: 13px; line-height: 1.55; }
+.auto-form { margin-top: 12px; padding: 12px 13px; border-radius: 10px; background: #F5F2ED; border: 1px solid #E4DFD6; }
+.auto-form-label { font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; color: #8A847C; margin-bottom: 5px; }
+.auto-photo { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; display: block; background: #E4DFD6; }
+
+/* switch */
+.switch { border: 0; padding: 0; width: 34px; height: 20px; border-radius: 999px; background: #CFC9BF; position: relative; flex: 0 0 auto; cursor: pointer; transition: background .15s; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #FBFAF8; box-shadow: 0 1px 2px rgba(27,25,23,.2); transition: left .15s; }
+.switch.is-on { background: #2E7D4F; }
+.switch.is-on::after { left: 17px; }
+
+/* rule builder */
+.rb-line { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px dashed #E4DFD6; }
+.rb-line:first-child { border-top: 0; }
+.rb-key { width: 64px; flex: 0 0 auto; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: .05em; color: #8A847C; }
+.rb-key.is-then { color: #2E7D4F; }
+.rb-key.is-except { color: #B8860B; }
+.rb-val { flex: 1; min-width: 0; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; }
+.rb-token { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 6px; background: #EDEAE3; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; color: #1B1917; margin-right: 4px; }
+.icon-btn { border: 1px solid #D9D4CC; background: #FBFAF8; border-radius: 7px; width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: #4A4640; cursor: pointer; flex: 0 0 auto; }
+.icon-btn:hover { background: #F0EDE6; color: #1B1917; }
+.group-tab { border: 0; background: transparent; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; color: #4A4640; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.group-tab:hover { background: #EDEAE3; }
+.group-tab.is-on { background: #FBFAF8; color: #1B1917; box-shadow: 0 0 0 1px #E4DFD6; }
+.dup-side { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px; background: #F5F2ED; }
+.sim-ring { width: 54px; height: 54px; flex: 0 0 auto; position: relative; }
+.sim-ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; color: #1B1917; }
+.pub-case { border: 0; background: transparent; width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-top: 1px solid #EFEAE2; cursor: pointer; font-family: 'Barlow', sans-serif; }
+.pub-case:first-child { border-top: 0; }
+.pub-case:hover { background: #F5F2ED; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; color: #57524B; padding: 8px 10px; white-space: nowrap; border-bottom: 1px solid #E4DFD6; }
+.data-table td { padding: 9px 10px; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; border-top: 1px solid #EFEAE2; vertical-align: top; }
+.data-table tr:first-child td { border-top: 0; }
+.actor-chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+/* =====================================================================
+   Performanca — role-based performance & management view
+   ===================================================================== */
+.perf-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.perf-kpi { display: flex; flex-direction: column; justify-content: flex-start; border: 1px solid #ECE7DE; background: #FBFAF8; border-radius: 16px; padding: 14px 16px 12px; text-align: left; cursor: pointer; min-width: 0; font-family: 'Barlow', sans-serif; box-shadow: 0 1px 3px rgba(27,25,23,.03), 0 10px 20px rgba(27,25,23,.05); }
+.perf-kpi:hover { border-color: #D9D4CC; box-shadow: 0 2px 5px rgba(27,25,23,.05), 0 14px 28px rgba(27,25,23,.08); }
+.perf-kpi-name { font-size: 12px; font-weight: 700; color: #4A4640; }
+.perf-kpi-val { margin-top: 6px; font-family: 'Barlow Condensed', sans-serif; font-size: 32px; line-height: 1; font-weight: 800; color: #1B1917; white-space: nowrap; }
+.perf-kpi > div:nth-last-child(2) { margin-bottom: 8px; }
+.perf-kpi-delta { font-size: 12px; font-weight: 700; }
+.perf-kpi-foot { margin-top: auto; flex-wrap: wrap; row-gap: 4px; padding-top: 8px; border-top: 1px solid #EFEAE2; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #6B665F; }
+.perf-cell { border: 0; background: transparent; padding: 3px 6px; margin: -3px -6px; border-radius: 6px; cursor: pointer; font-family: 'Barlow', sans-serif; font-size: 13px; color: #1B1917; text-align: left; }
+.perf-cell:hover { background: #EDEAE3; }
+.perf-cell small { display: block; font-size: 11px; font-weight: 700; }
+.perf-crumb { border: 0; background: transparent; padding: 3px 2px; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+.perf-crumb:hover { text-decoration: underline; }
+.perf-bar-track { height: 8px; border-radius: 999px; background: #EDEAE3; overflow: hidden; }
+.perf-bar-fill { height: 100%; border-radius: 999px; background: #1B1917; }
+.perf-role { border: 1px solid #D9D4CC; background: #FBFAF8; width: 100%; text-align: left; padding: 7px 9px; border-radius: 8px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; color: #4A4640; cursor: pointer; margin-bottom: 5px; }
+.perf-role.is-on { background: #1B1917; color: #F5F2ED; border-color: #1B1917; }
+.perf-modal-bg { position: absolute; inset: 0; background: rgba(27,25,23,.28); z-index: 80; display: flex; align-items: flex-start; justify-content: center; padding-top: 70px; }
+.perf-modal { width: 620px; max-height: 760px; overflow-y: auto; background: #FBFAF8; border-radius: 16px; box-shadow: 0 24px 60px rgba(27,25,23,.28); padding: 20px 22px; }
+.perf-field { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid #EFEAE2; font-family: 'Barlow', sans-serif; font-size: 13px; }
+.perf-field:first-child { border-top: 0; }
+.perf-field-k { font-weight: 700; color: #6B665F; }
+.perf-insight { display: flex; gap: 12px; padding: 13px 16px; border-top: 1px solid #EFEAE2; }
+.perf-insight:first-child { border-top: 0; }
+
+/* Pagination — shared by Automatizimet + Performanca lists and tables */
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 14px; border-top: 1px solid #EFEAE2; background: #FBFAF8; }
+.pager-btns { display: flex; align-items: center; gap: 4px; }
+.pager-num { border: 1px solid transparent; background: transparent; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 7px; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; color: #4A4640; cursor: pointer; }
+.pager-num:hover { background: #EDEAE3; }
+.pager-num.is-on { background: #1B1917; color: #F5F2ED; }
+.pager-gap { font-family: 'Barlow', sans-serif; font-size: 12px; color: #8A847C; padding: 0 2px; }
+.pager-bare { border-top: 0; background: transparent; padding: 10px 2px 0; }
+
+/* =====================================================================
+   Page header — ONE anatomy for every page: fixed 96px band so the
+   bottom rule sits at the same height everywhere; optional crumb above
+   the title on detail views; one context line; actions on the right.
+   ===================================================================== */
+.page-header { height: 96px; box-sizing: border-box; padding: 0 28px; border-bottom: 1px solid #E4DFD6; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex: 0 0 auto; }
+.page-header-main { min-width: 0; flex: 1; }
+.page-crumb { display: inline-flex; align-items: center; gap: 5px; margin: 0 0 4px; padding: 0; border: 0; background: transparent; font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; color: #6B665F; cursor: pointer; text-decoration: none; }
+.page-crumb:hover { color: #1B1917; }
+.page-title { margin: 0; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.15; letter-spacing: 0; color: #1B1917; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page-context { margin: 5px 0 0; display: flex; align-items: center; gap: 12px; min-width: 0; font-family: 'Barlow', sans-serif; font-size: 13px; color: #6B665F; white-space: nowrap; overflow: hidden; }
+.page-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+
+.report-row-link .staff-td { border-top: 0; }
+.sidebar-profile:hover { background: rgba(245,242,237,.06) !important; }

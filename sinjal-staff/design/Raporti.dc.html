@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<title>Sinjal — Nëpunësi — Raporti</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="staff.css">
+<script src="mock-data.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;}
+.conf-track{background:#E4DFD6;border-radius:999px;height:6px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:999px;}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;background:#F5F2ED;overflow:hidden;">
+
+<dc-import name="Sidebar" active="raportet" hint-size="232px,900px"></dc-import>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto;">
+  <header class="page-header">
+    <div class="page-header-main">
+      <a href="Raportet.dc.html" class="tap page-crumb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Raportet</a>
+      <h1 class="page-title">{{ r.title }}</h1>
+      <div class="page-context">
+        <span class="tabular-nums" style="font-weight:600;color:#4A4640;">{{ r.id }}</span>
+        <span class="status-pill" style="background:{{ r.statusBg }};color:{{ r.statusInk }};padding:2px 9px 2px 7px;"><span class="status-dot" style="background:{{ r.statusDot }};"></span>{{ r.status }}</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;font-weight:700;color:{{ r.priorityColor }};"><span class="status-dot" style="background:{{ r.priorityColor }};"></span>{{ r.priority }}</span>
+        <span>{{ r.category }}</span>
+        <span>{{ r.zone }}</span>
+      </div>
+    </div>
+    <div class="page-actions">
+      <sc-for list="{{ actions }}" as="a" hint-placeholder-count="2">
+        <button type="button" onClick="{{ a.onClick }}" class="tap {{ a.btnClass }}" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">{{ a.label }}</button>
+      </sc-for>
+      <div style="position:relative;">
+        <button type="button" onClick="{{ onToggleMore }}" class="tap staff-btn-secondary {{ moreBtnClass }}" style="padding:8px 10px;display:inline-flex;align-items:center;" aria-label="Më shumë veprime"><svg width="16" height="16" viewBox="0 0 24 24" fill="#1B1917"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+        <sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
+          <div class="panel" style="top:40px;right:0;width:200px;padding:6px;">
+            <button type="button" onClick="{{ onExport }}" class="tap menu-row" style="display:block;width:100%;text-align:left;border:0;background:transparent;border-radius:7px;padding:8px 10px;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">Eksporto rastin</button>
+          </div>
+        </sc-if>
+      </div>
+      <span style="width:1px;height:28px;background:#E4DFD6;margin:0 4px;"></span>
+      <dc-import name="NotificationBell" hint-size="40px,40px"></dc-import>
+    </div>
+  </header>
+
+
+
+  <main style="flex:1;padding:20px 28px 32px;">
+    <sc-if value="{{ exportNotice }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-bottom:14px;padding:8px 14px;border-radius:10px;background:#E1EEE5;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <span style="font-family:'Barlow',sans-serif;font-size:12px;color:#1E5C3A;">U përgatit eksporti i rastit {{ r.id }}.</span>
+        <button type="button" onClick="{{ onDismissExport }}" class="tap" style="border:0;background:transparent;color:#1E5C3A;padding:2px;display:inline-flex;" aria-label="Mbyll"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ topBanner.show }}" hint-placeholder-val="{{ false }}">
+      <div class="exception-banner" style="margin-bottom:14px;background:{{ topBanner.bg }};border-left-color:{{ topBanner.border }};">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ topBanner.border }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:1px;"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.5h.01"/></svg>
+        <span style="flex:1;font-family:'Barlow',sans-serif;font-size:13px;color:{{ topBanner.ink }};"><strong>{{ topBanner.text }}</strong> — {{ topBanner.evidence }}</span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ reopenOpen }}" hint-placeholder-val="{{ false }}">
+      <div class="quick-panel" style="margin-bottom:14px;">
+        <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#7A5A0B;margin-bottom:8px;">Rihap raportin</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <input type="text" value="{{ reopenReason }}" onChange="{{ onReopenReason }}" placeholder="Arsyeja e rihapjes (p.sh. problemi është rishfaqur)…" class="staff-input" style="flex:1;padding:8px 10px;">
+          <button type="button" onClick="{{ onConfirmReopen }}" class="tap staff-btn-primary" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Konfirmo</button>
+          <button type="button" onClick="{{ onCancelReopen }}" class="tap staff-btn-secondary" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Anulo</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ requestOpen }}" hint-placeholder-val="{{ false }}">
+      <div class="quick-panel" style="margin-bottom:14px;background:#EDEAE3;border-color:#D9D4CC;">
+        <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;margin-bottom:8px;">Kërko informacion nga qytetari</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <sc-for list="{{ requestTemplates }}" as="t" hint-placeholder-count="3">
+            <button type="button" onClick="{{ t.onClick }}" class="tap request-chip">{{ t.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" value="{{ requestCustom }}" onChange="{{ onRequestCustom }}" placeholder="Mesazh i personalizuar…" class="staff-input" style="flex:1;padding:8px 10px;">
+          <button type="button" onClick="{{ onSendCustomRequest }}" class="tap staff-btn-primary" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Dërgo</button>
+          <button type="button" onClick="{{ onCancelRequest }}" class="tap staff-btn-secondary" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Anulo</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start;">
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0;">
+
+        <section class="staff-card" style="padding:18px;">
+          <h2 style="margin:0 0 12px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Raporti i qytetarit</h2>
+          <div style="display:grid;grid-template-columns:150px 1fr;gap:14px;">
+            <img src="{{ r.photo }}" alt="Foto e ngarkuar nga qytetari" style="width:150px;height:112px;object-fit:cover;border-radius:8px;flex:0 0 auto;">
+            <div style="min-width:0;">
+              <p style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-size:13px;line-height:1.55;color:#1B1917;">{{ r.description }}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:16px;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;">
+                <span>Dërguar: {{ r.submittedLabel }}</span>
+                <span>Qytetari: {{ r.citizenInitials }}</span>
+                <span>{{ r.zone }} · {{ r.address }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="staff-card" style="padding:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Përpunimi automatik i SINJAL</h2>
+            <button type="button" onClick="{{ ai.onUse }}" class="tap staff-btn-secondary" style="padding:6px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Përdor sugjerimin</button>
+          </div>
+          <p style="margin:0 0 12px;font-family:'Barlow',sans-serif;font-size:13px;color:#6B665F;">{{ ai.summaryLead }} <strong style="color:#1B1917;">{{ ai.summaryTarget }}</strong> në {{ ai.assignedTime }}.</p>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px;margin-bottom:12px;">
+            <div><div style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:3px;">Zona e mbulimit</div><div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ ai.zone }}</div></div>
+            <div><div style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:3px;">Prioriteti automatik</div><div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ ai.priority }}</div></div>
+            <div><div style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:3px;">Routing automatik</div><div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ ai.department }}</div></div>
+            <div><div style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:3px;">Risku</div><div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ ai.risk }}</div></div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;">Besueshmëria e routing-ut</span>
+              <span style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:{{ ai.confColor }};" class="tabular-nums">{{ ai.confidence }}%</span>
+            </div>
+            <div class="conf-track"><div class="conf-fill" style="width:{{ ai.confidence }}%;background:{{ ai.confColor }};"></div></div>
+          </div>
+          <div style="padding-top:12px;border-top:1px solid #E4DFD6;">
+            <div style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:4px;">Pse?</div>
+            <p style="margin:0;font-family:'Barlow',sans-serif;font-size:13px;line-height:1.55;color:#4A4640;">{{ ai.rationale }}</p>
+            <a href="Automatizimet.dc.html" onClick="{{ ai.onAutomation }}" class="tap" style="display:inline-block;margin-top:10px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:#C23B31;">Shiko vendimin në Automatizimet →</a>
+          </div>
+
+          <sc-if value="{{ ai.reassignNote.show }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:14px;padding:12px 14px;border-radius:8px;background:#EDEAE3;">
+              <div style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:#1B1917;margin-bottom:4px;">Ndërhyrje njerëzore: caktimi u ndryshua</div>
+              <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#4A4640;line-height:1.6;">Nga: {{ ai.reassignNote.from }}<br>Në: {{ ai.reassignNote.to }}<br>Nga: {{ ai.reassignNote.by }}<br>Arsye: {{ ai.reassignNote.reason }}</div>
+            </div>
+          </sc-if>
+        </section>
+
+        <section class="staff-card" style="padding:18px;">
+          <h2 style="margin:0 0 4px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Ndërhyrja e departamentit</h2>
+          <p style="margin:0 0 12px;font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;">Kryer nga {{ dept.doneBy }} · filloi {{ dept.startedLabel }}</p>
+          <sc-if value="{{ dept.evidenceMissing }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:12px;padding:9px 12px;border-radius:8px;background:#F5EBD6;font-family:'Barlow',sans-serif;font-size:12px;color:#7A5A0B;"><span style="display:inline-flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:1px;"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.5h.01"/></svg>Mungon foto pas ndërhyrjes</span></div>
+          </sc-if>
+          <sc-if value="{{ dept.hasPhotos }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:6px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:#8A847C;">Foto pas ndërhyrjes</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+              <sc-for list="{{ dept.photos }}" as="p" hint-placeholder-count="2">
+                <img src="{{ p.photo }}" alt="Foto pas ndërhyrjes" style="width:120px;height:90px;object-fit:cover;border-radius:8px;">
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-for list="{{ dept.notes }}" as="n" hint-placeholder-count="0">
+            <div style="padding:8px 0;border-top:1px solid #E4DFD6;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">{{ n.text }}</div>
+          </sc-for>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <input type="text" value="{{ dept.draft }}" onChange="{{ dept.onDraft }}" placeholder="Shto shënim ndërhyrjeje…" class="staff-input" style="flex:1;padding:8px 10px;">
+            <button type="button" onClick="{{ dept.onAdd }}" class="tap staff-btn-secondary" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Shto</button>
+          </div>
+        </section>
+
+        <sc-if value="{{ verify.show }}" hint-placeholder-val="{{ false }}">
+          <section class="staff-card" style="padding:18px;">
+            <h2 style="margin:0 0 12px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Verifikimi i zgjidhjes</h2>
+            <div style="margin-bottom:12px;">
+              <div class="verify-row"><span class="check-ico" style="width:16px;height:16px;background:{{ verify.locationBg }};color:{{ verify.locationColor }};font-size:11px;font-weight:800;">{{ verify.locationMark }}</span><span style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">Vendndodhja përputhet</span></div>
+              <div class="verify-row"><span class="check-ico" style="width:16px;height:16px;background:{{ verify.descBg }};color:{{ verify.descColor }};font-size:11px;font-weight:800;">{{ verify.descMark }}</span><span style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">Përshkrimi i zgjidhjes u dha</span></div>
+              <div class="verify-row"><span class="check-ico" style="width:16px;height:16px;background:{{ verify.photoBg }};color:{{ verify.photoColor }};font-size:11px;font-weight:800;">{{ verify.photoMark }}</span><span style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">Foto pas ndërhyrjes u ngarkua</span></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button type="button" onClick="{{ verify.onAccept }}" class="tap staff-btn-primary" style="padding:9px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">Prano zgjidhjen</button>
+              <button type="button" onClick="{{ verify.onReopen }}" class="tap staff-btn-secondary" style="padding:9px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">Rihap raportin</button>
+            </div>
+          </section>
+        </sc-if>
+
+        <section class="staff-card" style="padding:18px;">
+          <h2 style="margin:0 0 12px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Komunikimi me qytetarin</h2>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+            <sc-for list="{{ thread }}" as="m" hint-placeholder-count="3">
+              <div class="thread-row {{ m.rowClass }}">
+                <div class="thread-msg {{ m.bubbleClass }}">
+                  <div>{{ m.text }}</div>
+                  <div style="margin-top:3px;font-size:11px;opacity:.7;">{{ m.timeLabel }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <button type="button" onClick="{{ onOpenRequest }}" class="tap staff-btn-secondary" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Kërko informacion</button>
+        </section>
+
+        <section class="staff-card" style="padding:18px;">
+          <h2 style="margin:0 0 12px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Historiku i plotë i raportit</h2>
+          <div style="display:flex;flex-direction:column;">
+            <sc-for list="{{ timeline }}" as="ev" hint-placeholder-count="5">
+              <div style="display:flex;gap:12px;padding:8px 0;">
+                <span style="flex:0 0 auto;width:44px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;" class="tabular-nums">{{ ev.time }}</span>
+                <span class="status-dot" style="margin-top:5px;background:{{ ev.color }};"></span>
+                <span style="flex:1;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">{{ ev.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0;">
+
+        <section class="staff-card" style="padding:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Përgjegjësia</h2>
+            <sc-if value="{{ assign.showOpenBtn }}" hint-placeholder-val="{{ false }}">
+              
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ assign.open }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <label style="display:block;">
+                <span style="display:block;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:4px;">Departamenti</span>
+                <select value="{{ assign.department }}" onChange="{{ assign.onDept }}" class="staff-select" style="width:100%;padding:8px 10px;">
+                  <sc-for list="{{ deptOptions }}" as="o" hint-placeholder-count="5"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:block;">
+                <span style="display:block;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:4px;">Punonjësi</span>
+                <select value="{{ assign.responsible }}" onChange="{{ assign.onResp }}" class="staff-select" style="width:100%;padding:8px 10px;">
+                  <option value="">— Pa caktuar —</option>
+                  <sc-for list="{{ assign.respOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:block;">
+                <span style="display:block;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:4px;">Prioriteti</span>
+                <select value="{{ assign.priority }}" onChange="{{ assign.onPriority }}" class="staff-select" style="width:100%;padding:8px 10px;">
+                  <sc-for list="{{ priorityOptions }}" as="o" hint-placeholder-count="4"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                </select>
+              </label>
+              <sc-if value="{{ assign.reasonRequired }}" hint-placeholder-val="{{ false }}">
+                <label style="display:block;">
+                  <span style="display:block;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:0;color:#8A847C;margin-bottom:4px;">Arsyeja e rishpërndarjes</span>
+                  <input type="text" value="{{ assign.reason }}" onChange="{{ assign.onReason }}" placeholder="P.sh. kategoria fillestare ishte e pasaktë…" class="staff-input" style="width:100%;padding:8px 10px;">
+                </label>
+              </sc-if>
+              <div style="display:flex;gap:8px;margin-top:2px;">
+                <button type="button" onClick="{{ assign.onSave }}" class="tap staff-btn-primary" style="flex:1;padding:10px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">{{ assign.saveLabel }}</button>
+                <button type="button" onClick="{{ assign.onCancel }}" class="tap staff-btn-secondary" style="padding:10px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">Anulo</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ assign.showSummary }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-4h4v4"/></svg>
+                <span style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">{{ r.departmentName }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+                <span style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">{{ r.responsibleLabel }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M12 21s-7-6.3-7-12a7 7 0 0114 0c0 5.7-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                <span style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">{{ r.zone }}</span>
+              </div>
+              <div style="padding-top:8px;border-top:1px solid #E4DFD6;font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;">Caktuar: {{ assign.assignedAtLabel }}</div>
+            </div>
+          </sc-if>
+        </section>
+
+        <section class="staff-card" style="padding:18px;box-shadow:inset 3px 0 0 {{ sla.color }}, 0 2px 5px rgba(27,25,23,.03), 0 18px 34px rgba(27,25,23,.055);">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;">
+            <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">SLA</h2>
+            <span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:18px;font-weight:700;color:{{ sla.color }};">{{ sla.headline }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
+            <div><div style="font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;margin-bottom:2px;">Lejuar</div><div class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ sla.allowedLabel }}</div></div>
+            <div><div style="font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;margin-bottom:2px;">Ka kaluar</div><div class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ sla.elapsedLabel }}</div></div>
+          </div>
+          <div class="conf-track" style="margin-bottom:10px;"><div class="conf-fill" style="width:{{ sla.pct }}%;background:{{ sla.color }};"></div></div>
+          <div style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:{{ sla.color }};margin-bottom:10px;">{{ sla.statusLabel }}</div>
+          <div style="padding-top:10px;border-top:1px solid #E4DFD6;display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;justify-content:space-between;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;"><span>Caktuar</span><span class="tabular-nums">{{ sla.historyAssigned }}</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;"><span>Filloi puna</span><span class="tabular-nums">{{ sla.historyStarted }}</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;"><span>Përditësimi i fundit</span><span class="tabular-nums">{{ sla.historyLastUpdate }}</span></div>
+          </div>
+
+        </section>
+
+        <section class="staff-card" style="padding:18px;">
+          <h2 style="margin:0 0 12px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Statusi</h2>
+          <div style="margin-bottom:12px;">
+            <sc-for list="{{ lifecycle.steps }}" as="s" hint-placeholder-count="6">
+              <div>
+                <div class="lifecycle-step {{ s.stepClass }}">
+                  <span class="lifecycle-dot"></span>
+                  <span class="lifecycle-label" style="font-family:'Barlow',sans-serif;font-size:13px;color:#4A4640;">{{ s.label }}</span>
+                </div>
+                <sc-if value="{{ s.showConnector }}" hint-placeholder-val="{{ true }}">
+                  <div class="lifecycle-connector {{ s.connectorClass }}"></div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ lifecycle.isBranch }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:12px;padding:8px 12px;border-radius:8px;background:#EDEAE3;font-family:'Barlow',sans-serif;font-size:12px;color:#4A4640;">Ky rast doli nga rrjedha kryesore: <strong style="color:#1B1917;">{{ lifecycle.branchNote }}</strong></div>
+          </sc-if>
+          <select value="{{ statusCtl.value }}" onChange="{{ statusCtl.onChange }}" class="staff-select" style="width:100%;padding:8px 10px;margin-bottom:10px;">
+            <sc-for list="{{ statusOptions }}" as="o" hint-placeholder-count="9"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+          </select>
+          <button type="button" onClick="{{ statusCtl.onSave }}" class="tap staff-btn-primary" style="width:100%;padding:10px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">{{ statusCtl.saveLabel }}</button>
+        </section>
+
+        <sc-if value="{{ hasExceptions }}" hint-placeholder-val="{{ false }}">
+          <section class="staff-card" style="padding:18px;">
+            <h2 style="margin:0 0 4px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Probleme me këtë raport</h2>
+            <div>
+              <sc-for list="{{ exceptions }}" as="ex" hint-placeholder-count="2">
+                <div class="exception-list-row">
+                  <span class="auto-dot" style="margin-top:6px;background:{{ ex.color }};"></span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ ex.text }}</div>
+                    <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;margin-top:1px;">{{ ex.evidence }}</div>
+                    <sc-if value="{{ ex.hasAction }}" hint-placeholder-val="{{ false }}">
+                      <button type="button" onClick="{{ ex.onAction }}" class="tap" style="margin-top:4px;border:0;background:transparent;padding:0;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#C23B31;">{{ ex.actionLabel }}</button>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ dup.show }}" hint-placeholder-val="{{ false }}">
+          <section class="staff-card" style="padding:18px;">
+            <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Dublikatë e mundshme</h2>
+            <div style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;margin-bottom:10px;">{{ dup.candidateId }} · {{ dup.similarity }}% ngjashmëri</div>
+            <div style="display:flex;gap:8px;">
+              <button type="button" onClick="{{ dup.onConfirm }}" class="tap staff-btn-primary" style="padding:7px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Lidh</button>
+              <button type="button" onClick="{{ dup.onDismiss }}" class="tap staff-btn-secondary" style="padding:7px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Mbaji të ndara</button>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ linked.show }}" hint-placeholder-val="{{ false }}">
+          <section class="staff-card" style="padding:18px;">
+            <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Raporte të lidhura</h2>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <sc-for list="{{ linked.items }}" as="l" hint-placeholder-count="2">
+                <a href="Raporti.dc.html" onClick="{{ l.onClick }}" class="tap staff-row" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;">
+                  <span style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#6B665F;" class="tabular-nums">{{ l.id }}</span>
+                  <span style="flex:1;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ l.title }}</span>
+                  <span class="status-pill" style="background:{{ l.statusBg }};color:{{ l.statusInk }};font-size:11px;"><span class="status-dot" style="background:{{ l.statusDot }};"></span>{{ l.status }}</span>
+                </a>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ reappear.show }}" hint-placeholder-val="{{ false }}">
+          <section class="staff-card" style="padding:18px;background:#F5EBD6;border-color:#E3D3A6;">
+            <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#7A5A0B;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7A5A0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-right:6px;vertical-align:-2px;"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Rishfaqje</h2>
+            <p style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-size:13px;color:#7A5A0B;">Ky problem është raportuar më parë.</p>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;font-family:'Barlow',sans-serif;font-size:12px;color:#7A5A0B;">
+              <div>Raporti i mëparshëm: <strong>{{ reappear.prevId }}</strong></div>
+              <div>Statusi i tij: {{ reappear.prevStatus }}</div>
+            </div>
+            <a href="Raporti.dc.html" onClick="{{ reappear.onOpen }}" class="tap staff-btn-secondary" style="display:inline-block;padding:7px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Shiko raportin e mëparshëm</a>
+          </section>
+        </sc-if>
+
+        <section class="staff-card" style="padding:18px;">
+          <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Konteksti i hartës</h2>
+          <div class="map-frame">
+            <div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(#E4DFD6 1px,transparent 1px),linear-gradient(90deg,#E4DFD6 1px,transparent 1px);background-size:22px 22px;"></div>
+            <div class="map-pin" style="left:{{ mapPin.left }};top:{{ mapPin.top }};">
+              <svg width="20" height="25" viewBox="0 0 30 38" fill="none"><path d="M15 1c7.7 0 14 6.2 14 14 0 10-14 22-14 22S1 25 1 15C1 7.2 7.3 1 15 1z" fill="{{ mapPin.color }}" stroke="#1B1917" stroke-width="1"></path><circle cx="15" cy="15" r="5" fill="#FBFAF8"></circle></svg>
+            </div>
+          </div>
+          <p style="margin:10px 0 0;font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;">{{ r.zone }} · {{ r.address }}</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  state = {
+    currentId: null, overrides: {},
+    moreOpen: false, exportNotice: false,
+    assignOpen: false, assignDraft: null, assignReason: '',
+    statusDraft: null,
+    reopenOpen: false, reopenReason: '',
+    requestOpen: false, requestCustom: '',
+    deptDraft: '',
+  };
+
+  componentDidMount() {
+    let id = null;
+    try { id = window.localStorage.getItem('sinjal_selected_report'); } catch (e) {}
+    const S = window.SINJAL;
+    if (!id || !S.byId(id)) id = (S.reports[0] || {}).id;
+    let overrides = {};
+    try { overrides = JSON.parse(window.localStorage.getItem('sinjal_case_overrides') || '{}'); } catch (e) {}
+    this.setState({ currentId: id, overrides: overrides });
+  }
+
+  _persistOverrides(overrides) {
+    try { window.localStorage.setItem('sinjal_case_overrides', JSON.stringify(overrides)); } catch (e) {}
+  }
+  _patchOverride(id, patch) {
+    const overrides = Object.assign({}, this.state.overrides);
+    overrides[id] = Object.assign({}, overrides[id], patch);
+    this._persistOverrides(overrides);
+    this.setState({ overrides: overrides });
+  }
+  _goTo(id) {
+    return () => {
+      try { window.localStorage.setItem('sinjal_selected_report', id); } catch (e) {}
+      this.setState({
+        currentId: id, assignOpen: false, assignDraft: null, assignReason: '',
+        statusDraft: null, reopenOpen: false, reopenReason: '', requestOpen: false, requestCustom: '', deptDraft: '', moreOpen: false,
+      });
+    };
+  }
+  // Shared read of "the report as the clerk currently sees it" (seed data
+  // merged with the sinjal_case_overrides layer other actions have saved),
+  // used both by renderVals and by the action handlers below so the merge
+  // logic — including the department-name/employee-name recompute overrides
+  // don't carry on their own — lives in exactly one place.
+  _currentReport() {
+    const S = window.SINJAL;
+    const id = this.state.currentId || (S.reports[0] || {}).id;
+    const base = S.byId(id) || S.reports[0];
+    const ov = this.state.overrides[base.id] || {};
+    const eff = Object.assign({}, base, ov);
+    if (ov.status) eff.status = ov.status;
+    eff.departmentName = S.deptName(eff.department);
+    eff.responsibleName = eff.responsible ? S.empName(eff.responsible) : null;
+    return { S: S, base: base, ov: ov, eff: eff };
+  }
+
+  _openAssign() {
+    const { eff } = this._currentReport();
+    this.setState({ assignOpen: true, assignDraft: { department: eff.department, responsible: eff.responsible || '', priority: eff.priority }, assignReason: '' });
+  }
+  _cancelAssign() { this.setState({ assignOpen: false, assignDraft: null, assignReason: '' }); }
+  _saveAssign() {
+    const { base, eff, S } = this._currentReport();
+    const d = this.state.assignDraft;
+    if (!d) return;
+    const deptOrRespChanged = d.department !== eff.department || (d.responsible || '') !== (eff.responsible || '');
+    const isReassignment = !!eff.responsible && deptOrRespChanged;
+    if (isReassignment && !(this.state.assignReason || '').trim()) return;
+    const patch = { department: d.department, responsible: d.responsible || null, priority: d.priority };
+    if (isReassignment) {
+      const reassignLog = (this.state.overrides[base.id] && this.state.overrides[base.id].reassignLog) || [];
+      patch.reassignLog = reassignLog.concat([{ at: S.now.toISOString(), from: eff.departmentName, to: S.deptName(d.department), by: 'Drita K.', reason: this.state.assignReason.trim() }]);
+    }
+    this._patchOverride(base.id, patch);
+    this.setState({ assignOpen: false, assignDraft: null, assignReason: '' });
+  }
+
+  _openReopen() { this.setState({ reopenOpen: true, reopenReason: '', requestOpen: false }); }
+  _cancelReopen() { this.setState({ reopenOpen: false, reopenReason: '' }); }
+  _confirmReopen() {
+    const { base, eff, S } = this._currentReport();
+    const reason = (this.state.reopenReason || '').trim();
+    if (!reason) return;
+    const reopenLog = (this.state.overrides[base.id] && this.state.overrides[base.id].reopenLog) || [];
+    this._patchOverride(base.id, { status: 'Në punë', reopenLog: reopenLog.concat([{ at: S.now.toISOString(), from: eff.status, by: 'Drita K.', reason: reason }]) });
+    this.setState({ reopenOpen: false, reopenReason: '', statusDraft: null });
+  }
+
+  _toggleEscalate() {
+    const { base, ov, S } = this._currentReport();
+    if (ov.escalated) this._patchOverride(base.id, { escalated: false, escalatedAt: null });
+    else this._patchOverride(base.id, { escalated: true, escalatedAt: S.now.toISOString() });
+  }
+  _acceptResolution() {
+    const { base, S } = this._currentReport();
+    this._patchOverride(base.id, { status: 'Mbyllur', acceptedAt: S.now.toISOString() });
+  }
+
+  _sendRequest(label) {
+    const { base, S } = this._currentReport();
+    const reqs = (this.state.overrides[base.id] && this.state.overrides[base.id].citizenRequests) || [];
+    this._patchOverride(base.id, { citizenRequests: reqs.concat([{ at: S.now.toISOString(), label: label }]) });
+    this.setState({ requestOpen: false, requestCustom: '' });
+  }
+  _sendCustomRequest() {
+    const text = (this.state.requestCustom || '').trim();
+    if (!text) return;
+    this._sendRequest(text);
+  }
+
+  renderVals() {
+    const S = window.SINJAL;
+    if (!S || !this.state.currentId) return {};
+    const NOW = S.now;
+    const { base, ov, eff } = this._currentReport();
+
+    const sm = S.statusMeta[eff.status] || S.statusMeta['I ri'];
+    const pm = S.priorityMeta[eff.priority] || S.priorityMeta['E mesme'];
+    const slaColor = base.slaBreached ? '#C23B31' : (base.slaAtRisk ? '#B8860B' : '#6B665F');
+
+    const dupDismissed = !!ov.dupDismissed;
+    const dupShow = !!base.duplicateCandidateId && !dupDismissed && eff.status !== 'Dublikatë';
+
+    // ---- merge the seed timeline with every audit event this session's
+    // actions have generated (reassignment, reopen, escalation, an info
+    // request, an intervention note, an accepted resolution) into one real,
+    // chronologically-sorted history — nothing here is invented copy, it is
+    // built from the actual patches those actions wrote. ----------------
+    const withDot = (s) => (/[.!?]$/.test(s) ? s : s + '.');
+    const auditEvents = [];
+    (ov.reassignLog || []).forEach((e) => auditEvents.push({ time: new Date(e.at), label: 'Caktimi u ndryshua nga ' + e.from + ' në ' + e.to + '. Arsye: ' + withDot(e.reason), kind: 'clerk' }));
+    (ov.reopenLog || []).forEach((e) => auditEvents.push({ time: new Date(e.at), label: 'Raporti u rihap (ishte "' + e.from + '"). Arsye: ' + withDot(e.reason), kind: 'clerk' }));
+    if (ov.escalatedAt) auditEvents.push({ time: new Date(ov.escalatedAt), label: 'U përshkallëzua te përgjegjësi i departamentit.', kind: 'clerk' });
+    (ov.citizenRequests || []).forEach((e) => auditEvents.push({ time: new Date(e.at), label: 'Iu kërkua qytetarit: ' + e.label, kind: 'clerk' }));
+    (ov.notes || []).forEach((n) => { if (n && n.at) auditEvents.push({ time: new Date(n.at), label: 'Shënim ndërhyrjeje: ' + n.text, kind: 'clerk' }); });
+    if (ov.acceptedAt) auditEvents.push({ time: new Date(ov.acceptedAt), label: 'Zgjidhja u pranua; rasti u mbyll.', kind: 'clerk' });
+    const mergedTimeline = (base.timeline || []).concat(auditEvents).sort((a, b) => a.time - b.time);
+    const lastActivityAt = mergedTimeline.length ? mergedTimeline[mergedTimeline.length - 1].time : base.submittedAt;
+
+    const relTime = (d) => {
+      const mins = Math.max(0, Math.round((NOW - d) / 60000));
+      if (mins < 1) return 'tani';
+      if (mins < 60) return mins + ' min më parë';
+      const hrs = Math.round(mins / 60);
+      if (hrs < 24) return hrs + ' orë më parë';
+      return Math.round(hrs / 24) + ' ditë më parë';
+    };
+    const fmtDur = (hours) => S.fmtHours(Math.abs(hours));   // shared app-wide duration format
+
+    // ---- exceptions: every signal is a real, computed condition, not a
+    // fixed list — ranked so the single most urgent one becomes the top
+    // banner and the rest appear in the full "Probleme" panel. ----------
+    const terminal = ['Zgjidhur', 'Mbyllur', 'Refuzuar', 'Dublikatë'].indexOf(eff.status) !== -1;
+    const noActivity48h = !terminal && ((NOW - lastActivityAt) / 3600000) >= 48;
+    const dupUndismissed = dupShow;
+    const evidenceMissing = eff.status === 'Zgjidhur' && !(base.resolutionEvidence && base.resolutionEvidence.length > 0);
+    const lowConfidence = base.ai.confidence < 60;
+    const raw = [];
+    if (base.slaBreached) raw.push({ sev: 3, isSla: true, text: 'SLA e shkelur', evidence: 'Afati u tejkalua (' + base.slaLabel + ').', actionLabel: 'Rishpërndaj', onAction: () => this._openAssign() });
+    else if (base.slaAtRisk) raw.push({ sev: 2, isSla: true, text: 'SLA në rrezik', evidence: 'Kanë mbetur ' + base.slaLabel + ' deri në afat.', actionLabel: ov.escalated ? 'Anulo përshkallëzimin' : 'Escalo', onAction: () => this._toggleEscalate() });
+    if (noActivity48h) raw.push({ sev: 2, text: 'Pa aktivitet për 48+ orë', evidence: 'Veprimi i fundit: ' + relTime(lastActivityAt) + '.', actionLabel: 'Rishpërndaj', onAction: () => this._openAssign() });
+    if (dupUndismissed) raw.push({ sev: 2, text: 'Dublikatë e mundshme e pashqyrtuar', evidence: base.duplicateSimilarity + '% ngjashmëri me ' + S.byId(base.duplicateCandidateId).displayId + '.', actionLabel: '', onAction: null });
+    if (evidenceMissing) raw.push({ sev: 2, text: 'Mungon dëshmia e zgjidhjes', evidence: 'Statusi është "Zgjidhur" por nuk ka foto/dëshmi të ngarkuar.', actionLabel: '', onAction: null });
+    if (base.reappeared) raw.push({ sev: 1, text: 'Raport i rishfaqur', evidence: 'I ngjashëm me ' + S.byId(base.reappearedFromId).displayId + ', tashmë ' + S.byId(base.reappearedFromId).status + '.', actionLabel: '', onAction: null });
+    if (lowConfidence) raw.push({ sev: 1, text: 'Routing me besueshmëri të ulët', evidence: base.ai.confidence + '% besueshmëri e routing-ut — rekomandohet verifikim manual i departamentit.', actionLabel: 'Rishpërndaj', onAction: () => this._openAssign() });
+    raw.sort((a, b) => b.sev - a.sev);
+    const SEVC = { 3: '#C23B31', 2: '#B8860B', 1: '#8A847C' };
+    // SLA lives in the SLA card only — keep it out of the banner and list
+    const nonSla = raw.filter((ex) => !ex.isSla);
+    const exceptions = nonSla.map((ex) => ({ color: SEVC[ex.sev], text: ex.text, evidence: ex.evidence, hasAction: !!ex.actionLabel, actionLabel: ex.actionLabel, onAction: ex.onAction || (() => {}) }));
+    const TONE = { 3: { bg: 'rgba(194,59,49,.07)', border: '#C23B31', ink: '#8C2A22' }, 2: { bg: '#F5EBD6', border: '#B8860B', ink: '#7A5A0B' }, 1: { bg: '#EDEAE3', border: '#8A847C', ink: '#4A4640' } };
+    const top = nonSla[0];
+    const topBanner = top ? { show: true, text: top.text, evidence: top.evidence, bg: TONE[top.sev].bg, border: TONE[top.sev].border, ink: TONE[top.sev].ink } : { show: false };
+
+    // ---- contextual primary actions (header + mirrored sticky bar) ----
+    const actions = [];
+    if (['I ri', 'Në shqyrtim'].indexOf(eff.status) !== -1) {
+      actions.push({ label: 'Cakto', btnClass: 'staff-btn-primary', onClick: () => this._openAssign() });
+    } else if (['Caktuar', 'Në punë'].indexOf(eff.status) !== -1) {
+      actions.push({ label: 'Rishpërndaj', btnClass: 'staff-btn-secondary', onClick: () => this._openAssign() });
+      actions.push({ label: 'Kërko informacion', btnClass: 'staff-btn-secondary', onClick: () => this.setState({ requestOpen: true, reopenOpen: false }) });
+      if (base.slaAtRisk || base.slaBreached) actions.push({ label: ov.escalated ? 'Anulo përshkallëzimin' : 'Escalo', btnClass: 'staff-btn-secondary', onClick: () => this._toggleEscalate() });
+    } else if (eff.status === 'Zgjidhur') {
+      actions.push({ label: 'Prano zgjidhjen', btnClass: 'staff-btn-primary', onClick: () => this._acceptResolution() });
+      actions.push({ label: 'Rihap raportin', btnClass: 'staff-btn-secondary', onClick: () => this._openReopen() });
+      actions.push({ label: 'Kërko informacion', btnClass: 'staff-btn-secondary', onClick: () => this.setState({ requestOpen: true, reopenOpen: false }) });
+    } else if (eff.status === 'Mbyllur') {
+      actions.push({ label: 'Rihap raportin', btnClass: 'staff-btn-secondary', onClick: () => this._openReopen() });
+    } else {
+      actions.push({ label: 'Rihap raportin', btnClass: 'staff-btn-secondary', onClick: () => this._openReopen() });
+    }
+
+    const requestTemplates = [
+      { label: 'Kërko foto', onClick: () => this._sendRequest('Kërko foto shtesë') },
+      { label: 'Kërko vendndodhje më të saktë', onClick: () => this._sendRequest('Kërko vendndodhje më të saktë') },
+      { label: 'Kërko përshkrim shtesë', onClick: () => this._sendRequest('Kërko përshkrim shtesë') },
+    ];
+
+    // ---- assignment card: read-only summary, or the edit form when the
+    // clerk opened it via "Cakto"/"Rishpërndaj" (header, sticky bar, or the
+    // card's own "Ndrysho" link) ----------------------------------------
+    const assignDraft = this.state.assignDraft || { department: eff.department, responsible: eff.responsible || '', priority: eff.priority };
+    const deptEmployees = S.employees.filter((e) => e.dept === assignDraft.department);
+    const deptOrRespChanged = assignDraft.department !== eff.department || (assignDraft.responsible || '') !== (eff.responsible || '');
+    const reasonRequired = !!eff.responsible && deptOrRespChanged;
+    const assignedEvent = mergedTimeline.filter((ev) => ev.label.indexOf('u caktua te') !== -1)[0];
+
+    // ---- SLA card: real elapsed/remaining + the two named milestones
+    // pulled straight out of the (deterministic) seed timeline copy. -----
+    const allowedHours = (base.slaDeadline.getTime() - base.submittedAt.getTime()) / 3600000;
+    const elapsedHours = (NOW.getTime() - base.submittedAt.getTime()) / 3600000;
+    const pct = Math.max(0, Math.min(100, (elapsedHours / allowedHours) * 100));
+    const assignedTl = mergedTimeline.filter((ev) => ev.label.indexOf('u caktua te') !== -1)[0];
+    const startedTl = mergedTimeline.filter((ev) => ev.label === 'Statusi ndryshoi në Në punë.')[0];
+
+    // ---- department-work / intervention card ---------------------------
+    const deptNotes = (ov.notes || []).map((n) => ({ text: typeof n === 'string' ? n : n.text }));
+    const deptPhotos = (base.resolutionEvidence || []).map((e) => ({ photo: e.photo }));
+
+    // ---- resolution verification (only relevant once the department has
+    // marked the case Zgjidhur, before the clerk closes it out) ----------
+    const locationOk = !!(base.address && base.zone);
+    const descOk = (base.resolutionEvidence || []).some((e) => e.note) || deptNotes.length > 0;
+    const photoOk = deptPhotos.length > 0;
+
+    // ---- citizen-facing communication thread: built from the real,
+    // already-derived milestones (submission, assignment, resolution) plus
+    // any info requests this session actually sent — never invented
+    // citizen replies. ----------------------------------------------------
+    const thread = [];
+    thread.push({ from: 'system', at: base.submittedAt, text: 'Raporti juaj u regjistrua nga SINJAL.' });
+    if (assignedTl) thread.push({ from: 'system', at: assignedTl.time, text: 'Raporti juaj u caktua te Departamenti i ' + eff.departmentName + '.' });
+    if (['Zgjidhur', 'Mbyllur'].indexOf(eff.status) !== -1) {
+      const resolvedTl = mergedTimeline.filter((ev) => ev.label === 'Statusi ndryshoi në Zgjidhur.')[0];
+      thread.push({ from: 'system', at: resolvedTl ? resolvedTl.time : base.slaDeadline, text: 'Raporti është shënuar si i zgjidhur.' });
+    }
+    (ov.citizenRequests || []).forEach((r2) => thread.push({ from: 'clerk', at: new Date(r2.at), text: r2.label }));
+    thread.sort((a, b) => a.time - b.time);
+
+    // ---- status lifecycle stepper ---------------------------------------
+    const CHAIN = ['I ri', 'Në shqyrtim', 'Caktuar', 'Në punë', 'Zgjidhur', 'Mbyllur'];
+    const chainIdx = CHAIN.indexOf(eff.status);
+    const isBranch = chainIdx === -1;
+    const steps = CHAIN.map((s, i) => {
+      const state2 = isBranch ? 'pending' : (i < chainIdx ? 'done' : (i === chainIdx ? 'current' : 'pending'));
+      return { label: s, stepClass: state2 === 'done' ? 'is-done' : (state2 === 'current' ? 'is-current' : ''), showConnector: i < CHAIN.length - 1, connectorClass: (state2 === 'done' && i < chainIdx) ? 'is-done' : '' };
+    });
+
+    // ---- related / duplicate reports ------------------------------------
+    const linkedIds = base.linkedIds || [];
+    const linkedItems = linkedIds.map((lid) => {
+      const lr = S.byId(lid);
+      if (!lr) return null;
+      return { id: lr.displayId, title: lr.title, status: lr.status, statusBg: S.statusMeta[lr.status].bg, statusInk: S.statusMeta[lr.status].ink, statusDot: S.statusMeta[lr.status].dot, onClick: this._goTo(lr.id) };
+    }).filter(Boolean);
+
+    const reappearFrom = base.reappearedFromId ? S.byId(base.reappearedFromId) : null;
+    const zc = S.zoneCoords[base.zone] || { x: 50, y: 50 };
+
+    return {
+      r: {
+        id: base.displayId, category: base.categoryLabel, title: base.title, zone: base.zone, address: base.address,
+        status: eff.status, statusBg: sm.bg, statusInk: sm.ink, statusDot: sm.dot,
+        priority: eff.priority, priorityColor: pm.color,
+        slaLabel: base.slaLabel, slaColor: slaColor,
+        description: base.description, submittedLabel: base.submittedLabel, citizenInitials: base.citizenInitials, photo: base.photo,
+        departmentName: eff.departmentName, responsibleLabel: eff.responsibleName || 'Pa caktuar',
+      },
+      actions: actions,
+      moreOpen: this.state.moreOpen,
+      moreBtnClass: this.state.moreOpen ? 'is-on' : '',
+      onToggleMore: () => this.setState({ moreOpen: !this.state.moreOpen }),
+      onExport: () => this.setState({ exportNotice: true, moreOpen: false }),
+      exportNotice: this.state.exportNotice,
+      onDismissExport: () => this.setState({ exportNotice: false }),
+
+      topBanner: topBanner,
+      exceptions: exceptions,
+      hasExceptions: exceptions.length > 0,
+
+      reopenOpen: this.state.reopenOpen, reopenReason: this.state.reopenReason,
+      onReopenReason: (e) => this.setState({ reopenReason: e.target.value }),
+      onConfirmReopen: () => this._confirmReopen(),
+      onCancelReopen: () => this._cancelReopen(),
+
+      requestOpen: this.state.requestOpen, requestCustom: this.state.requestCustom, requestTemplates: requestTemplates,
+      onRequestCustom: (e) => this.setState({ requestCustom: e.target.value }),
+      onSendCustomRequest: () => this._sendCustomRequest(),
+      onCancelRequest: () => this.setState({ requestOpen: false, requestCustom: '' }),
+      onOpenRequest: () => this.setState({ requestOpen: true, reopenOpen: false }),
+
+      ai: {
+        zone: base.zone, priority: base.ai.suggestedPriority, department: base.ai.confidence < 55 ? 'Pranimi i përgjithshëm' : base.ai.suggestedDepartment,
+        summaryLead: base.ai.confidence < 55 ? 'Besueshmëri e pamjaftueshme — SINJAL e dërgoi te' : 'SINJAL e routoi automatikisht te',
+        summaryTarget: base.ai.confidence < 55 ? 'Pranimi i përgjithshëm' : base.ai.suggestedDepartment,
+        risk: base.ai.risk, confidence: base.ai.confidence, confColor: base.ai.confidence >= 80 ? '#2E7D4F' : (base.ai.confidence >= 55 ? '#B8860B' : '#C23B31'),
+        rationale: base.ai.rationale,
+        assignedTime: assignedEvent ? S.fmtTime(assignedEvent.time) : S.fmtTime(base.submittedAt),
+        onUse: () => {
+          const d = S.departments.filter((x) => x.name === base.ai.suggestedDepartment)[0];
+          this.setState({ assignOpen: true, assignDraft: { department: (d && d.id) || eff.department, responsible: '', priority: base.ai.suggestedPriority }, assignReason: '' });
+        },
+        onAutomation: () => { try { window.localStorage.setItem('sinjal_auto_focus', JSON.stringify({ screen: 'routing', caseId: base.id })); } catch (e) {} },
+        reassignNote: (ov.reassignLog && ov.reassignLog.length) ? { show: true, from: ov.reassignLog[ov.reassignLog.length - 1].from, to: ov.reassignLog[ov.reassignLog.length - 1].to, by: ov.reassignLog[ov.reassignLog.length - 1].by, reason: ov.reassignLog[ov.reassignLog.length - 1].reason } : { show: false },
+      },
+
+      dept: {
+        doneBy: eff.responsibleName || '—',
+        startedLabel: startedTl ? S.fmtDateTime(startedTl.time) : '—',
+        evidenceMissing: eff.status === 'Zgjidhur' && !photoOk,
+        hasPhotos: deptPhotos.length > 0, photos: deptPhotos,
+        notes: deptNotes,
+        draft: this.state.deptDraft,
+        onDraft: (e) => this.setState({ deptDraft: e.target.value }),
+        onAdd: () => {
+          const text = (this.state.deptDraft || '').trim();
+          if (!text) return;
+          const notes = (ov.notes || []).concat([{ text: text, at: S.now.toISOString() }]);
+          this._patchOverride(base.id, { notes: notes });
+          this.setState({ deptDraft: '' });
+        },
+      },
+
+      verify: {
+        show: eff.status === 'Zgjidhur',
+        locationMark: locationOk ? '✓' : '!', locationColor: locationOk ? '#2E7D4F' : '#B8860B', locationBg: locationOk ? '#E1EEE5' : '#F5EBD6',
+        descMark: descOk ? '✓' : '!', descColor: descOk ? '#2E7D4F' : '#B8860B', descBg: descOk ? '#E1EEE5' : '#F5EBD6',
+        photoMark: photoOk ? '✓' : '!', photoColor: photoOk ? '#2E7D4F' : '#B8860B', photoBg: photoOk ? '#E1EEE5' : '#F5EBD6',
+        onAccept: () => this._acceptResolution(),
+        onReopen: () => this._openReopen(),
+      },
+
+      thread: thread.map((m) => ({ rowClass: m.from === 'clerk' ? 'from-clerk' : '', bubbleClass: m.from === 'clerk' ? 'from-clerk' : 'from-system', text: m.text, timeLabel: S.fmtDateTime(m.at) })),
+
+      timeline: mergedTimeline.map((ev) => ({ time: S.fmtTime(ev.time), label: ev.label, color: ev.kind === 'ai' ? '#B8860B' : (ev.kind === 'clerk' ? '#C23B31' : '#6B665F') })),
+
+      deptOptions: S.departments.map((d) => ({ value: d.id, label: d.name })),
+      priorityOptions: S.priorityOrder.map((p) => ({ value: p, label: p })),
+      statusOptions: S.statusOrder.map((s) => ({ value: s, label: s })),
+
+      assign: {
+        open: this.state.assignOpen, showOpenBtn: !this.state.assignOpen, showSummary: !this.state.assignOpen,
+        openLabel: eff.responsible ? 'Rishpërndaj' : 'Cakto',
+        onOpen: () => this._openAssign(), onCancel: () => this._cancelAssign(),
+        department: assignDraft.department, responsible: assignDraft.responsible || '', priority: assignDraft.priority,
+        respOptions: deptEmployees.map((e) => ({ value: e.id, label: e.name })),
+        reasonRequired: reasonRequired, reason: this.state.assignReason,
+        onDept: (e) => this.setState({ assignDraft: { department: e.target.value, responsible: '', priority: assignDraft.priority } }),
+        onResp: (e) => this.setState({ assignDraft: Object.assign({}, assignDraft, { responsible: e.target.value }) }),
+        onPriority: (e) => this.setState({ assignDraft: Object.assign({}, assignDraft, { priority: e.target.value }) }),
+        onReason: (e) => this.setState({ assignReason: e.target.value }),
+        onSave: () => this._saveAssign(),
+        saveLabel: reasonRequired ? 'Ruaj rishpërndarjen' : 'Ruaj caktimin',
+        assignedAtLabel: assignedEvent ? S.fmtDateTime(assignedEvent.time) : '—',
+      },
+
+      sla: {
+        allowedLabel: fmtDur(allowedHours), elapsedLabel: fmtDur(elapsedHours),
+        remainingLabel: base.slaRemainingHours === null ? '—' : base.slaLabel,
+        color: slaColor, pct: pct,
+        statusLabel: base.slaBreached ? 'E shkelur — afati ka kaluar' : (base.slaAtRisk ? 'Në rrezik — afati po afrohet' : 'Brenda afatit'),
+        headline: base.slaRemainingHours === null ? '—' : (base.slaBreached ? S.fmtHours(base.slaRemainingHours) : S.fmtHours(base.slaRemainingHours) + ' mbeten'),
+        historyAssigned: assignedTl ? S.fmtTime(assignedTl.time) : '—',
+        historyStarted: startedTl ? S.fmtTime(startedTl.time) : '—',
+        historyLastUpdate: S.fmtTime(lastActivityAt),
+        showEscalate: base.slaAtRisk || base.slaBreached,
+        escalateLabel: ov.escalated ? 'U përshkallëzua' : 'Escalo te përgjegjësi i departamentit',
+        escalateClass: ov.escalated ? 'is-on' : '',
+        onEscalate: () => this._toggleEscalate(),
+      },
+
+      lifecycle: { steps: steps, isBranch: isBranch, branchNote: isBranch ? eff.status : '' },
+      statusCtl: {
+        value: this.state.statusDraft !== null ? this.state.statusDraft : eff.status,
+        onChange: (e) => this.setState({ statusDraft: e.target.value }),
+        onSave: () => { const v = this.state.statusDraft !== null ? this.state.statusDraft : eff.status; this._patchOverride(base.id, { status: v }); this.setState({ statusDraft: null }); },
+        saveLabel: (this.state.statusDraft !== null && this.state.statusDraft !== eff.status) ? 'Përditëso statusin' : 'Statusi u përditësua',
+      },
+
+      dup: {
+        show: dupShow, candidateId: base.duplicateCandidateId ? S.byId(base.duplicateCandidateId).displayId : '', similarity: base.duplicateSimilarity,
+        onConfirm: () => this._patchOverride(base.id, { status: 'Dublikatë' }),
+        onDismiss: () => this._patchOverride(base.id, { dupDismissed: true }),
+      },
+      linked: { show: linkedItems.length > 0, items: linkedItems },
+      reappear: reappearFrom ? { show: true, prevId: reappearFrom.displayId, prevStatus: reappearFrom.status, onOpen: this._goTo(reappearFrom.id) } : { show: false },
+      mapPin: { left: zc.x + '%', top: zc.y + '%', color: pm.color },
+    };
+  }
+}
+</script>
+</body>
+</html>

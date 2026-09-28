@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<title>Sinjal — Nëpunësi — Departamentet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="staff.css">
+<script src="mock-data.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;}</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;background:#F5F2ED;overflow:hidden;">
+
+<dc-import name="Sidebar" active="departamentet" hint-size="232px,900px"></dc-import>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;">
+
+  <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+    <header class="page-header">
+      <div class="page-header-main">
+        <h1 class="page-title">Departamentet</h1>
+        <div class="page-context">
+          <span class="stat-chip"><b class="tabular-nums">{{ orgSummary.deptCount }}</b> departamente</span>
+          <span class="stat-chip"><b class="tabular-nums">{{ orgSummary.activeTotal }}</b> raste aktive</span>
+          <span class="stat-chip"><b class="tabular-nums">{{ orgSummary.slaRiskTotal }}</b> në rrezik SLA</span>
+        </div>
+      </div>
+      <div class="page-actions">
+        <dc-import name="NotificationBell" hint-size="40px,40px"></dc-import>
+      </div>
+    </header>
+
+    <div style="flex:1;min-height:0;overflow-y:auto;padding:20px 28px 28px;">
+
+      <section>
+        <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Departamentet</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+          <sc-for list="{{ deptCards }}" as="d" hint-placeholder-count="5">
+            <button type="button" onClick="{{ d.onClick }}" class="tap staff-card dept-card">
+              <div style="font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;color:#1B1917;">{{ d.name }}</div>
+              <div style="margin-top:8px;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;"><span class="tabular-nums" style="font-weight:700;color:#1B1917;">{{ d.active }}</span> aktive</div>
+              <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">
+                <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:12px;color:{{ d.atRiskColor }};"><span class="status-dot" style="background:{{ d.atRiskColor }};"></span><span class="tabular-nums" style="font-weight:700;">{{ d.atRisk }}</span> në rrezik SLA</span>
+                <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:12px;color:#2E7D4F;"><span class="status-dot" style="background:#2E7D4F;"></span><span class="tabular-nums" style="font-weight:700;">{{ d.onSla }}</span> brenda SLA</span>
+              </div>
+              <div class="dept-card-sla-row"><b class="tabular-nums">{{ d.slaRate }}%</b><span style="font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">SLA · 30 ditë</span></div>
+              <div style="margin-top:auto;padding-top:10px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#C23B31;">Shiko departamentin →</div>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Shpërndarja e ngarkesës</h2>
+        <div class="staff-card" style="padding:10px 16px 14px;">
+          <sc-for list="{{ workloadRows }}" as="w" hint-placeholder-count="5">
+            <div class="workload-row">
+              <span class="workload-row-label">{{ w.name }}</span>
+              <div class="workload-track"><div class="workload-fill" style="width:{{ w.widthPct }};"></div></div>
+              <span class="workload-row-count tabular-nums">{{ w.active }}</span>
+            </div>
+            <div style="margin-left:144px;margin-top:-4px;margin-bottom:6px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;" class="tabular-nums">{{ w.active }} aktive · {{ w.urgent }} urgjente · {{ w.atRisk }} SLA në rrezik</div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="margin-top:22px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Rregullat e caktimit</h2>
+          <button type="button" onClick="{{ onOpenAddRule }}" class="tap staff-btn-secondary" style="padding:6px 12px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">+ Shto rregull</button>
+        </div>
+        <div class="staff-card" style="padding:4px 14px 12px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 6px;">
+            <span class="staff-th" style="flex:1;padding:0;">Kategoria</span>
+            <span class="staff-th" style="width:160px;padding:0;">Departamenti</span>
+            <span class="staff-th" style="width:90px;padding:0;">Prioritet</span>
+            <span class="staff-th" style="flex:1.5;padding:0;">Përjashtim</span>
+            <span style="width:22px;flex:0 0 auto;"></span>
+          </div>
+          <sc-for list="{{ rules }}" as="r" hint-placeholder-count="5">
+            <div class="rule-row">
+              <span style="flex:1;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ r.category }}</span>
+              <span style="width:160px;font-family:'Barlow',sans-serif;font-size:13px;color:#4A4640;">{{ r.department }}</span>
+              <span style="width:90px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:{{ r.priorityColor }};">{{ r.priority }}</span>
+              <span style="flex:1.5;font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;">{{ r.exception }}</span>
+              <sc-if value="{{ r.removable }}" hint-placeholder-val="{{ false }}">
+                <button type="button" onClick="{{ r.onRemove }}" class="tap" style="width:22px;flex:0 0 auto;border:0;background:transparent;color:#8A847C;font-size:15px;line-height:1;">×</button>
+              </sc-if>
+              <sc-if value="{{ r.removableOff }}" hint-placeholder-val="{{ true }}">
+                <span style="width:22px;flex:0 0 auto;"></span>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ addRuleOpen }}" hint-placeholder-val="{{ false }}">
+            <div class="add-rule-panel">
+              <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                <div style="flex:1;min-width:150px;">
+                  <div class="filter-group-title" style="margin-bottom:4px;">Kategoria</div>
+                  <select value="{{ addRuleDraft.category }}" onChange="{{ onRuleCategory }}" class="staff-select" style="width:100%;padding:7px 9px;">
+                    <option value="">Zgjidh...</option>
+                    <sc-for list="{{ categoryOptions }}" as="o" hint-placeholder-count="5"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                  </select>
+                </div>
+                <div style="flex:1;min-width:150px;">
+                  <div class="filter-group-title" style="margin-bottom:4px;">Departamenti</div>
+                  <select value="{{ addRuleDraft.department }}" onChange="{{ onRuleDept }}" class="staff-select" style="width:100%;padding:7px 9px;">
+                    <option value="">Zgjidh...</option>
+                    <sc-for list="{{ deptOptions }}" as="o" hint-placeholder-count="5"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                  </select>
+                </div>
+                <div style="flex:0 0 130px;">
+                  <div class="filter-group-title" style="margin-bottom:4px;">Prioritet</div>
+                  <select value="{{ addRuleDraft.priority }}" onChange="{{ onRulePriority }}" class="staff-select" style="width:100%;padding:7px 9px;">
+                    <sc-for list="{{ priorityOptions }}" as="o" hint-placeholder-count="4"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                  </select>
+                </div>
+                <div style="flex:0 0 auto;display:flex;gap:6px;">
+                  <button type="button" onClick="{{ onSaveRule }}" class="tap staff-btn-primary {{ saveRuleDisabledClass }}" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;">Ruaj</button>
+                  <button type="button" onClick="{{ onCancelAddRule }}" class="tap staff-btn-secondary" style="padding:8px 14px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;">Anulo</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </section>
+
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <header class="page-header">
+      <div class="page-header-main">
+        <button type="button" onClick="{{ onBack }}" class="tap page-crumb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Departamentet</button>
+        <h1 class="page-title">{{ detail.name }}</h1>
+        <p class="page-context tabular-nums">{{ detail.active }} aktive · {{ detail.urgent }} urgjente · {{ detail.atRisk }} SLA në rrezik</p>
+      </div>
+      <div class="page-actions">
+        <dc-import name="NotificationBell" hint-size="40px,40px"></dc-import>
+      </div>
+    </header>
+    <div class="dept-tab-bar" style="padding:0 28px;flex:0 0 auto;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+        <button type="button" onClick="{{ t.onClick }}" class="tap dept-tab {{ t.onClass }}">{{ t.label }}</button>
+      </sc-for>
+    </div>
+
+    <div style="flex:1;min-height:0;overflow-y:auto;padding:18px 28px 28px;">
+
+      <sc-if value="{{ isTabPermbledhje }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+          <div class="staff-card" style="padding:16px;">
+            <h2 style="margin:0 0 2px;font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:#8A847C;">Ngarkesa aktuale</h2>
+            <div class="tabular-nums" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:32px;color:#1B1917;line-height:1.2;">{{ detail.active }}</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;margin-bottom:10px;">aktive</div>
+            <sc-for list="{{ detail.priorityBreakdown }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+                <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;"><span class="status-dot" style="background:{{ p.color }};"></span>{{ p.label }}</span>
+                <span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ p.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div class="staff-card" style="padding:16px;">
+            <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:#8A847C;">Statusi</h2>
+            <sc-for list="{{ detail.statusBreakdown }}" as="s" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+                <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;"><span class="status-dot" style="background:{{ s.color }};"></span>{{ s.label }}</span>
+                <span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ s.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div class="staff-card" style="padding:16px;">
+            <h2 style="margin:0 0 2px;font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:#8A847C;">Performanca</h2>
+            <div class="tabular-nums" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:32px;color:#1B1917;line-height:1.2;">{{ detail.slaRate }}%</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;margin-bottom:10px;">zgjidhur brenda SLA · 30 ditë</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;">Koha mesatare e reagimit: <span style="font-weight:700;color:#1B1917;" class="tabular-nums">{{ detail.avgResponse }}</span></div>
+            <div style="margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;">Koha mesatare e zgjidhjes: <span style="font-weight:700;color:#1B1917;" class="tabular-nums">{{ detail.avgResolution }}</span></div>
+          </div>
+        </div>
+
+        <section style="margin-top:18px;">
+          <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Kërkojnë ndërhyrje</h2>
+          <div class="staff-card" style="padding:2px 10px;">
+            <sc-for list="{{ detail.exceptionGroups }}" as="g" hint-placeholder-count="4">
+              <div class="exception-group" style="padding:9px 0;">
+                <a href="Raportet.dc.html" onClick="{{ g.onClick }}" class="tap exception-group-head">
+                  <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:{{ g.color }};"></span>
+                  <span style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;" class="tabular-nums">{{ g.count }}</span>
+                  <span style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ g.label }}</span>
+                </a>
+                <a href="Raporti.dc.html" onClick="{{ g.example.onClick }}" class="tap exception-card" style="border-left-color:{{ g.color }};">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <span style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;color:#6B665F;" class="tabular-nums">{{ g.example.id }}</span>
+                    <span style="flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:{{ g.color }};">{{ g.actionLabel }} →</span>
+                  </div>
+                  <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ g.example.title }}</div>
+                  <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">{{ g.example.meta }}</div>
+                </a>
+              </div>
+            </sc-for>
+            <sc-if value="{{ detail.exceptionsNone }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:22px 8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div style="font-family:'Barlow',sans-serif;font-size:13px;color:#6B665F;">Asgjë nuk kërkon ndërhyrje të menjëhershme.</div>
+              </div>
+            </sc-if>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isTabRaportet }}" hint-placeholder-val="{{ false }}">
+        <div class="staff-card" style="padding:4px 14px 6px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 6px;">
+            <span class="staff-th" style="width:60px;flex:0 0 auto;padding:0;">ID</span>
+            <span class="staff-th" style="flex:1;padding:0;">Titulli</span>
+            <span class="staff-th" style="width:140px;flex:0 0 auto;padding:0;">Statusi</span>
+            <span class="staff-th" style="width:90px;flex:0 0 auto;padding:0;">Prioriteti</span>
+            <span class="staff-th" style="width:110px;flex:0 0 auto;padding:0;">Përgjegjësi</span>
+            <span class="staff-th" style="width:80px;flex:0 0 auto;padding:0;text-align:right;">SLA</span>
+          </div>
+          <sc-for list="{{ detail.caseRows }}" as="r" hint-placeholder-count="10">
+            <a href="Raporti.dc.html" onClick="{{ r.onClick }}" class="tap hl-row" style="display:flex;align-items:center;gap:10px;padding:9px 6px;">
+              <span class="tabular-nums" style="width:60px;flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:#6B665F;">{{ r.id }}</span>
+              <span style="flex:1;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.title }}</span>
+              <span style="width:140px;flex:0 0 auto;"><span class="status-pill" style="background:{{ r.statusBg }};color:{{ r.statusInk }};font-size:11px;"><span class="status-dot" style="background:{{ r.statusDot }};"></span>{{ r.status }}</span></span>
+              <span style="width:90px;flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:{{ r.priorityColor }};">{{ r.priority }}</span>
+              <span style="width:110px;flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:12px;color:#4A4640;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.responsibleLabel }}</span>
+              <span class="tabular-nums" style="width:80px;flex:0 0 auto;text-align:right;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:{{ r.slaColor }};">{{ r.slaLabel }}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTabEkipi }}" hint-placeholder-val="{{ false }}">
+        <section>
+          <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Ekipi</h2>
+          <div class="staff-card" style="padding:4px 14px 8px;">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 6px;">
+              <span style="width:24px;flex:0 0 auto;"></span>
+              <span class="staff-th" style="flex:1;padding:0;">Punonjësi</span>
+              <span class="staff-th" style="width:60px;flex:0 0 auto;padding:0;text-align:right;">Aktive</span>
+              <span class="staff-th" style="width:70px;flex:0 0 auto;padding:0;text-align:right;">Urgjente</span>
+              <span class="staff-th" style="width:90px;flex:0 0 auto;padding:0;text-align:right;">SLA rrezik</span>
+              <span class="staff-th" style="width:40px;flex:0 0 auto;padding:0;text-align:right;">Status</span>
+            </div>
+            <sc-for list="{{ detail.team }}" as="e" hint-placeholder-count="4">
+              <button type="button" onClick="{{ e.onClick }}" class="tap team-row {{ e.onClass }}">
+                <span class="mini-avatar" style="background:#EDEAE3;color:#4A4640;">{{ e.initials }}</span>
+                <span style="flex:1;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.name }}</span>
+                <span class="tabular-nums" style="width:60px;flex:0 0 auto;text-align:right;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ e.active }}</span>
+                <span class="tabular-nums" style="width:70px;flex:0 0 auto;text-align:right;font-family:'Barlow',sans-serif;font-size:13px;color:#C23B31;">{{ e.urgent }}</span>
+                <span class="tabular-nums" style="width:90px;flex:0 0 auto;text-align:right;font-family:'Barlow',sans-serif;font-size:13px;color:#B8860B;">{{ e.slaRisk }}</span>
+                <span style="width:40px;flex:0 0 auto;display:flex;justify-content:flex-end;"><span class="status-dot" style="background:{{ e.statusColor }};"></span></span>
+              </button>
+              <sc-if value="{{ e.isSelected }}" hint-placeholder-val="{{ false }}">
+                <div style="margin:2px 0 8px;padding:12px 14px;background:#F5F2ED;border-radius:12px;">
+                  <div style="font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:#1B1917;" class="tabular-nums">{{ e.detail.active }} raste aktive</div>
+                  <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
+                    <sc-for list="{{ e.detail.categoryBreakdown }}" as="cb" hint-placeholder-count="3">
+                      <span class="zone-chip"><span class="tabular-nums" style="font-weight:700;margin-right:3px;">{{ cb.count }}</span>{{ cb.label }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:10px;">
+                    <div class="filter-group-title" style="margin-bottom:5px;">Zonat e mbulimit</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      <sc-for list="{{ e.detail.zones }}" as="z" hint-placeholder-count="3">
+                        <span class="zone-chip">{{ z }}</span>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <sc-if value="{{ e.detail.hasCases }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #E4DFD6;">
+                      <sc-for list="{{ e.detail.cases }}" as="cs" hint-placeholder-count="4">
+                        <a href="Raporti.dc.html" onClick="{{ cs.onClick }}" class="tap hl-row" style="display:flex;align-items:center;gap:8px;padding:7px 6px;">
+                          <span class="tabular-nums" style="width:54px;flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;color:#6B665F;">{{ cs.id }}</span>
+                          <span style="flex:1;min-width:0;font-family:'Barlow',sans-serif;font-size:12px;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ cs.title }}</span>
+                          <span class="status-pill" style="flex:0 0 auto;background:{{ cs.statusBg }};color:{{ cs.statusInk }};font-size:11px;"><span class="status-dot" style="background:{{ cs.statusDot }};"></span>{{ cs.status }}</span>
+                        </a>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </sc-for>
+          </div>
+        </section>
+
+        <sc-if value="{{ detail.hasUnassigned }}" hint-placeholder-val="{{ false }}">
+          <section style="margin-top:18px;">
+            <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Caktimi i rasteve pa përgjegjës</h2>
+            <sc-for list="{{ detail.unassignedCases }}" as="u" hint-placeholder-count="2">
+              <div class="balance-card">
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                  <span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:#6B665F;">{{ u.id }}</span>
+                  <span style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ u.title }}</span>
+                </div>
+                <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;">{{ u.category }} · {{ u.priority }}</div>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
+                  <sc-for list="{{ u.candidates }}" as="c" hint-placeholder-count="3">
+                    <div class="candidate-row {{ c.onClass }}">
+                      <span class="mini-avatar" style="background:#EDEAE3;color:#4A4640;">{{ c.initials }}</span>
+                      <span style="flex:1;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">{{ c.name }} <span class="tabular-nums" style="color:#8A847C;">— {{ c.active }} aktive</span></span>
+                      <sc-if value="{{ c.isTop }}" hint-placeholder-val="{{ false }}">
+                        <span style="flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;color:#2E7D4F;">Rekomanduar</span>
+                      </sc-if>
+                      <button type="button" onClick="{{ c.onAssign }}" class="tap staff-btn-secondary" style="flex:0 0 auto;padding:5px 10px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Cakto</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="margin-top:8px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">Arsye: {{ u.reasonText }}</div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-if>
+
+        <section style="margin-top:18px;">
+          <h2 style="margin:0 0 10px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Historiku i caktimeve</h2>
+          <div class="staff-card" style="padding:2px 16px;">
+            <sc-for list="{{ detail.history }}" as="h" hint-placeholder-count="5">
+              <div style="display:flex;gap:12px;padding:8px 0;border-top:1px solid #EFEAE2;">
+                <span style="flex:0 0 auto;width:54px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;" class="tabular-nums">{{ h.time }}</span>
+                <span class="status-dot" style="margin-top:5px;flex:0 0 auto;background:{{ h.color }};"></span>
+                <span style="flex:1;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">{{ h.label }}</span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ detail.historyNone }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:16px 4px;font-family:'Barlow',sans-serif;font-size:13px;color:#8A847C;">Ende pa aktivitet caktimi për këtë departament.</div>
+            </sc-if>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isTabRregullat }}" hint-placeholder-val="{{ false }}">
+        <div class="staff-card" style="padding:4px 14px 10px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 6px;">
+            <span class="staff-th" style="flex:1;padding:0;">Kategoria</span>
+            <span class="staff-th" style="width:90px;flex:0 0 auto;padding:0;">Prioritet</span>
+            <span class="staff-th" style="flex:1.5;padding:0;">Përjashtim</span>
+          </div>
+          <sc-for list="{{ detail.rules }}" as="r" hint-placeholder-count="3">
+            <div class="rule-row">
+              <span style="flex:1;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">{{ r.category }}</span>
+              <span style="width:90px;flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:{{ r.priorityColor }};">{{ r.priority }}</span>
+              <span style="flex:1.5;font-family:'Barlow',sans-serif;font-size:12px;color:#8A847C;">{{ r.exception }}</span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ detail.rulesNone }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px 4px;font-family:'Barlow',sans-serif;font-size:13px;color:#8A847C;">Asnjë rregull i përcaktuar për këtë departament ende.</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+    </div>
+  </sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  state = {
+    view: 'overview',
+    selectedDept: null,
+    detailTab: 'permbledhje',
+    selectedEmployee: null,
+    overrides: {},
+    customRules: [],
+    addRuleOpen: false,
+    addRuleDraft: { category: '', department: '', priority: 'E mesme' },
+  };
+
+  componentDidMount() {
+    let overrides = {};
+    try { overrides = JSON.parse(window.localStorage.getItem('sinjal_case_overrides') || '{}'); } catch (e) {}
+    let customRules = [];
+    try { customRules = JSON.parse(window.localStorage.getItem('sinjal_custom_rules') || '[]'); } catch (e) {}
+    let focus = null;
+    try {
+      focus = window.localStorage.getItem('sinjal_dept_focus');
+      if (focus) window.localStorage.removeItem('sinjal_dept_focus');
+    } catch (e) {}
+    const S = window.SINJAL;
+    const validFocus = (focus && S.departments.some((d) => d.id === focus)) ? focus : null;
+    this.setState({
+      overrides: overrides, customRules: customRules,
+      view: validFocus ? 'detail' : 'overview',
+      selectedDept: validFocus,
+    });
+  }
+
+  _select(id) {
+    return () => { try { window.localStorage.setItem('sinjal_selected_report', id); } catch (e) {} };
+  }
+  _filterLink(f) {
+    return () => { try { window.localStorage.setItem('sinjal_incoming_filter', JSON.stringify(f)); } catch (e) {} };
+  }
+  _openDept(id) { this.setState({ view: 'detail', selectedDept: id, detailTab: 'permbledhje', selectedEmployee: null }); }
+  _backToOverview() { this.setState({ view: 'overview', selectedDept: null, selectedEmployee: null }); }
+  _setTab(tab) { this.setState({ detailTab: tab, selectedEmployee: null }); }
+  _selectEmployee(id) { this.setState({ selectedEmployee: this.state.selectedEmployee === id ? null : id }); }
+
+  _persistOverrides(overrides) { try { window.localStorage.setItem('sinjal_case_overrides', JSON.stringify(overrides)); } catch (e) {} }
+  _patchOverride(id, patch) {
+    const overrides = Object.assign({}, this.state.overrides);
+    overrides[id] = Object.assign({}, overrides[id], patch);
+    this._persistOverrides(overrides);
+    this.setState({ overrides: overrides });
+  }
+  _assignCase(reportId, empId) {
+    const S = window.SINJAL;
+    const ov = this.state.overrides[reportId] || {};
+    const assignLog = (ov.assignLog || []).concat([{ at: S.now.toISOString(), employee: S.empName(empId), by: 'Drita K.' }]);
+    this._patchOverride(reportId, { responsible: empId, assignLog: assignLog });
+  }
+
+  _persistRules(rules) { try { window.localStorage.setItem('sinjal_custom_rules', JSON.stringify(rules)); } catch (e) {} }
+  _openAddRule() { this.setState({ addRuleOpen: true, addRuleDraft: { category: '', department: '', priority: 'E mesme' } }); }
+  _cancelAddRule() { this.setState({ addRuleOpen: false, addRuleDraft: { category: '', department: '', priority: 'E mesme' } }); }
+  _setRuleDraft(patch) { this.setState({ addRuleDraft: Object.assign({}, this.state.addRuleDraft, patch) }); }
+  _saveRule() {
+    const d = this.state.addRuleDraft;
+    if (!d.category || !d.department) return;
+    const rules = this.state.customRules.concat([{ id: 'custom-' + Date.now(), category: d.category, department: d.department, priority: d.priority || 'E mesme' }]);
+    this._persistRules(rules);
+    this.setState({ customRules: rules, addRuleOpen: false, addRuleDraft: { category: '', department: '', priority: 'E mesme' } });
+  }
+  _removeRule(id) {
+    const rules = this.state.customRules.filter((r) => r.id !== id);
+    this._persistRules(rules);
+    this.setState({ customRules: rules });
+  }
+
+  renderVals() {
+    const S = window.SINJAL;
+    const reports = (S && S.reports) || [];
+    const NOW = (S && S.now) || new Date();
+    const overrides = this.state.overrides;
+
+    const all = reports.map((r) => {
+      const ov = overrides[r.id] || {};
+      const eff = Object.assign({}, r, ov);
+      return Object.assign({}, eff, {
+        baseId: r.id,
+        departmentName: S.deptName(eff.department),
+        responsibleName: eff.responsible ? S.empName(eff.responsible) : null,
+        routingChanged: r.ai.suggestedDepartment !== S.deptName(eff.department),
+      });
+    });
+
+    const isOpenCase = (r) => r.status !== 'Zgjidhur' && r.status !== 'Mbyllur' && r.status !== 'Refuzuar' && r.status !== 'Dublikatë';
+    const isSlaFlagged = (r) => r.slaAtRisk || r.slaBreached;
+    const initialsOf = (full) => (full || '').split(' ').filter(Boolean).map((w) => w[0]).join('').toUpperCase().slice(0, 2);
+
+    // ---- Org-wide department stats — one real Aktive/Në-SLA/Urgjente/
+    // SLA-rrezik split per department, shared by the overview cards, the
+    // workload bars and (filtered to one department) the detail workspace.
+    const perfRecs = S.perf.records(this.state.overrides);
+    const deptStats = S.departments.map((d) => {
+      const deptAll = all.filter((r) => r.department === d.id);
+      const active = deptAll.filter(isOpenCase);
+      const atRisk = active.filter(isSlaFlagged);
+      const urgent = active.filter((r) => r.priority === 'Urgjente');
+      const onSlaCount = active.length - atRisk.length;
+      // SLA compliance = resolved within SLA / resolved, last 30 days — the
+      // shared S.perf definition, so it matches Kreu and Performanca.
+      const sla30 = S.perf.slaRate(perfRecs, { dept: d.id }, 30);
+      const slaRate = sla30 == null ? '—' : Math.round(sla30);
+      return {
+        id: d.id, name: d.name, deptAll: deptAll, active: active,
+        activeCount: active.length, atRiskCount: atRisk.length, onSlaCount: onSlaCount,
+        urgentCount: urgent.length, slaRate: slaRate,
+      };
+    });
+    const byDeptId = {};
+    deptStats.forEach((d) => { byDeptId[d.id] = d; });
+
+    const orgSummary = {
+      deptCount: S.departments.length,
+      activeTotal: deptStats.reduce((s, d) => s + d.activeCount, 0),
+      slaRiskTotal: deptStats.reduce((s, d) => s + d.atRiskCount, 0),
+    };
+
+    const deptCards = deptStats.map((d) => ({
+      id: d.id, name: d.name, active: d.activeCount, atRisk: d.atRiskCount, onSla: d.onSlaCount, slaRate: d.slaRate,
+      atRiskColor: d.atRiskCount > 0 ? '#C23B31' : '#8A847C',
+      onClick: () => this._openDept(d.id),
+    }));
+
+    const maxActive = Math.max(1, ...deptStats.map((d) => d.activeCount));
+    const workloadRows = deptStats.slice().sort((a, b) => b.activeCount - a.activeCount).map((d) => ({
+      name: d.name, active: d.activeCount, urgent: d.urgentCount, atRisk: d.atRiskCount,
+      widthPct: Math.round((d.activeCount / maxActive) * 100) + '%',
+    }));
+
+    // ---- Assignment rules — the real category→department routing already
+    // used for automatic routing everywhere else, plus the default
+    // priority/exception each rule carries, with any clerk-added rules
+    // (persisted to localStorage) appended after the seed rules.
+    const seedRules = S.categories.map((c) => ({
+      id: 'seed-' + c.id, category: c.label, department: S.deptName(c.dept), departmentId: c.dept,
+      priority: c.defaultPriority, priorityColor: S.priorityMeta[c.defaultPriority].color, exception: c.exception,
+      removable: false, removableOff: true, onRemove: () => {},
+    }));
+    const customRuleVals = this.state.customRules.map((r) => ({
+      id: r.id, category: S.catLabel(r.category), department: S.deptName(r.department), departmentId: r.department,
+      priority: r.priority, priorityColor: (S.priorityMeta[r.priority] || {}).color || '#4A4640', exception: 'Rregull i shtuar nga nëpunësi',
+      removable: true, removableOff: false, onRemove: () => this._removeRule(r.id),
+    }));
+    const rules = seedRules.concat(customRuleVals);
+
+    const categoryOptions = S.categories.map((c) => ({ value: c.id, label: c.label }));
+    const deptOptions = S.departments.map((d) => ({ value: d.id, label: d.name }));
+    const priorityOptions = S.priorityOrder.map((p) => ({ value: p, label: p }));
+    const draft = this.state.addRuleDraft;
+
+    // ---- Department detail workspace — only computed when a department is
+    // open, kept as safe empty defaults otherwise (never a bare null on a
+    // dot-path the template reads, per the app's established convention).
+    let detail = {
+      name: '', active: 0, urgent: 0, atRisk: 0, slaRate: 100, avgResponse: '—', avgResolution: '—',
+      priorityBreakdown: [], statusBreakdown: [], exceptionGroups: [], exceptionsNone: true,
+      caseRows: [], team: [], hasUnassigned: false, unassignedCases: [], history: [], historyNone: true,
+      rules: [], rulesNone: true,
+    };
+    const selectedDept = this.state.selectedDept;
+    if (selectedDept && byDeptId[selectedDept]) {
+      const d = byDeptId[selectedDept];
+      const deptName = d.name;
+
+      const priorityBreakdown = S.priorityOrder.slice().reverse().map((p) => ({
+        label: p, color: S.priorityMeta[p].color, count: d.active.filter((r) => r.priority === p).length,
+      }));
+      const reja = d.active.filter((r) => r.status === 'I ri').length;
+      const nePune = d.active.filter((r) => r.status === 'Në punë' || r.status === 'Caktuar').length;
+      const nePritje = d.active.filter((r) => r.status === 'Në shqyrtim' || r.status === 'Kërkon informacion').length;
+      const statusBreakdown = [
+        { label: 'Të reja', color: '#8A847C', count: reja },
+        { label: 'Në punë', color: '#B8860B', count: nePune },
+        { label: 'Në pritje verifikimi', color: '#6B665F', count: nePritje },
+      ];
+
+      // 30-day averages from the shared S.perf engine (same as Performanca)
+      const avgResponseHours = S.perf.avgResponse(perfRecs, { dept: d.id }, 30);
+      const avgResolutionHours = S.perf.avgResolution(perfRecs, { dept: d.id }, 30);
+
+      // ---- Exceptions — the same shape as Kreu's "Kërkojnë vëmendjen",
+      // scoped to this department: SLA risk/breach, unassigned, reappeared,
+      // and stuck (still new/assigned with no progress after 48h).
+      const fmtWaitHours = (r) => Math.max(1, Math.round((NOW - r.submittedAt) / 3600000));
+      const slaFlagged = d.active.filter(isSlaFlagged);
+      const unassigned = d.active.filter((r) => !r.responsible);
+      const reappeared = d.active.filter((r) => r.reappeared);
+      const stuck = d.active.filter((r) => (r.status === 'I ri' || r.status === 'Caktuar') && (NOW - r.submittedAt) / 3600000 > 48);
+      const exceptionGroups = [];
+      if (slaFlagged.length > 0) {
+        const worst = slaFlagged.slice().sort((a, b) => a.slaRemainingHours - b.slaRemainingHours)[0];
+        exceptionGroups.push({
+          color: '#C23B31', label: 'në rrezik SLA', count: slaFlagged.length,
+          onClick: this._filterLink({ department: selectedDept, slaFlag: true }), actionLabel: 'Shiko raportin',
+          example: { id: worst.displayId, title: worst.title, meta: worst.slaBreached ? 'SLA e shkelur (' + worst.slaLabel + ')' : worst.slaLabel + ' deri në SLA', onClick: this._select(worst.baseId) },
+        });
+      }
+      if (unassigned.length > 0) {
+        const oldest = unassigned.slice().sort((a, b) => a.submittedAt - b.submittedAt)[0];
+        exceptionGroups.push({
+          color: '#B8860B', label: 'raporte pa përgjegjës', count: unassigned.length,
+          onClick: this._filterLink({ department: selectedDept, unassigned: true }), actionLabel: 'Cakto',
+          example: { id: oldest.displayId, title: oldest.title, meta: fmtWaitHours(oldest) + ' orë pa përgjegjës', onClick: this._select(oldest.baseId) },
+        });
+      }
+      if (stuck.length > 0) {
+        const oldestStuck = stuck.slice().sort((a, b) => a.submittedAt - b.submittedAt)[0];
+        exceptionGroups.push({
+          color: '#8A847C', label: 'raste të bllokuara (pa ndryshim > 48h)', count: stuck.length,
+          onClick: this._filterLink({ department: selectedDept }), actionLabel: 'Shiko raportin',
+          example: { id: oldestStuck.displayId, title: oldestStuck.title, meta: fmtWaitHours(oldestStuck) + ' orë pa ndryshim statusi', onClick: this._select(oldestStuck.baseId) },
+        });
+      }
+      if (reappeared.length > 0) {
+        const rep = reappeared[0];
+        exceptionGroups.push({
+          color: '#8E5FB0', label: 'raporte të rishfaqura', count: reappeared.length,
+          onClick: this._filterLink({ department: selectedDept, reappeared: true }), actionLabel: 'Shiko raportin',
+          example: { id: rep.displayId, title: rep.title, meta: 'I ngjashëm me një rast të mbyllur më parë.', onClick: this._select(rep.baseId) },
+        });
+      }
+
+      const caseRows = d.deptAll.slice().sort((a, b) => b.submittedAt - a.submittedAt).map((r) => ({
+        id: r.displayId, title: r.title,
+        status: r.status, statusBg: S.statusMeta[r.status].bg, statusInk: S.statusMeta[r.status].ink, statusDot: S.statusMeta[r.status].dot,
+        priority: r.priority, priorityColor: S.priorityMeta[r.priority].color,
+        responsibleLabel: r.responsibleName || 'Pa caktuar',
+        slaLabel: r.slaLabel, slaColor: r.slaBreached ? '#C23B31' : (r.slaAtRisk ? '#B8860B' : '#6B665F'),
+        onClick: this._select(r.baseId),
+      }));
+
+      // ---- Ekipi — one row per department employee, real active/urgent/
+      // SLA-risk counts from `all`, with an inline drill-down for whichever
+      // employee is selected (category mix, coverage zones, actual cases).
+      const deptEmployees = S.employees.filter((e) => e.dept === selectedDept);
+      const team = deptEmployees.map((e) => {
+        const empCases = all.filter((r) => r.responsible === e.id);
+        const activeCases = empCases.filter(isOpenCase);
+        const urgent = activeCases.filter((r) => r.priority === 'Urgjente').length;
+        const slaRisk = activeCases.filter(isSlaFlagged).length;
+        const isSelected = this.state.selectedEmployee === e.id;
+        let empDetail = { active: 0, categoryBreakdown: [], zones: e.coverageZones || [], cases: [], hasCases: false };
+        if (isSelected) {
+          const catCounts = {};
+          activeCases.forEach((r) => { catCounts[r.categoryLabel] = (catCounts[r.categoryLabel] || 0) + 1; });
+          const categoryBreakdown = Object.keys(catCounts).map((k) => ({ label: k, count: catCounts[k] }));
+          const cases = activeCases.slice().sort((a, b) => b.submittedAt - a.submittedAt).map((r) => ({
+            id: r.displayId, title: r.title, status: r.status,
+            statusBg: S.statusMeta[r.status].bg, statusInk: S.statusMeta[r.status].ink, statusDot: S.statusMeta[r.status].dot,
+            onClick: this._select(r.baseId),
+          }));
+          empDetail = { active: activeCases.length, categoryBreakdown: categoryBreakdown, zones: e.coverageZones || [], cases: cases, hasCases: cases.length > 0 };
+        }
+        return {
+          id: e.id, name: e.full, initials: initialsOf(e.full),
+          active: activeCases.length, urgent: urgent, slaRisk: slaRisk,
+          statusColor: slaRisk > 0 ? '#B8860B' : '#2E7D4F',
+          isSelected: isSelected, onClass: isSelected ? 'is-on' : '',
+          onClick: () => this._selectEmployee(e.id),
+          detail: empDetail,
+        };
+      });
+
+      // ---- Workload balancing — for every unassigned active case, rank
+      // this department's employees by current active load, preferring
+      // whoever's coverage zone includes the report's own zone, and expose
+      // a real "Cakto" action (writes to sinjal_case_overrides, same
+      // mechanism Raporti.dc.html uses for reassignment).
+      const unassignedActive = d.active.filter((r) => !r.responsible);
+      const unassignedCases = unassignedActive.slice().sort((a, b) => a.submittedAt - b.submittedAt).map((r) => {
+        const ranked = deptEmployees.map((e) => {
+          const activeCount = all.filter((x) => x.responsible === e.id && isOpenCase(x)).length;
+          const zoneMatch = (e.coverageZones || []).indexOf(r.zone) !== -1;
+          return { emp: e, activeCount: activeCount, zoneMatch: zoneMatch };
+        }).sort((a2, b2) => {
+          if (a2.zoneMatch !== b2.zoneMatch) return a2.zoneMatch ? -1 : 1;
+          return a2.activeCount - b2.activeCount;
+        });
+        const top = ranked[0];
+        const reasonParts = top ? ['më pak raste aktive (' + top.activeCount + ')'] : [];
+        if (top && top.zoneMatch) reasonParts.push('zona e raportit (' + r.zone + ') brenda zonës së saj të mbulimit');
+        const candidates = ranked.slice(0, 3).map((c, idx) => ({
+          id: c.emp.id, name: c.emp.name, initials: initialsOf(c.emp.full), active: c.activeCount,
+          isTop: idx === 0, onClass: idx === 0 ? 'is-recommended' : '',
+          onAssign: () => this._assignCase(r.baseId, c.emp.id),
+        }));
+        return {
+          id: r.displayId, title: r.title, category: r.categoryLabel, priority: r.priority,
+          candidates: candidates, reasonText: reasonParts.length ? reasonParts.join(' + ') : 'asnjë punonjës i disponueshëm në këtë departament.',
+        };
+      });
+
+      // ---- Historiku i caktimeve — real routing/assignment events only:
+      // AI's original department suggestion (when it differs from where
+      // the case ended up), and every real assignLog/reassignLog entry this
+      // session's actions have written — nothing invented.
+      const historyEvents = [];
+      d.deptAll.forEach((r) => {
+        if (r.routingChanged) {
+          historyEvents.push({ time: r.submittedAt, label: 'AI sugjeroi departamentin ' + r.ai.suggestedDepartment + ' për ' + r.displayId + '.', color: '#B8860B' });
+        }
+        const ov = overrides[r.baseId] || {};
+        (ov.assignLog || []).forEach((e) => {
+          historyEvents.push({ time: new Date(e.at), label: r.displayId + ' u caktua te ' + e.employee + ' (nga ' + e.by + ').', color: '#C23B31' });
+        });
+        (ov.reassignLog || []).forEach((e) => {
+          if (e.to === deptName || e.from === deptName) {
+            historyEvents.push({ time: new Date(e.at), label: r.displayId + ' u rikalua nga ' + e.from + ' në ' + e.to + '. Arsye: ' + e.reason, color: '#C23B31' });
+          }
+        });
+      });
+      historyEvents.sort((a, b) => b.time - a.time);
+      const history = historyEvents.slice(0, 10).map((e) => ({ time: S.fmtTime(e.time), label: e.label, color: e.color }));
+
+      const deptRules = rules.filter((r) => r.departmentId === selectedDept);
+
+      detail = {
+        name: deptName, active: d.activeCount, urgent: d.urgentCount, atRisk: d.atRiskCount, slaRate: d.slaRate,
+        avgResponse: S.fmtDuration(avgResponseHours), avgResolution: S.fmtDuration(avgResolutionHours),
+        priorityBreakdown: priorityBreakdown, statusBreakdown: statusBreakdown,
+        exceptionGroups: exceptionGroups, exceptionsNone: exceptionGroups.length === 0,
+        caseRows: caseRows, team: team,
+        hasUnassigned: unassignedCases.length > 0, unassignedCases: unassignedCases,
+        history: history, historyNone: history.length === 0,
+        rules: deptRules, rulesNone: deptRules.length === 0,
+      };
+    }
+
+    const tabDefs = [
+      { key: 'permbledhje', label: 'Përmbledhje' },
+      { key: 'raportet', label: 'Raportet' },
+      { key: 'ekipi', label: 'Ekipi' },
+      { key: 'rregullat', label: 'Rregullat' },
+    ];
+    const tabs = tabDefs.map((o) => ({ label: o.label, onClass: this.state.detailTab === o.key ? 'is-on' : '', onClick: () => this._setTab(o.key) }));
+
+    return {
+      isOverview: this.state.view === 'overview',
+      isDetail: this.state.view === 'detail',
+      orgSummary: orgSummary,
+      deptCards: deptCards,
+      workloadRows: workloadRows,
+      rules: rules,
+      categoryOptions: categoryOptions,
+      deptOptions: deptOptions,
+      priorityOptions: priorityOptions,
+      addRuleOpen: this.state.addRuleOpen,
+      addRuleDraft: draft,
+      saveRuleDisabledClass: (!draft.category || !draft.department) ? 'is-disabled' : '',
+      onOpenAddRule: () => this._openAddRule(),
+      onCancelAddRule: () => this._cancelAddRule(),
+      onSaveRule: () => this._saveRule(),
+      onRuleCategory: (e) => this._setRuleDraft({ category: e.target.value }),
+      onRuleDept: (e) => this._setRuleDraft({ department: e.target.value }),
+      onRulePriority: (e) => this._setRuleDraft({ priority: e.target.value }),
+
+      onBack: () => this._backToOverview(),
+      tabs: tabs,
+      isTabPermbledhje: this.state.detailTab === 'permbledhje',
+      isTabRaportet: this.state.detailTab === 'raportet',
+      isTabEkipi: this.state.detailTab === 'ekipi',
+      isTabRregullat: this.state.detailTab === 'rregullat',
+      detail: detail,
+    };
+  }
+}
+</script>
+</body>
+</html>

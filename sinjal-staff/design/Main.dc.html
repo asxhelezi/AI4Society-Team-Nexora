@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<title>Sinjal — Nëpunësi — Kreu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="staff.css">
+<script src="mock-data.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;}</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;background:#F5F2ED;overflow:hidden;">
+
+<dc-import name="Sidebar" active="kreu" hint-size="232px,900px"></dc-import>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto;">
+  <header class="page-header">
+    <div class="page-header-main">
+      <h1 class="page-title">Kreu</h1>
+      <p class="page-context">{{ greeting }}</p>
+    </div>
+    <div class="page-actions">
+      <dc-import name="NotificationBell" hint-size="40px,40px"></dc-import>
+    </div>
+  </header>
+
+  <main style="flex:1;padding:20px 28px 32px;">
+
+    <div style="display:flex;gap:12px;">
+      <a href="Raportet.dc.html" onClick="{{ kpiNew.onClick }}" class="tap kpi-card" style="flex:1;min-width:0;padding:14px 16px;display:block;">
+        <div class="icon-chip" style="background:rgba(27,25,23,.06);">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1B1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><line x1="12" y1="13" x2="12" y2="18"/><line x1="9.5" y1="15.5" x2="14.5" y2="15.5"/></svg>
+        </div>
+        <div style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;color:#1B1917;" class="tabular-nums">{{ kpiNew.count }}</div>
+        <div style="margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#6B665F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Raporte të reja</div>
+        <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="tabular-nums">{{ kpiNew.sub }}</div>
+      </a>
+      <a href="Raportet.dc.html" onClick="{{ kpiInProgress.onClick }}" class="tap kpi-card" style="flex:1;min-width:0;padding:14px 16px;display:block;">
+        <div class="icon-chip" style="background:rgba(107,102,95,.11);">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4A4640" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 12 8 12 10 7 14 17 16 12 21 12"/></svg>
+        </div>
+        <div style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;color:#1B1917;" class="tabular-nums">{{ kpiInProgress.count }}</div>
+        <div style="margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#6B665F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Në punë</div>
+        <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="tabular-nums">{{ kpiInProgress.sub }}</div>
+      </a>
+      <a href="Raportet.dc.html" onClick="{{ kpiUnassigned.onClick }}" class="tap kpi-card" style="flex:1;min-width:0;padding:14px 16px;display:block;">
+        <div class="icon-chip" style="background:rgba(184,134,11,.13);">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>
+        </div>
+        <div style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;color:#1B1917;" class="tabular-nums">{{ kpiUnassigned.count }}</div>
+        <div style="margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#6B665F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Pa caktuar</div>
+        <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="tabular-nums">{{ kpiUnassigned.sub }}</div>
+      </a>
+      <a href="Raportet.dc.html" onClick="{{ kpiSla.onClick }}" class="tap kpi-card" style="flex:1;min-width:0;padding:14px 16px;display:block;">
+        <div class="icon-chip" style="background:rgba(194,59,49,.16);">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C23B31" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;color:#C23B31;" class="tabular-nums">{{ kpiSla.count }}</div>
+        <div style="margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#A8302A;">SLA në rrezik</div>
+        <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#A8302A;opacity:.85;" class="tabular-nums">{{ kpiSla.sub }}</div>
+      </a>
+      <a href="Raportet.dc.html" onClick="{{ kpiDone.onClick }}" class="tap kpi-card" style="flex:1;min-width:0;padding:14px 16px;display:block;">
+        <div class="icon-chip" style="background:rgba(46,125,79,.13);">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2E7D4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;color:#1B1917;" class="tabular-nums">{{ kpiDone.count }}</div>
+        <div style="margin-top:5px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#6B665F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Përfunduar</div>
+        <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="tabular-nums">{{ kpiDone.sub }}</div>
+      </a>
+    </div>
+
+    <div style="margin-top:18px;display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:stretch;">
+      <section style="display:flex;flex-direction:column;min-width:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Kërkojnë vëmendjen tuaj</h2>
+        </div>
+        <div class="staff-card" style="padding:2px 10px;flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <sc-for list="{{ exceptionGroups }}" as="g" hint-placeholder-count="3">
+            <div class="exception-group" style="padding:9px 0;">
+              <a href="Raportet.dc.html" onClick="{{ g.onClick }}" class="tap exception-group-head">
+                <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:{{ g.color }};"></span>
+                <span style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;" class="tabular-nums">{{ g.count }}</span>
+                <span style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ g.label }}</span>
+              </a>
+              <a href="Raporti.dc.html" onClick="{{ g.example.onClick }}" class="tap exception-card" style="border-left-color:{{ g.color }};">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                  <span style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;color:#6B665F;" class="tabular-nums">{{ g.example.id }}</span>
+                  <span style="flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:{{ g.color }};">{{ g.actionLabel }} →</span>
+                </div>
+                <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ g.example.title }}</div>
+                <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">{{ g.example.meta }}</div>
+              </a>
+            </div>
+          </sc-for>
+          <sc-if value="{{ exceptionsNone }}">
+            <div style="padding:22px 8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <div style="font-family:'Barlow',sans-serif;font-size:13px;color:#6B665F;">Asgjë nuk kërkon vëmendje të menjëhershme.</div>
+            </div>
+          </sc-if>
+        </div>
+      </section>
+
+      <section style="display:flex;flex-direction:column;min-width:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Problemet në qytet</h2>
+          <a href="Harta.dc.html" class="tap" style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#C23B31;">Hap hartën →</a>
+        </div>
+        <div class="staff-card" style="padding:14px;flex:1;display:flex;flex-direction:column;">
+          <div class="map-frame">
+            <div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(#E4DFD6 1px,transparent 1px),linear-gradient(90deg,#E4DFD6 1px,transparent 1px);background-size:22px 22px;"></div>
+            <div aria-hidden="true" style="position:absolute;left:-10%;top:22%;width:120%;height:8px;background:#E4DFD6;transform:rotate(-6deg);"></div>
+            <div aria-hidden="true" style="position:absolute;left:38%;top:-10%;width:8px;height:120%;background:#E4DFD6;transform:rotate(4deg);"></div>
+            <div aria-hidden="true" style="position:absolute;left:-10%;top:66%;width:120%;height:6px;background:#E4DFD6;transform:rotate(3deg);"></div>
+            <div aria-hidden="true" style="position:absolute;left:12%;top:10%;width:16%;height:14%;background:rgba(27,25,23,.05);"></div>
+            <div aria-hidden="true" style="position:absolute;left:64%;top:14%;width:20%;height:11%;background:rgba(27,25,23,.05);"></div>
+            <div aria-hidden="true" style="position:absolute;left:10%;top:70%;width:20%;height:16%;background:rgba(27,25,23,.05);"></div>
+            <div aria-hidden="true" style="position:absolute;left:68%;top:62%;width:18%;height:18%;background:rgba(27,25,23,.05);"></div>
+            <span aria-hidden="true" style="position:absolute;left:10px;top:8px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8A847C;">Elbasan</span>
+            <sc-for list="{{ mapPins }}" as="p" hint-placeholder-count="12">
+              <a href="Raporti.dc.html" onClick="{{ p.onClick }}" class="tap map-pin" style="left:{{ p.left }};top:{{ p.top }};" title="{{ p.title }}">
+                <svg width="20" height="25" viewBox="0 0 30 38" fill="none"><path d="M15 1c7.7 0 14 6.2 14 14 0 10-14 22-14 22S1 25 1 15C1 7.2 7.3 1 15 1z" fill="{{ p.color }}" stroke="#1B1917" stroke-width="1"></path><circle cx="15" cy="15" r="5" fill="#FBFAF8"></circle></svg>
+              </a>
+            </sc-for>
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid #EFEAE2;">
+            <div style="font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;line-height:1.2;letter-spacing:0;color:#1B1917;" class="tabular-nums">{{ mapActiveCount }} raporte aktive</div>
+            <div style="margin-top:9px;display:flex;gap:12px;flex-wrap:wrap;">
+              <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:11px;color:#4A4640;" class="tabular-nums"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#C23B31;"></span>Urgjente {{ priorityCounts.urgjente }}</span>
+              <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:11px;color:#4A4640;" class="tabular-nums"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#B8860B;"></span>E lartë {{ priorityCounts.elarte }}</span>
+              <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:11px;color:#4A4640;" class="tabular-nums"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#4A4640;"></span>E mesme {{ priorityCounts.emesme }}</span>
+              <span style="display:flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:11px;color:#4A4640;" class="tabular-nums"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#8A847C;"></span>E ulët {{ priorityCounts.eulet }}</span>
+            </div>
+            <div style="margin-top:10px;font-family:'Barlow',sans-serif;font-size:11px;color:#6B665F;">Zona me më shumë raportime: <span style="color:#1B1917;font-weight:600;">{{ topZone.name }}</span> · {{ topZone.count }} raportime</div>
+            <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:11px;color:#6B665F;">Kategoria dominante: <span style="color:#1B1917;font-weight:600;">{{ topCategory.label }}</span> · {{ topCategory.pct }}%</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div style="margin-top:18px;display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:stretch;">
+      <section style="display:flex;flex-direction:column;min-width:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Çfarë po ndryshon?</h2>
+        </div>
+        <div class="staff-card" style="padding:14px;flex:1;display:flex;flex-direction:column;">
+          <div style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:#8A847C;">Raporte të reja · 7 ditët e fundit</div>
+          <div class="trend-chart" style="margin-top:10px;">
+            <sc-for list="{{ trendDays }}" as="t" hint-placeholder-count="7">
+              <div class="trend-bar-col" title="{{ t.label }}: {{ t.count }}">
+                <div class="trend-bar-track"><div class="trend-bar" style="height:{{ t.pct }}%;"></div></div>
+                <span class="trend-bar-label">{{ t.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid #EFEAE2;">
+            <div style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:#8A847C;margin-bottom:4px;">Kategoritë në lëvizje · 30 ditë</div>
+            <sc-for list="{{ categoryTrends }}" as="c" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+                <span style="font-family:'Barlow',sans-serif;font-size:12px;color:#1B1917;">{{ c.label }}</span>
+                <span style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:{{ c.color }};" class="tabular-nums">{{ c.arrow }}{{ c.pct }}%</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:auto;padding-top:12px;">
+            <div style="padding:9px 10px;background:#F5F2ED;border-radius:10px;display:flex;gap:8px;align-items:flex-start;">
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;margin-top:2px;"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/></svg>
+              <span style="font-family:'Barlow',sans-serif;font-size:12px;color:#4A4640;line-height:1.4;">{{ insightText }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="display:flex;flex-direction:column;min-width:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Ngarkesa sipas departamentit</h2>
+          <a href="Departamentet.dc.html" class="tap" style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#C23B31;">Detaje →</a>
+        </div>
+        <div class="staff-card" style="padding:8px 12px 12px;flex:1;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 6px 4px;">
+            <span class="staff-th" style="padding:0;flex:1;min-width:0;">Departamenti</span>
+            <span class="staff-th" style="padding:0;width:44px;text-align:right;">Aktive</span>
+            <span class="staff-th" style="padding:0;width:52px;text-align:right;">Në SLA</span>
+            <span class="staff-th" style="padding:0;width:60px;text-align:right;">Në rrezik</span>
+          </div>
+          <sc-for list="{{ deptTable }}" as="d" hint-placeholder-count="5">
+            <a href="Departamentet.dc.html" onClick="{{ d.onClick }}" class="tap dept-table-row">
+              <span style="flex:1;min-width:0;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ d.name }}</span>
+              <span style="width:44px;text-align:right;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;" class="tabular-nums">{{ d.active }}</span>
+              <span style="width:52px;text-align:right;font-family:'Barlow',sans-serif;font-size:13px;color:#2E7D4F;" class="tabular-nums">{{ d.onSla }}</span>
+              <span style="width:60px;text-align:right;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:{{ d.atRiskColor }};" class="tabular-nums">{{ d.atRisk }}</span>
+            </a>
+          </sc-for>
+          <sc-if value="{{ focusDept }}">
+            <a href="Departamentet.dc.html" onClick="{{ focusDept.onClick }}" class="tap focus-dept-card" style="margin-top:auto;display:block;">
+              <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ focusDept.name }}</div>
+              <div style="margin-top:3px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <span style="font-family:'Barlow',sans-serif;font-size:11px;color:#6B665F;" class="tabular-nums">{{ focusDept.active }} aktive · {{ focusDept.atRisk }} në rrezik</span>
+                <span style="flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:#C23B31;">Shiko departamentin →</span>
+              </div>
+            </a>
+          </sc-if>
+        </div>
+      </section>
+    </div>
+
+    <div style="margin-top:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <h2 style="margin:0;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Aktiviteti i fundit</h2>
+      </div>
+      <div class="staff-card" style="padding:4px 10px;">
+        <sc-for list="{{ activityFeed }}" as="a" hint-placeholder-count="4">
+          <a href="Raporti.dc.html" onClick="{{ a.onClick }}" class="tap activity-row">
+            <span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;margin-top:5px;background:{{ a.color }};"></span>
+            <div style="min-width:0;">
+              <div style="font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;"><span style="font-weight:700;" class="tabular-nums">{{ a.id }}</span> {{ a.text }}</div>
+              <div style="margin-top:2px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;" class="tabular-nums">{{ a.minutesAgo }} min më parë · {{ a.meta }}</div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  _select(id) {
+    return () => { try { window.localStorage.setItem('sinjal_selected_report', id); } catch (e) {} };
+  }
+  _filter(f) {
+    return () => { try { window.localStorage.setItem('sinjal_incoming_filter', JSON.stringify(f)); } catch (e) {} };
+  }
+  _deptFocus(id) {
+    return () => { try { window.localStorage.setItem('sinjal_dept_focus', id); } catch (e) {} };
+  }
+  renderVals() {
+    const S = window.SINJAL;
+    const reports = (S && S.reports) || [];
+    const NOW = (S && S.now) || new Date();
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Mirëmëngjes' : hour < 18 ? 'Mirëdita' : 'Mirëmbrëma';
+    const DAY_ABBR = ['Die', 'Hën', 'Mar', 'Mër', 'Enj', 'Pre', 'Sht'];
+
+    const isNew = (r) => r.status === 'I ri';
+    const isUnassigned = (r) => !r.responsible && r.status !== 'Dublikatë' && r.status !== 'Refuzuar';
+    const isInProgress = (r) => r.status === 'Në punë';
+    const isDone = (r) => r.status === 'Zgjidhur' || r.status === 'Mbyllur';
+    const isPendingClosure = (r) => r.status === 'Zgjidhur' && r.resolutionEvidence && r.resolutionEvidence.length > 0;
+    const isOpenCase = (r) => r.status !== 'Zgjidhur' && r.status !== 'Mbyllur' && r.status !== 'Refuzuar' && r.status !== 'Dublikatë';
+    const isSlaFlagged = (r) => r.slaAtRisk || r.slaBreached;
+    const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    const countBy = (list, key) => {
+      const m = {};
+      list.forEach((r) => { const k = r[key]; m[k] = (m[k] || 0) + 1; });
+      return m;
+    };
+    const topEntry = (m) => Object.entries(m).sort((a, b) => b[1] - a[1])[0] || null;
+
+    const newReports = reports.filter(isNew);
+    const inProgress = reports.filter(isInProgress);
+    const unassigned = reports.filter(isUnassigned);
+    const done = reports.filter(isDone);
+    const slaFlagged = reports.filter(isSlaFlagged);
+    const pendingClosure = reports.filter(isPendingClosure);
+    const cSlaBreached = reports.filter((r) => r.slaBreached).length;
+    const cSlaAtRisk = reports.filter((r) => r.slaAtRisk).length;
+    const dueToday = inProgress.filter((r) => sameDay(r.slaDeadline, NOW)).length;
+    const overTwoHours = unassigned.filter((r) => (NOW - r.submittedAt) / 3600000 > 2).length;
+    // Shared performance engine (same records + formulas as Performanca).
+    let ovs = {}; try { ovs = JSON.parse(window.localStorage.getItem('sinjal_case_overrides') || '{}'); } catch (e) {}
+    const recs = S.perf.records(ovs);
+    const wkNow = S.perf.newCount(recs, {}, 7, 0), wkPrev = S.perf.newCount(recs, {}, 7, 1);
+    const wkDelta = wkPrev ? Math.round(((wkNow - wkPrev) / wkPrev) * 100) : 0;
+    const sla30 = S.perf.slaRate(recs, {}, 30);
+
+    // ---- KPI row: 5 equal cards, each pairing a headline count with a
+    // real operational sub-line wherever the mock dataset supports one
+    // (today's SLA deadlines, hours unassigned, the SLA breach/at-risk
+    // split). The weekly volume and the resolved-within-SLA rate come from
+    // the shared S.perf engine, so they match Performanca exactly. --------
+    const kpiNew = { count: newReports.length, sub: wkNow + ' të dërguara këtë javë (' + (wkDelta >= 0 ? '+' : '−') + Math.abs(wkDelta) + '%)', onClick: this._filter({ status: 'I ri' }) };
+    const kpiInProgress = { count: inProgress.length, sub: dueToday > 0 ? dueToday + ' kanë afat sot' : 'Asnjë me afat sot', onClick: this._filter({ status: 'Në punë' }) };
+    const kpiUnassigned = { count: unassigned.length, sub: overTwoHours > 0 ? overTwoHours + ' prej tyre > 2 orë' : 'Të gjitha nën 2 orë', onClick: this._filter({ unassigned: true }) };
+    const kpiSla = { count: slaFlagged.length, sub: cSlaBreached + ' shkelur · ' + cSlaAtRisk + ' afrohen', onClick: this._filter({ slaFlag: true }) };
+    const kpiDone = { count: done.length, sub: (sla30 == null ? '—' : Math.round(sla30)) + '% brenda SLA · 30 ditë', onClick: this._filter({ done: true }) };
+
+    // ---- Kërkojnë vëmendjen tuaj: exceptions, not a recent-activity list.
+    // Each group shows its real count plus one concrete representative
+    // case (the worst SLA breach, the longest-unassigned report, the
+    // oldest pending verification) so the clerk sees an actual example to
+    // act on rather than just a tally. Duplicate/low-confidence/repeat
+    // signals stay off Kreu per direction — Automatizimet and Raportet
+    // already surface those. ------------------------------------------
+    const fmtWaitHours = (r) => Math.max(1, Math.round((NOW - r.submittedAt) / 3600000));
+    const exceptionGroups = [];
+    if (slaFlagged.length > 0) {
+      const worst = slaFlagged.slice().sort((a, b) => a.slaRemainingHours - b.slaRemainingHours)[0];
+      exceptionGroups.push({
+        color: '#C23B31',
+        label: 'SLA në rrezik',
+        count: slaFlagged.length,
+        onClick: this._filter({ slaFlag: true }),
+        actionLabel: 'Shiko raportin',
+        example: {
+          id: worst.displayId,
+          title: worst.title,
+          meta: worst.departmentName + ' · ' + (worst.slaBreached ? 'SLA e shkelur (' + worst.slaLabel + ')' : worst.slaLabel + ' deri në SLA'),
+          onClick: this._select(worst.id),
+        },
+      });
+    }
+    if (unassigned.length > 0) {
+      const oldest = unassigned.slice().sort((a, b) => a.submittedAt - b.submittedAt)[0];
+      exceptionGroups.push({
+        color: '#B8860B',
+        label: 'raporte pa caktuar',
+        count: unassigned.length,
+        onClick: this._filter({ unassigned: true }),
+        actionLabel: 'Cakto',
+        example: {
+          id: oldest.displayId,
+          title: oldest.title,
+          meta: fmtWaitHours(oldest) + ' orë pa përgjegjës · ' + oldest.departmentName,
+          onClick: this._select(oldest.id),
+        },
+      });
+    }
+    if (pendingClosure.length > 0) {
+      const rep = pendingClosure[0];
+      exceptionGroups.push({
+        color: '#2E7D4F',
+        label: 'raporte kërkojnë verifikim',
+        count: pendingClosure.length,
+        onClick: this._filter({ pendingClosure: true }),
+        actionLabel: 'Verifiko',
+        example: {
+          id: rep.displayId,
+          title: rep.title,
+          meta: 'Zgjidhja u raportua nga ' + rep.departmentName + ', pret verifikim përfundimtar.',
+          onClick: this._select(rep.id),
+        },
+      });
+    }
+    const exceptionsNone = exceptionGroups.length === 0;
+
+    // ---- Problemet në qytet — same map widget as before (unchanged pin
+    // placement), plus a legend that now carries real per-tier counts and
+    // two real "what's dominant" lines computed from the full report set,
+    // not just the active pins. --------------------------------------
+    const zoneCoords = S.zoneCoords || {};
+    const hashOf = (str) => { let hash = 0; for (let i = 0; i < str.length; i++) { hash = (hash * 31 + str.charCodeAt(i)) >>> 0; } return hash; };
+    const activeReports = reports.filter(isOpenCase);
+    const mapPins = activeReports.map((r) => {
+      const base = zoneCoords[r.zone] || { x: 50, y: 50 };
+      const angle = (hashOf(r.id + 'a') % 360) * (Math.PI / 180);
+      const radius = 4 + (hashOf(r.id + 'r') % 100) / 100 * 6;
+      const x = Math.min(95, Math.max(5, base.x + Math.cos(angle) * radius));
+      const y = Math.min(93, Math.max(6, base.y + Math.sin(angle) * radius * 1.85));
+      return { left: x.toFixed(1) + '%', top: y.toFixed(1) + '%', color: S.priorityMeta[r.priority].color, onClick: this._select(r.id), title: r.displayId + ' · ' + r.title };
+    });
+    const priorityCounts = { urgjente: 0, elarte: 0, emesme: 0, eulet: 0 };
+    activeReports.forEach((r) => {
+      if (r.priority === 'Urgjente') priorityCounts.urgjente++;
+      else if (r.priority === 'E lartë') priorityCounts.elarte++;
+      else if (r.priority === 'E mesme') priorityCounts.emesme++;
+      else priorityCounts.eulet++;
+    });
+    const topZoneEntry = topEntry(countBy(reports, 'zone'));
+    const topZone = topZoneEntry ? { name: topZoneEntry[0], count: topZoneEntry[1] } : { name: '—', count: 0 };
+    const topCatEntry = topEntry(countBy(reports, 'categoryLabel'));
+    const topCategory = topCatEntry ? { label: topCatEntry[0], pct: Math.round((topCatEntry[1] / reports.length) * 100) } : { label: '—', pct: 0 };
+
+    // ---- Çfarë po ndryshon: the 7-day bucket counts and the top-category
+    // → top-zone insight sentence are both computed live from submittedAt
+    // over the shared S.perf records (history + live), and the category
+    // deltas use the same 30-vs-30-day comparison as Performanca. ------
+    const dayBuckets = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(NOW); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
+      const next = new Date(d); next.setDate(next.getDate() + 1);
+      dayBuckets.push({ label: DAY_ABBR[d.getDay()], count: recs.filter((r) => r.submittedAt >= d && r.submittedAt < next).length });
+    }
+    const maxDay = Math.max(1, Math.max.apply(null, dayBuckets.map((d) => d.count)));
+    const trendDays = dayBuckets.map((d) => ({ label: d.label, count: d.count, pct: Math.round((d.count / maxDay) * 100) }));
+
+    // 30 days vs the 30 before — the same comparison Performanca's insights use
+    const categoryTrends = S.categories.map((c) => {
+      const a = S.perf.newCount(recs, { category: c.id }, 30, 0), b = S.perf.newCount(recs, { category: c.id }, 30, 1);
+      return { c: c, d: b ? Math.round(((a - b) / b) * 100) : 0 };
+    }).sort((x, y) => Math.abs(y.d) - Math.abs(x.d)).slice(0, 3).map((x) => ({
+      label: x.c.label,
+      pct: Math.abs(x.d),
+      arrow: x.d >= 0 ? '↑' : '↓',
+      color: x.d >= 0 ? '#C23B31' : '#2E7D4F',
+    }));
+
+    const last7Start = new Date(NOW); last7Start.setDate(last7Start.getDate() - 7); last7Start.setHours(0, 0, 0, 0);
+    const last7 = recs.filter((r) => r.submittedAt >= last7Start).map((r) => Object.assign({ categoryLabel: S.catLabel(r.category) }, r));
+    const last7TopCatEntry = topEntry(countBy(last7, 'categoryLabel'));
+    let insightText = 'Nuk ka ende mjaftueshëm të dhëna për një insight këtë javë.';
+    if (last7TopCatEntry) {
+      const catReports = last7.filter((r) => r.categoryLabel === last7TopCatEntry[0]);
+      const catTopZoneEntry = topEntry(countBy(catReports, 'zone'));
+      insightText = catTopZoneEntry
+        ? 'Raportimet për ' + last7TopCatEntry[0] + ' janë përqendruar kryesisht në zonën ' + catTopZoneEntry[0] + ' gjatë 7 ditëve të fundit.'
+        : 'Raportimet për ' + last7TopCatEntry[0] + ' janë kategoria më e shpeshtë këtë javë.';
+    }
+
+    // ---- Ngarkesa sipas departamentit — a real Aktive / Në SLA / Në
+    // rrezik split per department, sorted by load, with a callout for
+    // whichever department is carrying the most right now. -------------
+    const deptRaw = S.departments.map((d) => {
+      const deptReports = reports.filter((r) => r.department === d.id);
+      const active = deptReports.filter(isOpenCase);
+      const atRisk = active.filter(isSlaFlagged).length;
+      return { id: d.id, name: d.name, active: active.length, atRisk: atRisk, onSla: active.length - atRisk };
+    });
+    const deptTable = deptRaw.slice().sort((a, b) => b.active - a.active).map((d) => Object.assign({}, d, {
+      atRiskColor: d.atRisk > 0 ? '#C23B31' : '#8A847C',
+      onClick: this._deptFocus(d.id),
+    }));
+    const focusDept = deptTable.length && deptTable[0].active > 0 ? deptTable[0] : null;
+
+    // ---- Aktiviteti i fundit — hand-authored feed (see mock-data.js),
+    // but every entry resolves to a real report and its current
+    // department, so the copy here can't drift from that report's actual
+    // state. -------------------------------------------------------------
+    const ACTIVITY_COPY = {
+      resolved: () => 'u shënua si Zgjidhur',
+      auto_assigned: (r) => 'u caktua automatikisht te ' + r.departmentName,
+      reviewed: (r, a) => 'u rishikua nga ' + (a.actor || 'nëpunësi'),
+      reappeared: (r) => 'u rikthye në ' + r.status + (r.reappearedFromId ? ' · përsëritje e #' + r.reappearedFromId : ''),
+    };
+    const ACTIVITY_COLOR = { resolved: '#2E7D4F', auto_assigned: '#4A6FA0', reviewed: '#B8860B', reappeared: '#C23B31' };
+    const activityFeed = (S.activity || []).map((a) => {
+      const r = S.byId(a.reportId);
+      if (!r) return null;
+      const copyFn = ACTIVITY_COPY[a.kind];
+      return {
+        id: r.displayId,
+        text: copyFn ? copyFn(r, a) : '',
+        minutesAgo: a.minutesAgo,
+        meta: r.departmentName,
+        color: ACTIVITY_COLOR[a.kind] || '#8A847C',
+        onClick: this._select(r.id),
+      };
+    }).filter(Boolean);
+
+    return {
+      greeting: greet + ', Drita. Ja çfarë po ndodh sot.',
+      kpiNew: kpiNew,
+      kpiInProgress: kpiInProgress,
+      kpiUnassigned: kpiUnassigned,
+      kpiSla: kpiSla,
+      kpiDone: kpiDone,
+      exceptionGroups: exceptionGroups,
+      exceptionsNone: exceptionsNone,
+      mapPins: mapPins,
+      mapActiveCount: activeReports.length,
+      priorityCounts: priorityCounts,
+      topZone: topZone,
+      topCategory: topCategory,
+      trendDays: trendDays,
+      categoryTrends: categoryTrends,
+      insightText: insightText,
+      deptTable: deptTable,
+      focusDept: focusDept,
+      activityFeed: activityFeed,
+    };
+  }
+}
+</script>
+</body>
+</html>

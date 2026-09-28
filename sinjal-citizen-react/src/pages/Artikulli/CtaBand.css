@@ -1,0 +1,41 @@
+/*
+ * "Sheh diçka që nuk shkon?" band. Tablet/desktop: `.r-cta-band` in responsive.css. It sets
+ * align-items/justify-content/flex without !important; none of those were inline in the
+ * static markup, so single classes are fine here.
+ */
+.artikulli-cta {
+  background: var(--c-ink);
+  color: var(--c-paper);
+}
+.artikulli-cta__inner {
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.artikulli-cta__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+.artikulli-cta__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px 22px;
+  background: var(--c-red);
+  color: var(--c-paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.artikulli-cta__arrow {
+  font-family: var(--font-body);
+  font-weight: 400;
+}

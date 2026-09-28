@@ -1,0 +1,734 @@
+/*
+ * SINJAL staff — responsive layout.
+ *
+ * Desktop (≥1100px) keeps the design's 1440×900 artboard, scaled as one piece
+ * (lib/viewportScale.ts). Below 1100px the app switches to a fluid layout at
+ * real device size, and the rules in this file take over:
+ *
+ *   720–1099px  tablet — the sidebar collapses to a 76px icon rail; two-column
+ *                        screens keep two columns where they still fit.
+ *   < 720px     phone  — a top bar + off-canvas drawer replace the sidebar;
+ *                        every layout stacks to one column.
+ *
+ * Screens are styled inline (ported 1:1 from the design), so overrides here
+ * need !important. They hook into the app-* / r-* classes added to the layout
+ * containers; nothing in this file matches at desktop widths except the few
+ * neutral rules in the first block.
+ */
+
+/* Neutral at every size: wrappers added for the responsive hooks. */
+.page-actions-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.app-topbar,
+.app-nav-backdrop,
+.app-sidebar-close {
+  display: none;
+}
+
+/* ==================================================================================== */
+/* Fluid layout (tablet + phone)                                                         */
+/* ==================================================================================== */
+@media (max-width: 1099px) {
+  .app-frame {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    transform: none;
+  }
+
+  /* The content column scrolls as one page; panes that scrolled on their own at
+     desktop size (a fixed 900px artboard) just flow inside it. */
+  .app-content {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .app-pane {
+    flex: none !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  .page-header {
+    height: auto;
+    min-height: 88px;
+    padding: 16px 24px;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+  .page-header-main {
+    flex: 1 1 320px;
+  }
+  .page-title {
+    white-space: normal;
+  }
+  .page-context {
+    flex-wrap: wrap;
+    row-gap: 4px;
+    white-space: normal;
+  }
+  /* When the actions wrap under the title they stay right-aligned, so the bell keeps its corner. */
+  .page-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+  .page-actions-extra {
+    flex-wrap: wrap;
+  }
+
+  .app-pad {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+}
+
+/* ==================================================================================== */
+/* Tablet: icon rail                                                                     */
+/* ==================================================================================== */
+@media (min-width: 720px) and (max-width: 1099px) {
+  .app-sidebar {
+    width: 76px !important;
+    flex: 0 0 76px !important;
+  }
+  .app-sidebar-brand {
+    display: flex !important;
+    justify-content: center;
+    padding: 26px 0 20px !important;
+  }
+  .app-sidebar-brand img {
+    height: 24px !important;
+  }
+  .app-sidebar-wordmark,
+  .app-sidebar-tagline,
+  .app-profile-text,
+  .app-profile-chevron {
+    display: none !important;
+  }
+  .app-sidebar-nav {
+    padding: 8px 12px !important;
+    gap: 6px !important;
+  }
+  .staff-nav-item {
+    justify-content: center;
+    padding: 12px 0 !important;
+  }
+  .app-nav-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .sidebar-profile {
+    justify-content: center;
+    padding: 16px 0 !important;
+  }
+  /* Language toggle stacks vertically in the 76px rail. */
+  .app-sidebar-lang {
+    flex-direction: column;
+    height: auto !important;
+    margin: 6px 16px 10px !important;
+  }
+  .app-sidebar-lang button {
+    min-width: 0 !important;
+    height: 26px !important;
+    flex: 0 0 auto !important;
+  }
+  .app-sidebar-lang button + button {
+    border-left: 0 !important;
+    border-top: 1px solid var(--sj-sep);
+  }
+  .app-profile-menu {
+    right: auto !important;
+    width: 232px !important;
+  }
+}
+
+/* ==================================================================================== */
+/* Phone: top bar + drawer, single column                                                */
+/* ==================================================================================== */
+@media (max-width: 719px) {
+  .app-frame {
+    flex-direction: column;
+  }
+
+  .app-topbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    height: calc(56px + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) 12px 0 6px;
+    background: #1b1917;
+    color: #f5f2ed;
+  }
+  .app-topbar-menu {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #f5f2ed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .app-topbar-menu:hover {
+    background: rgba(245, 242, 237, 0.08);
+  }
+  .app-topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px;
+    color: #f5f2ed;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .app-topbar-brand img {
+    display: block;
+    height: 18px;
+    width: auto;
+  }
+
+  /* Drawer */
+  .app-sidebar {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 90;
+    width: min(300px, 86vw) !important;
+    flex: none !important;
+    height: 100% !important;
+    padding-top: env(safe-area-inset-top, 0px);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.28s;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+  }
+  .is-nav-open .app-sidebar {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+  .app-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    background: rgba(27, 25, 23, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .is-nav-open .app-nav-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .app-sidebar-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: calc(18px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(245, 242, 237, 0.75);
+  }
+  .app-sidebar-close:hover {
+    background: rgba(245, 242, 237, 0.08);
+    color: #f5f2ed;
+  }
+  .staff-nav-item {
+    padding: 12px 12px !important;
+    font-size: 15px !important;
+  }
+
+  /* Page header: title + bell on the first row, page actions on their own row. */
+  .page-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 12px;
+    row-gap: 12px;
+    min-height: 0;
+    padding: 16px;
+  }
+  .page-header-main {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .page-actions {
+    display: contents;
+  }
+  .bell-wrap {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .page-actions-extra {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .page-title {
+    font-size: 22px;
+  }
+  .bell-panel {
+    position: fixed !important;
+    top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    left: 12px;
+    right: 12px !important;
+    width: auto !important;
+    max-height: calc(100dvh - 88px) !important;
+  }
+
+  .app-pad {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* ==================================================================================== */
+/* Screens — fluid layout                                                                */
+/* ==================================================================================== */
+@media (max-width: 1099px) {
+  /* Kreu: KPI tiles as an even grid */
+  .r-kpis {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px !important;
+  }
+  .r-kpis > .kpi-card {
+    padding: 12px 14px !important;
+  }
+
+  /* Raportet: toolbar + table with the lower-priority columns dropped */
+  .r-search {
+    max-width: none !important;
+  }
+  .r-filter-panel {
+    width: min(700px, calc(100vw - 76px - 48px)) !important;
+  }
+  .r-c-zone,
+  .r-c-dept,
+  .r-c-upd {
+    display: none !important;
+  }
+  .r-c-title {
+    min-width: 0 !important;
+  }
+
+  /* Harta: the map takes the full width; filters open as a panel over it */
+  .r-harta {
+    position: relative;
+    min-height: 520px;
+  }
+  .r-harta > .harta-filters-col {
+    position: absolute;
+    z-index: 60;
+    top: 16px;
+    bottom: 18px;
+    left: 24px;
+    width: min(300px, calc(100% - 48px)) !important;
+    box-shadow: 0 18px 48px rgba(27, 25, 23, 0.22);
+  }
+
+  /* Departamentet: department cards two across */
+  .r-grid3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Automatizimet + Performanca: the section sub-nav becomes a scrollable tab strip */
+  .r-subnav-split {
+    flex-direction: column;
+  }
+  .r-subnav-split > .auto-subnav {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    width: auto;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 24px;
+    border-right: 0;
+    border-bottom: 1px solid #e4dfd6;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 24px), transparent 100%);
+  }
+  .r-subnav-split > .auto-subnav::-webkit-scrollbar {
+    display: none;
+  }
+  .r-subnav-split > .auto-subnav > .auto-subnav-title {
+    display: none;
+  }
+  .r-subnav-split > .auto-subnav > div:not(.auto-subnav-title) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+  }
+  /* Performanca: the scope switch (bashkiak / departament) is set apart from the section tabs. */
+  .r-subnav-split > .auto-subnav > div:has(> .perf-role) {
+    padding-right: 12px !important;
+    margin-right: 6px !important;
+    border-right: 1px solid #d9d4cc !important;
+  }
+  .r-subnav-split .perf-role.is-on {
+    background: #c23b31;
+    border-color: #c23b31;
+  }
+  .r-subnav-split > .auto-subnav > div:last-child:not(:has(button)) {
+    display: none;
+  }
+  .r-subnav-split .auto-nav-item {
+    width: auto;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #fbfaf8;
+    box-shadow: inset 0 0 0 1px #e4dfd6;
+    white-space: nowrap;
+  }
+  .r-subnav-split .auto-nav-item.is-on {
+    background: #1b1917;
+    box-shadow: none;
+  }
+  .r-subnav-split .auto-nav-label {
+    overflow: visible;
+  }
+  .r-subnav-split .perf-role {
+    width: auto;
+    margin: 0;
+    padding: 7px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .r-subnav-split .auto-subnav .staff-select {
+    width: auto !important;
+    margin: 0 !important;
+  }
+  .r-subnav-split > main {
+    padding-top: 18px !important;
+  }
+
+  /* Wide dashboard pieces */
+  /* Five health cells: 3 + 2, both rows filling the full width. */
+  .health-strip {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .health-cell {
+    grid-column: span 2;
+  }
+  .health-cell:nth-child(n + 4) {
+    grid-column: span 3;
+    border-top: 1px solid #efeae2;
+  }
+  .health-cell:nth-child(4) {
+    border-left: 0;
+  }
+  .perf-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .perf-modal-bg {
+    position: fixed;
+    padding: 24px 16px;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+  .perf-modal {
+    width: min(620px, 100%);
+    max-height: none;
+  }
+}
+
+/* Narrow tablets: side-by-side panes stack */
+@media (max-width: 1023px) {
+  .r-md {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .r-md > * {
+    width: auto !important;
+    flex: none !important;
+    position: static !important;
+  }
+}
+@media (max-width: 899px) {
+  .r-detail {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Phone */
+@media (max-width: 719px) {
+  /* Kreu */
+  .r-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .r-kpis > .kpi-card:last-child {
+    grid-column: 1 / -1;
+  }
+  .r-split {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Raportet toolbar: full-width search, then filters + sort; chips scroll sideways */
+  .r-search {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+  .r-chips {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0 16px 2px;
+  }
+  .r-chips::-webkit-scrollbar {
+    display: none;
+  }
+  .r-chips > * {
+    flex: 0 0 auto;
+  }
+  .r-filter-panel {
+    position: fixed !important;
+    top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    left: 12px !important;
+    right: 12px;
+    width: auto !important;
+    max-height: calc(100dvh - 88px) !important;
+  }
+  .r-filter-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Raportet table → stacked cards: ID + status, title, category · zone + SLA */
+  .r-thead {
+    display: none !important;
+  }
+  .report-row-link {
+    align-items: flex-start !important;
+  }
+  .report-row-link > span:first-child {
+    padding-top: 14px;
+  }
+  .r-row {
+    flex-wrap: wrap;
+    row-gap: 4px;
+    padding: 12px 14px 12px 0;
+  }
+  .r-row > .staff-td {
+    padding: 0 !important;
+    width: auto !important;
+    border: 0;
+  }
+  .r-row > .r-c-id {
+    order: 1;
+    font-size: 12px;
+  }
+  .r-row > .r-c-status {
+    order: 2;
+    margin-left: auto;
+    overflow: visible !important;
+  }
+  .r-row > .r-c-title {
+    order: 3;
+    flex: 1 1 100% !important;
+    font-size: 14px;
+  }
+  .r-row > .r-c-title > span:first-child {
+    white-space: normal !important;
+  }
+  .r-row > .r-c-cat {
+    order: 4;
+    font-size: 12px;
+  }
+  .r-row > .r-c-zone {
+    order: 5;
+    display: inline !important;
+    font-size: 12px;
+  }
+  .r-row > .r-c-zone::before {
+    content: '·';
+    margin: 0 6px;
+    color: #b8b2a9;
+  }
+  .r-row > .r-c-sla {
+    order: 6;
+    margin-left: auto;
+    text-align: right;
+  }
+  .r-row > .r-c-sla > div:first-child {
+    justify-content: flex-end;
+  }
+
+  /* Raporti */
+  .r-citizen {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .r-citizen > :first-child {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Harta: side panel becomes a bottom sheet over the map */
+  .r-harta {
+    min-height: 480px;
+  }
+  .r-harta > .harta-filters-col {
+    left: 16px;
+    width: calc(100% - 32px) !important;
+  }
+  .harta-side-panel {
+    top: auto;
+    left: 0;
+    width: auto;
+    max-height: 62%;
+    border-left: 0;
+    border-top: 1px solid #e4dfd6;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 30px rgba(27, 25, 23, 0.14);
+  }
+
+  /* Departamentet */
+  .r-grid3 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  /* Assignment rules: two-line cards — category + priority, then department and exception */
+  .staff-card:has(> .rule-row) > div:first-child {
+    display: none !important;
+  }
+  .rule-row {
+    flex-wrap: wrap;
+    row-gap: 3px;
+    align-items: flex-start;
+    padding: 11px 4px;
+  }
+  .rule-row > span:nth-child(1) {
+    flex: 1 1 auto !important;
+  }
+  .rule-row > span:nth-child(3) {
+    width: auto !important;
+  }
+  .rule-row > span:nth-child(2) {
+    order: 3;
+    width: auto !important;
+    flex: 1 1 100%;
+    font-size: 12px !important;
+  }
+  .rule-row > span:nth-child(4) {
+    order: 4;
+    flex: 1 1 100% !important;
+  }
+
+  /* Dense tables (5+ columns) scroll sideways inside their card */
+  .app-content .staff-card:has(> div > .staff-th:nth-of-type(5)):not([role='table']) {
+    overflow-x: auto !important;
+  }
+  .app-content .staff-card:has(> div > .staff-th:nth-of-type(5)):not([role='table']) > :is(div:has(> .staff-th), .hl-row, .auto-row, .rule-row, a, button) {
+    min-width: 620px;
+  }
+
+  /* Section heads wrap instead of squeezing their actions */
+  .auto-section-head {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .auto-section-head button {
+    white-space: nowrap;
+  }
+
+  /* Page actions (e.g. Raporti) fit one row */
+  .page-actions-extra {
+    gap: 6px;
+  }
+  .page-actions-extra > button,
+  .page-actions-extra > div > button {
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+  }
+  .page-actions-extra > span[style*='width: 1px'] {
+    display: none;
+  }
+
+  /* Automatizimet + Performanca */
+  .r-subnav-split > .auto-subnav {
+    padding: 10px 16px;
+  }
+  .health-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .health-cell:nth-child(n) {
+    grid-column: auto;
+    border-left: 0;
+    border-top: 1px solid #efeae2;
+  }
+  .health-cell:nth-child(2n) {
+    border-left: 1px solid #efeae2;
+  }
+  .health-cell:nth-child(-n + 2) {
+    border-top: 0;
+  }
+  .health-cell:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .health-foot {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .loop-band {
+    flex-direction: column;
+  }
+  .loop-arrow {
+    transform: rotate(90deg);
+    height: 18px;
+  }
+  .perf-kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .perf-field {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .r-subnav-split main [style*='grid-template-columns'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .r-subnav-split main [style*='grid-template-columns'] > * {
+    grid-column: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar,
+  .app-nav-backdrop {
+    transition: none !important;
+  }
+}

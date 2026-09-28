@@ -1,0 +1,97 @@
+/* Site footer. Tablet/desktop grid layout: .r-footer-in in responsive.css. */
+
+.site-footer {
+  background: var(--c-red);
+  color: var(--c-paper);
+}
+/*
+ * Scoped under .site-footer on purpose: responsive.css sets `column-gap: 48px` and
+ * `align-items: center` on .r-footer-in WITHOUT !important, which the static site's inline
+ * `gap` / `align-items` beat. A single class would lose to it (responsive.css loads last).
+ */
+.site-footer .site-footer__inner {
+  display: flex;
+  flex-direction: column;
+}
+.site-footer .site-footer__inner--full {
+  padding: 26px 20px 22px;
+  gap: 18px;
+}
+.site-footer .site-footer__inner--compact {
+  padding: 22px 20px;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.site-footer__logo {
+  display: block;
+  height: 26px;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.site-footer__note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgb(var(--c-paper-rgb) / 0.9);
+}
+.site-footer__note-link {
+  color: rgb(var(--c-paper-rgb) / 0.9);
+  text-decoration: underline;
+}
+
+.site-footer__nav {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.site-footer__nav--full {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px 16px;
+}
+.site-footer__nav--compact {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.site-footer__link {
+  color: var(--c-paper);
+}
+
+.site-footer__legal {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  border-top: 1px solid rgb(var(--c-paper-rgb) / 0.25);
+  padding-top: 14px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: rgb(var(--c-paper-rgb) / 0.7);
+}
+.site-footer__legal-link {
+  color: rgb(var(--c-paper-rgb) / 0.7);
+}
+.site-footer__legal-sep {
+  color: rgb(var(--c-paper-rgb) / 0.4);
+}
+
+.site-footer__copy {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: rgb(var(--c-paper-rgb) / 0.85);
+}

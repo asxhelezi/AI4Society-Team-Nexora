@@ -1,0 +1,40 @@
+/*
+ * Bulletini (blog.html). Phone-first styles moved 1:1 out of the static inline style=""
+ * attributes; everything is scoped under .bulletini or .bulletini-* classes. The cards and
+ * the "Sheh diçka që nuk shkon?" band are shared with the write-ups (../Artikulli/ArticleCard,
+ * ../Artikulli/CtaBand). Tablet/desktop overrides: `.r-intro`, `.r-cards` in responsive.css
+ * (all !important for the properties set here).
+ */
+
+/* The static page's <style> had `button{font:inherit}`. */
+:where(.bulletini) button {
+  font: inherit;
+}
+
+.bulletini-intro {
+  padding: 8px 20px 32px;
+}
+.bulletini-intro__title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 0.96;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.bulletini-intro__lead {
+  margin: 0;
+  font-size: 15px;
+  color: var(--c-muted);
+}
+
+.bulletini-list {
+  background: var(--c-paper);
+}
+.bulletini-list__cards {
+  padding: 0 20px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

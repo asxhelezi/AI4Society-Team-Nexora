@@ -1,0 +1,492 @@
+/* Harta (harta.html). All selectors scoped under .harta (the PageFrame root) or .harta-* classes. */
+
+/* Page <style> element rule, scoped without raising specificity. */
+:where(.harta) button {
+  font: inherit;
+}
+
+@keyframes harta-pulse {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@keyframes harta-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes harta-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Page column ---------- */
+/*
+ * Two classes: responsive.css `.r-harta` (desktop) sets `column-gap: 56px` without !important,
+ * which lost to the static page's inline `gap: 22px`. Keep that result.
+ */
+.harta .harta-main {
+  flex: 1;
+  width: 100%;
+  padding: 32px 20px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.harta-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  margin-bottom: 14px;
+}
+.harta-eyebrow__bar {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--c-red);
+}
+.harta-title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.harta-lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--c-muted);
+  max-width: 300px;
+}
+
+/* ---------- Legend + links ---------- */
+.harta-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.harta-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a4540;
+}
+.harta-legend__swatch {
+  width: 11px;
+  height: 11px;
+  display: block;
+}
+.harta-legend__swatch--pending {
+  background: #ffdd00;
+}
+.harta-legend__swatch--resolved {
+  background: #3eb489;
+}
+
+.harta-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 17px 24px;
+  background: var(--c-red);
+  color: var(--c-paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.harta-cta__arrow {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+.harta-mine {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.harta-mine__arrow {
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* ---------- Map box ---------- */
+/* #mapBox keeps its id: responsive.css sets its height per breakpoint (with !important). */
+.harta-map {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  background: #26241f;
+  box-shadow: 0 10px 26px rgb(var(--c-ink-rgb) / 0.25);
+  touch-action: none;
+}
+.harta-camera {
+  position: absolute;
+  inset: 0;
+  cursor: default;
+  touch-action: none;
+}
+.harta-camera--grab {
+  cursor: grab;
+}
+.harta-camera__tint {
+  position: absolute;
+  inset: 0;
+  background: var(--c-ink);
+  opacity: 0.12;
+  pointer-events: none;
+}
+.harta-tiles {
+  position: absolute;
+  inset: 0;
+}
+.harta-tile {
+  position: absolute;
+  width: 257px;
+  height: 257px;
+  background-color: #26241f;
+  background-size: cover;
+  user-select: none;
+  pointer-events: none;
+}
+.harta-map__credit {
+  position: absolute;
+  left: 10px;
+  bottom: 6px;
+  z-index: 4;
+  font: 500 9px/1 var(--font-body);
+  color: rgb(var(--c-paper-rgb) / 0.7);
+}
+
+/* User location marker */
+.harta-marker {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 3;
+}
+.harta-marker__ring,
+.harta-marker__pulse {
+  position: absolute;
+  left: -42px;
+  top: -42px;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+}
+.harta-marker__ring {
+  background: rgba(74, 158, 255, 0.18);
+  border: 1px solid rgba(143, 203, 255, 0.7);
+  box-sizing: border-box;
+}
+.harta-marker__pulse {
+  background: rgba(143, 203, 255, 0.45);
+  animation: harta-pulse 2.2s ease-out infinite;
+}
+.harta-marker__dot {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c-red);
+  border: 3px solid var(--c-paper);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+}
+
+/* Case pins */
+.harta-pin {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 3;
+  cursor: pointer;
+}
+.harta-pin__drop {
+  position: absolute;
+  left: -17px;
+  top: -44px;
+  width: 34px;
+  height: 44px;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
+  animation: harta-fade-up 0.45s ease-out both;
+}
+
+/* ---------- Permission card (#permission: responsive.css centres it from 768 px) ---------- */
+.harta-permission {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9;
+  background: rgb(var(--c-ink-rgb) / 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgb(var(--c-paper-rgb) / 0.08);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  color: var(--c-paper);
+  padding: 22px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.harta-permission__bar {
+  width: 28px;
+  height: 4px;
+  background: var(--c-red);
+  display: block;
+}
+.harta-permission__title {
+  margin: 0;
+  font: 800 26px/0.98 var(--font-display);
+  text-transform: uppercase;
+}
+.harta-permission__msg {
+  margin: 0;
+  font: 400 13px/1.45 var(--font-body);
+  color: rgb(var(--c-paper-rgb) / 0.78);
+}
+.harta-permission__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.harta-permission__button {
+  flex: 1;
+  height: 44px;
+  color: var(--c-paper);
+  font: 700 15px/1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.harta-permission__button--allow {
+  border: 0;
+  background: var(--c-red);
+}
+.harta-permission__button--deny {
+  background: transparent;
+  border: 1.5px solid var(--c-paper);
+}
+
+/* ---------- Status toast (#toast: responsive.css narrows it from 768 px) ---------- */
+.harta-toast {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 6;
+  background: rgb(var(--c-ink-rgb) / 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-left: 4px solid var(--c-red);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  color: var(--c-paper);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.harta-toast__spinner {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid rgb(var(--c-paper-rgb) / 0.25);
+  border-top-color: var(--c-red);
+  animation: harta-spin 0.9s linear infinite;
+}
+.harta-toast__text {
+  font: 500 14px/1.3 var(--font-body);
+}
+
+/* ---------- Zoom buttons ---------- */
+.harta-zoom {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-ink);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+.harta-zoom__button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: var(--c-paper);
+  font: 700 19px/1 var(--font-display);
+  cursor: pointer;
+}
+.harta-zoom__button--in {
+  border-bottom: 1px solid rgb(var(--c-paper-rgb) / 0.15);
+}
+
+/* ---------- Case card ---------- */
+.harta-card {
+  position: absolute;
+  z-index: 8;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+  padding: 14px 14px 12px;
+  box-sizing: border-box;
+}
+.harta-card__close {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 22px;
+  height: 22px;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  border: 0;
+  font: 400 14px/1 var(--font-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.harta-card__street {
+  display: block;
+  font: 700 10px/1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b0793a;
+}
+.harta-card__title {
+  margin: 4px 0 0;
+  font: 800 19px/1.05 var(--font-display);
+  text-transform: uppercase;
+}
+.harta-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+.harta-card__category {
+  font: 400 12px/1 var(--font-body);
+  color: rgb(var(--c-ink-rgb) / 0.55);
+}
+.harta-card__pill {
+  display: inline-block;
+  padding: 4px 9px;
+  color: var(--c-ink);
+  font: 700 10px/1 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.harta-card__pill--resolved {
+  background: #3eb489;
+}
+.harta-card__pill--pending {
+  background: #ffdd00;
+}
+.harta-card__code {
+  margin-left: auto;
+  font:
+    600 11px/1 ui-monospace,
+    Menlo,
+    monospace;
+  color: var(--c-red);
+}
+.harta-card__photos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.harta-card__slot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.harta-card__slot-label {
+  font: 700 9px/1 var(--font-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(var(--c-ink-rgb) / 0.5);
+}
+.harta-card__photo {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+.harta-card__photo--before {
+  background: var(--c-ink);
+}
+.harta-card__photo--after {
+  background: #3a4d3f;
+}
+.harta-card__photo--waiting {
+  background: #8f8a80;
+}
+.harta-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.harta-card__img--before {
+  filter: grayscale(1) contrast(1.05) brightness(0.95);
+}
+.harta-card__icon {
+  font-size: 20px;
+  opacity: 0.6;
+  filter: grayscale(1) brightness(2.4);
+}
+.harta-card__photo--before .harta-card__icon {
+  opacity: 0.55;
+}
+.harta-card__photo--waiting .harta-card__icon {
+  filter: grayscale(1) brightness(1.6);
+}
+.harta-card__link {
+  display: inline-block;
+  margin-top: 12px;
+  font: 600 13px/1 var(--font-body);
+  text-decoration: none;
+}

@@ -1,0 +1,39 @@
+/*
+ * Design tokens — the palette and type actually used by the static citizen site.
+ * Use these in page CSS instead of hard-coding hex values.
+ *
+ * Translucent tints: the site uses many alpha variants of paper and ink
+ * (rgba(245,242,237,.15), rgba(27,25,23,.86)…). Write them as
+ *   rgb(var(--c-paper-rgb) / .15)   rgb(var(--c-ink-rgb) / .86)
+ */
+:root {
+  /* Surfaces & text */
+  --c-paper: #f5f2ed; /* page background, text on dark */
+  --c-ink: #1b1917; /* body text, dark sections, header */
+  --c-black: #0b0b0a; /* html background behind the page */
+  --c-card: #fbfaf8; /* raised card / input background */
+  --c-line: #d9d4cc; /* hairlines, inactive timeline steps */
+  --c-muted: #6b665f; /* secondary text */
+  --c-muted-2: #8a847c; /* placeholders, tertiary text */
+  --c-stone: #b8b2a9; /* "Dërguar" badge, scrollbar thumb */
+  --c-ink-hover: #3a3631; /* hover on ink buttons */
+
+  /* Brand & status */
+  --c-red: #c23b31; /* brand accent, CTAs, "Në proces" */
+  --c-red-dark: #a8302a; /* hover / active on red */
+  --c-green: #2e7d4f; /* "Përfunduar" */
+  --c-brown: #8b5e34; /* "Refuzuar" */
+
+  /* Channel triplets for alpha tints */
+  --c-paper-rgb: 245 242 237;
+  --c-ink-rgb: 27 25 23;
+  --c-red-rgb: 194 59 49;
+
+  /* Type */
+  --font-body: 'Barlow', sans-serif;
+  --font-display: 'Barlow Condensed', sans-serif;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}

@@ -1,0 +1,317 @@
+/*
+ * Gjurmo (gjurmo.html). Phone-first styles, moved 1:1 out of the static page's inline
+ * style="" attributes. All selectors are scoped under .gjurmo (the page root) or use
+ * .gjurmo-* classes. Tablet/desktop overrides stay in responsive.css (r-* hooks).
+ */
+
+/* ---------- The page's <style> block (element rules, scoped) + its citizen-* helpers ---------- */
+:where(.gjurmo) button {
+  font: inherit;
+}
+:where(.gjurmo) input::placeholder {
+  color: var(--c-muted-2);
+}
+:where(.gjurmo) .citizen-control {
+  border-radius: 10px;
+  overflow: hidden;
+}
+:where(.gjurmo) .citizen-pill {
+  border-radius: 999px;
+}
+:where(.gjurmo) .citizen-action {
+  border-radius: 8px;
+}
+
+/* ---------- Main column ---------- */
+.gjurmo-main {
+  flex: 1;
+  width: 100%;
+  padding: 40px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  justify-content: flex-start;
+}
+/* Nothing looked up yet: the search block sits in the middle of the page. */
+.gjurmo-main--centered {
+  justify-content: center;
+}
+
+/* ---------- Search block ---------- */
+.gjurmo-search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: 6px;
+}
+.gjurmo-search__info {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1.5px solid var(--c-muted-2);
+  background: transparent;
+  color: var(--c-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.gjurmo-search__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 46px;
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.gjurmo-search__hint {
+  margin: -10px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--c-muted);
+  max-width: 300px;
+}
+.gjurmo-search__control {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  border: 2px solid var(--c-ink);
+}
+.gjurmo-search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: var(--c-card);
+  padding: 15px 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--c-ink);
+  text-transform: uppercase;
+}
+.gjurmo-search__button {
+  border: 0;
+  cursor: pointer;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  padding: 0 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------- Result ---------- */
+.gjurmo-result {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.gjurmo-result__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--c-line);
+  padding-bottom: 14px;
+}
+.gjurmo-result__code {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+/* Background = the stage colour from STAGE_META, set inline. */
+.gjurmo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  color: var(--c-paper);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Timeline: a column on phones, a row from 768px (.r-timeline in responsive.css). */
+.gjurmo-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.gjurmo-step {
+  --gjurmo-step-color: var(--c-line);
+  border-top: 3px solid var(--gjurmo-step-color);
+  padding-top: 14px;
+  transition: border-color 0.5s var(--ease-out);
+}
+.gjurmo-step--active {
+  --gjurmo-step-color: var(--c-red);
+}
+.gjurmo-step--resolved {
+  --gjurmo-step-color: var(--c-green);
+}
+.gjurmo-step--rejected {
+  --gjurmo-step-color: var(--c-brown);
+}
+.gjurmo-step__n {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 44px;
+  line-height: 0.85;
+  color: var(--gjurmo-step-color);
+}
+.gjurmo-step__title {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--c-muted-2);
+}
+.gjurmo-step--active .gjurmo-step__title,
+.gjurmo-step--resolved .gjurmo-step__title,
+.gjurmo-step--rejected .gjurmo-step__title {
+  color: var(--c-ink);
+}
+.gjurmo-step__date {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--c-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.gjurmo-reason {
+  border-left: 3px solid var(--c-brown);
+  padding: 4px 0 4px 16px;
+}
+.gjurmo-reason__label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-brown);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.gjurmo-reason__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--c-ink);
+}
+
+.gjurmo-details {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  border-top: 1px solid var(--c-line);
+  padding-top: 22px;
+}
+.gjurmo-details__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.gjurmo-details__wide {
+  grid-column: 1 / -1;
+}
+.gjurmo-details__label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.gjurmo-details__label--desc {
+  margin-bottom: 7px;
+}
+.gjurmo-details__value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1;
+}
+.gjurmo-details__desc {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.gjurmo-details__post {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 18px;
+  background: var(--c-red);
+  color: var(--c-paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.gjurmo-arrow {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+.gjurmo-details__back {
+  font-size: 13px;
+  color: var(--c-muted);
+  border-bottom: 1px solid var(--c-line);
+  align-self: flex-start;
+  padding-bottom: 2px;
+}
+
+/* ---------- Not found / lookup failed ---------- */
+.gjurmo-missing {
+  border-top: 3px solid var(--c-red);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.gjurmo-missing__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.gjurmo-missing__code {
+  color: var(--c-red);
+}
+.gjurmo-missing__link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border: 1px solid var(--c-ink);
+  color: var(--c-ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

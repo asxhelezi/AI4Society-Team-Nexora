@@ -1,0 +1,350 @@
+/*
+ * Sinjal — responsive layer for the citizen site.
+ *
+ * The screens are designed mobile-first with inline styles. This file adapts them to
+ * tablets and desktops through the r-* class hooks in each template. Every layout rule
+ * sits behind a min-width query, so phones (< 768px) keep the original design; the only
+ * unscoped rules are the menu overlay, the language toggle and the desktop scrollbar tweaks.
+ *
+ * Inline styles win over normal stylesheet rules, so overrides below need !important.
+ *
+ *   < 768px     phone   — original design, fluid width
+ *   ≥ 768px     tablet  — centered content column, wider grids, larger type
+ *   ≥ 1024px    desktop — inline header navigation, multi-column page layouts
+ */
+
+:root {
+  --r-max: 1200px;
+  --r-gutter: 20px;
+  --r-ink: #1B1917;
+  --r-paper: #F5F2ED;
+  --r-red: #C23B31;
+  --r-red-dark: #A8302A;
+  --r-line: #D9D4CC;
+  --r-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Desktop navigation is present in every header but only shown from 1024px up. */
+.r-desknav { display: none; }
+
+/* The page now scrolls as a document, so pin the mobile menu to the viewport. */
+.r-menu { position: fixed !important; overscroll-behavior: contain; }
+
+/* ------------------------------------------------------------------------------------ */
+/* Language toggle (SQ | EN | SR) — sits in every header, beside the menu button on     */
+/* phones and after the "Raporto" button on desktop. Driven by i18n.js.                 */
+/* ------------------------------------------------------------------------------------ */
+.r-lang {
+  --r-lang-fg: var(--r-paper);
+  --r-lang-on: var(--r-ink);
+  --r-lang-line: rgba(245, 242, 237, .5);
+  display: inline-flex; flex: 0 0 auto; height: 40px;
+  border: 1px solid var(--r-lang-line);
+  background: rgba(27, 25, 23, .18);
+}
+.r-lang button {
+  all: unset; box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 38px; height: 100%; padding: 0 7px;
+  /* Regular-width Barlow: in the condensed cut, the Q of "SQ" reads as an O at this size. */
+  font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 13px;
+  letter-spacing: .06em; line-height: 1; color: var(--r-lang-fg); cursor: pointer;
+  transition: background .2s var(--r-ease), color .2s var(--r-ease);
+}
+.r-lang button + button { border-left: 1px solid rgba(245, 242, 237, .22); }
+.r-lang button[aria-pressed="true"] { background: var(--r-lang-fg); color: var(--r-lang-on); cursor: default; }
+.r-lang button:focus-visible { outline: 2px solid var(--r-red); outline-offset: 2px; position: relative; z-index: 1; }
+@media (hover: hover) {
+  .r-lang button:not([aria-pressed="true"]):hover { background: rgba(245, 242, 237, .14); }
+}
+/* Light header (Bulletini): ink on paper. */
+.r-header[style*="color:#1B1917"] .r-lang {
+  --r-lang-fg: var(--r-ink); --r-lang-on: var(--r-paper); --r-lang-line: rgba(27, 25, 23, .35);
+  background: transparent;
+}
+.r-header[style*="color:#1B1917"] .r-lang button + button { border-left-color: rgba(27, 25, 23, .18); }
+@media (hover: hover) {
+  .r-header[style*="color:#1B1917"] .r-lang button:not([aria-pressed="true"]):hover { background: rgba(27, 25, 23, .07); }
+}
+@media (max-width: 359px) {
+  .r-lang button { min-width: 32px; padding: 0 5px; font-size: 12px; }
+}
+
+/* Mouse users get a visible page scrollbar back (it's hidden globally for the phone look). */
+@media (hover: hover) and (pointer: fine) {
+  html { scrollbar-width: thin; scrollbar-color: #B8B2A9 var(--r-paper); }
+  html::-webkit-scrollbar { display: block; width: 10px; }
+  html::-webkit-scrollbar-thumb { background: #B8B2A9; }
+  html::-webkit-scrollbar-track { background: var(--r-paper); }
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* Hover affordances — pointer devices only, so touch screens never get stuck states.   */
+/* ------------------------------------------------------------------------------------ */
+@media (hover: hover) {
+  a.tap[style*="background:#C23B31"]:hover,
+  button.tap[style*="background:#C23B31"]:hover { background: var(--r-red-dark) !important; }
+  a.tap[style*="background:#1B1917"]:not(.r-card):hover,
+  button.tap[style*="background:#1B1917"]:hover { background: #3A3631 !important; }
+  .r-card img { transition: transform .7s var(--r-ease); }
+  .r-card:hover img { transform: scale(1.045); }
+  .r-footer-in a:hover { text-decoration: underline !important; text-underline-offset: 4px; }
+}
+
+/* ==================================================================================== */
+/* Tablet and up                                                                         */
+/* ==================================================================================== */
+@media (min-width: 768px) {
+  :root { --r-gutter: 40px; }
+
+  /* Full-bleed backgrounds, centered content column. */
+  .r-wrap,
+  .r-header {
+    --r-pad: max(var(--r-gutter), calc((100% - var(--r-max)) / 2));
+    padding-left: var(--r-pad) !important;
+    padding-right: var(--r-pad) !important;
+  }
+  .r-narrow,
+  .r-mia,
+  .r-rap { --r-max: 720px; }
+
+  .r-main { padding-top: 64px !important; padding-bottom: 88px !important; }
+  .r-main h1 { font-size: 56px !important; }
+
+  /* ---------- Home: hero ---------- */
+  .r-hero { padding-top: 150px !important; }
+  .r-hero-text { flex: 0 0 auto !important; margin-top: auto; }
+  .r-hero-hl { min-height: 0 !important; }
+  /* Width tuned so every rotating phrase breaks into two clean lines (never at the soft hyphens). */
+  .r-hero-h1 { font-size: clamp(84px, 10.5vw, 136px) !important; min-height: 1.9em; max-width: 7.5em; text-wrap: balance; }
+  .r-hero-cta { padding-top: 40px !important; padding-bottom: 0 !important; }
+  .r-hero-cta a { display: inline-flex !important; padding: 20px 44px !important; font-size: 22px !important; }
+  .r-hero-partners { margin-top: auto; padding-top: 56px !important; padding-bottom: 32px !important; }
+  /* Three logos fit comfortably here, so show them once, centered, instead of a half-empty marquee. */
+  .r-hero-partners [style*="width:max-content"] { width: auto !important; justify-content: center; gap: 56px !important; animation: none !important; transform: none !important; }
+  .r-hero-partners [style*="width:max-content"] > img:nth-child(n+4) { display: none !important; }
+  .r-hero-partners [style*="width:max-content"] > img { transform: scale(1.15); }
+
+  /* ---------- Home: resolved-cases bento (tablet keeps the phone's 2-col arrangement) ---------- */
+  .r-wrap > .r-bento { grid-auto-rows: minmax(210px, auto) !important; gap: 14px !important; padding-bottom: 72px !important; }
+  .r-bento .r-card > div:last-child { padding: 18px 16px 16px !important; }
+  .r-bento .r-card > div:last-child > div + div,
+  .r-b-f > span:last-child { font-size: 21px !important; }
+  .r-b-f { padding: 20px 18px !important; }
+  .r-b-count { padding-top: 40px !important; padding-bottom: 24px !important; }
+  .r-b-count [data-counter] { font-size: 128px !important; }
+  .r-b-count h2 { font-size: 30px !important; }
+
+  /* ---------- Home: how it works ---------- */
+  .r-how { padding-top: 88px !important; padding-bottom: 88px !important; }
+  .r-how > h2 { font-size: 56px !important; margin-bottom: 48px !important; }
+  .r-how-cta a { display: inline-flex !important; padding: 18px 40px !important; }
+
+  /* ---------- Home: track a report ---------- */
+  .r-track-sec { padding-top: 88px !important; padding-bottom: 96px !important; }
+  .r-track-sec > h2 { font-size: 56px !important; margin-bottom: 24px !important; }
+  .r-track { max-width: 560px; }
+  .r-track input { padding: 18px 18px !important; font-size: 18px !important; }
+  .r-track button { padding: 0 32px !important; }
+  /* Keep the info button in the section's corner, aligned to the content column. */
+  .r-info { top: 40px !important; right: max(var(--r-gutter), calc((100% - var(--r-max)) / 2)) !important; }
+
+  /* ---------- Footer ---------- */
+  .r-footer-in {
+    display: grid !important; align-content: start;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 48px;
+    row-gap: 22px !important;
+    padding-top: 40px !important;
+    padding-bottom: 32px !important;
+  }
+  .r-footer-in > nav {
+    grid-column: 2; grid-row: 1;
+    display: flex !important; flex-wrap: wrap; justify-content: flex-end;
+    gap: 12px 28px !important; font-size: 16px !important;
+  }
+  .r-footer-in > :not(nav):not(:first-child) { grid-column: 1 / -1; }
+  .r-footer-note { max-width: 560px; }
+
+  /* ---------- "Sheh diçka që nuk shkon?" band ---------- */
+  .r-cta-band {
+    flex-direction: row !important; align-items: center; justify-content: space-between;
+    gap: 32px !important; padding-top: 56px !important; padding-bottom: 56px !important;
+  }
+  .r-cta-band h2 { font-size: 44px !important; }
+  .r-cta-band a { flex: 0 0 auto; padding: 18px 36px !important; }
+
+  /* ---------- Bulletin list + "others" lists on case pages ---------- */
+  .r-intro { padding-top: 40px !important; padding-bottom: 48px !important; }
+  .r-intro h1 { font-size: 64px !important; margin-bottom: 12px !important; }
+  .r-intro p { font-size: 18px !important; max-width: 560px; }
+  .r-cards { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px !important; }
+  .r-cards:not(.r-wrap) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px !important; }
+  .r-cards.r-wrap { padding-bottom: 88px !important; }
+  .r-cards .r-card > div:last-child { padding: 16px 18px !important; }
+  .r-cards .r-card > div:last-child > div + div { font-size: 21px !important; }
+
+  /* ---------- Case write-up ---------- */
+  .r-cover-hero { min-height: 540px !important; }
+  .r-cover-text { padding-top: 160px !important; padding-bottom: 56px !important; }
+  .r-cover-h1 { font-size: clamp(48px, 6vw, 76px) !important; max-width: 15em; }
+  .r-meta { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .r-meta > div { padding: 24px 20px !important; border-top: 0 !important; border-right: 1px solid var(--r-line) !important; }
+  .r-meta > div:first-child { padding-left: 0 !important; }
+  .r-meta > div:last-child { border-right: 0 !important; }
+  .r-meta > div > div + div { font-size: 22px !important; }
+  .r-article { --r-max: 720px; padding-top: 64px !important; padding-bottom: 80px !important; gap: 48px !important; }
+  .r-prose { font-size: 18px !important; line-height: 1.7 !important; gap: 22px !important; }
+  .r-ba-grid { gap: 16px !important; }
+  .r-wrap > h2 + .r-cards { margin-top: 8px; }
+  .r-article + section + section > .r-wrap { padding-top: 64px !important; padding-bottom: 80px !important; }
+  .r-article + section + section h2 { font-size: 36px !important; margin-bottom: 28px !important; }
+
+  /* ---------- Track (gjurmo) ---------- */
+  .r-timeline { display: grid !important; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 20px !important; }
+
+  /* ---------- Report form ---------- */
+  .r-cat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .r-cat-grid > button { min-height: 116px !important; padding: 18px !important; }
+
+  /* ---------- Map ---------- */
+  #mapBox { height: 580px !important; }
+  /* Keep map overlays at a readable width instead of spanning the whole map. */
+  #permission { left: 50% !important; right: auto !important; width: min(440px, calc(100% - 32px)); transform: translate(-50%, -50%) !important; }
+  #toast { right: auto !important; width: min(420px, calc(100% - 28px)); }
+}
+
+/* ==================================================================================== */
+/* Desktop                                                                               */
+/* ==================================================================================== */
+@media (min-width: 1024px) {
+  :root { --r-gutter: 56px; }
+
+  /* ---------- Header: inline navigation replaces the hamburger ---------- */
+  .r-header { padding-top: 22px !important; padding-bottom: 22px !important; gap: 40px !important; }
+  .r-burger,
+  .r-menu { display: none !important; }
+  .r-header-tools { margin-left: -16px; }
+  .r-lang { height: 43px; }
+  .r-lang button { min-width: 42px; font-size: 14px; }
+  .r-desknav {
+    display: flex; align-items: center; gap: 32px; margin-left: auto;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px;
+    letter-spacing: .08em; text-transform: uppercase; line-height: 1;
+  }
+  .r-desknav a { position: relative; padding: 10px 0; color: inherit !important; }
+  .r-desknav a::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+    background: var(--r-red); transform: scaleX(0); transform-origin: left center;
+    transition: transform .3s var(--r-ease);
+  }
+  .r-desknav a:hover::after,
+  .r-desknav a[aria-current="page"]::after { transform: scaleX(1); }
+  .r-desknav .r-desknav-cta {
+    display: inline-flex; align-items: center; gap: 12px; margin-left: 8px;
+    padding: 13px 20px; background: var(--r-red); color: var(--r-paper) !important;
+    transition: background .2s var(--r-ease);
+  }
+  .r-desknav .r-desknav-cta::after { display: none; }
+  .r-desknav .r-desknav-cta span:last-child { font-family: 'Barlow', sans-serif; font-weight: 400; }
+  .r-desknav .r-desknav-cta:hover { background: var(--r-red-dark); }
+  .r-desknav .r-desknav-cta[aria-current="page"] { box-shadow: inset 0 0 0 2px var(--r-paper); }
+
+  .r-main h1 { font-size: 64px !important; }
+
+  /* ---------- Home: resolved cases as a symmetric gallery around the counter ----------
+     4×3 grid, every row the same height and one even gutter throughout. The counter sits in
+     the 2×1 centre cell on the page background, framed by the six stories:
+
+       [  A  ][  B  ]
+       [C][ 504+ ][D]
+       [  E  ][  F  ]
+
+     DOM order (A, B, C, counter, D, E, F) matches the visual reading order. */
+  .r-wrap > .r-bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(3, clamp(220px, 18vw, 270px)) !important;
+    grid-auto-rows: auto !important;
+    gap: 16px !important; padding-bottom: 104px !important;
+  }
+  .r-wrap:has(> .r-bento) { padding-top: 104px !important; }
+  .r-b-a     { grid-column: 1 / 3 !important; grid-row: 1 / 2 !important; }
+  .r-b-b     { grid-column: 3 / 5 !important; grid-row: 1 / 2 !important; }
+  .r-b-c     { grid-column: 1 / 2 !important; grid-row: 2 / 3 !important; }
+  .r-b-count { grid-column: 2 / 4 !important; grid-row: 2 / 3 !important; }
+  .r-b-d     { grid-column: 4 / 5 !important; grid-row: 2 / 3 !important; }
+  .r-b-e     { grid-column: 1 / 3 !important; grid-row: 3 / 4 !important; }
+  .r-b-f     { grid-column: 3 / 5 !important; grid-row: 3 / 4 !important; font-size: 26px !important; padding: 24px !important; }
+  .r-bento .r-card { min-height: 0 !important; }
+  .r-bento .r-card > div:last-child { padding: 20px 20px 18px !important; }
+
+  .r-b-count { justify-content: center; padding: 0 24px !important; }
+  .r-b-count [data-counter] { font-size: clamp(120px, 11vw, 168px) !important; }
+  .r-b-count h2 { margin-top: 14px !important; font-size: clamp(26px, 2.4vw, 34px) !important; letter-spacing: .04em !important; }
+
+  /* ---------- Home: steps side by side ---------- */
+  .r-steps { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px !important; }
+  .r-how-cta { margin-top: 56px !important; }
+
+  /* ---------- Bulletin grid ---------- */
+  .r-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px !important; }
+  .r-intro h1 { font-size: 80px !important; }
+
+  /* ---------- Case write-up ---------- */
+  .r-cover-hero { min-height: min(72vh, 680px) !important; }
+  .r-cover-text { padding-bottom: 72px !important; }
+
+  /* ---------- Harta: controls on the left, a large map on the right ---------- */
+  .r-harta {
+    display: grid !important; align-content: start;
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 56px; row-gap: 28px !important; align-items: start;
+    padding-top: 56px !important; padding-bottom: 80px !important;
+  }
+  .r-h-intro  { grid-column: 1; grid-row: 1; }
+  .r-h-legend { grid-column: 1; grid-row: 2; }
+  .r-h-cta    { grid-column: 1; grid-row: 3; }
+  .r-h-link   { grid-column: 1; grid-row: 4; justify-self: start; align-self: start !important; }
+  .r-h-map    { grid-column: 2; grid-row: 1 / 5; }
+  .r-h-intro p { font-size: 16px !important; }
+  #mapBox { height: clamp(560px, calc(100vh - 220px), 780px) !important; }
+
+  /* ---------- Raportet e mia: saved list beside the tracker ---------- */
+  .r-mia {
+    --r-max: 1080px;
+    display: grid !important; align-content: start;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    column-gap: 56px; row-gap: 40px !important; align-items: start;
+  }
+  .r-mia-head  { grid-column: 1 / -1; }
+  .r-mia-list  { grid-column: 1; grid-row: 2; }
+  .r-mia-track {
+    grid-column: 2; grid-row: 2; position: sticky; top: 32px;
+    padding: 28px !important; border: 1px solid var(--r-line) !important; background: #FBFAF8;
+  }
+  /* With nothing saved yet, the empty-state box and the tracker read as a pair: same
+     height, content centred. (A real list keeps the tracker compact beside it.) */
+  .r-mia-empty,
+  .r-mia:has(.r-mia-empty) .r-mia-track { align-self: stretch; justify-content: center; }
+
+  /* ---------- Raporto: step context on the left, the step itself on the right ---------- */
+  .r-rap {
+    --r-max: 1120px;
+    display: grid !important;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: 80px; align-items: start;
+  }
+  .r-rap-head { grid-column: 1; grid-row: 1; position: sticky; top: 40px; }
+  .r-rap-head h1 { font-size: 52px !important; }
+  .r-rap-step { grid-column: 2; grid-row: 1; }
+  .r-rap-done { grid-column: 1 / -1; width: 100%; max-width: 720px; justify-self: center; }
+  .r-cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+  .r-cat-grid > button { min-height: 104px !important; }
+}
+
+@media (min-width: 1280px) {
+  .r-rap .r-cat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .r-rap .r-cat-grid > button { min-height: 116px !important; }
+}

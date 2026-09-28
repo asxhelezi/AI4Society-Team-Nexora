@@ -1,0 +1,110 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Kreu",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Raportet.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Raportet",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Raporti.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Raporti — detaje rasti",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "Harta.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Harta",
+      "w": 1440,
+      "x": 4560,
+      "y": 0
+    },
+    "Departamentet.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Departamentet",
+      "w": 1440,
+      "x": 6080,
+      "y": 0
+    },
+    "Sidebar.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Përbërës — Sidebar",
+      "w": 232,
+      "x": 0,
+      "y": 1020
+    },
+    "NotificationBell.dc.html": {
+      "h": 40,
+      "is_interactive": true,
+      "title": "Përbërës — Njoftimet",
+      "w": 40,
+      "x": 312,
+      "y": 1020
+    },
+    "Automatizimet.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Automatizimet",
+      "w": 1440,
+      "x": 7600,
+      "y": 0
+    },
+    "Performanca.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Performanca",
+      "w": 1440,
+      "x": 9120,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-23T00:45:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "file": "Main.dc.html",
+    "view": "focused"
+  },
+  "notes": {
+    "n1": {
+      "kind": "title1",
+      "maxW": 3100,
+      "text": "Sinjal — Staff Desktop",
+      "w": 240,
+      "x": -33,
+      "y": -241
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Raportet.dc.html",
+    "Raporti.dc.html",
+    "Harta.dc.html",
+    "Departamentet.dc.html",
+    "Automatizimet.dc.html",
+    "Performanca.dc.html",
+    "Sidebar.dc.html",
+    "NotificationBell.dc.html"
+  ],
+  "pages": [],
+  "title": "Sinjal — Staff Desktop"
+}

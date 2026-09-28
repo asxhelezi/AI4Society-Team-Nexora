@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<title>Sinjal — Nëpunësi — Njoftimet</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="staff.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;}</style>
+</helmet>
+<div style="width:40px;height:40px;position:relative;">
+  <button type="button" onClick="{{ onToggle }}" aria-label="Njoftimet" aria-expanded="{{ isOpenAttr }}" class="tap bell-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B1917" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M9.5 20a2.5 2.5 0 0 0 5 0"/></svg>
+    <sc-if value="{{ hasUnread }}">
+      <span class="bell-badge">{{ unreadCount }}</span>
+    </sc-if>
+  </button>
+
+  <sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+    <div class="panel" style="top:46px;right:0;width:380px;max-height:520px;display:flex;flex-direction:column;overflow:hidden;">
+      <div style="padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E4DFD6;">
+        <span style="font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;letter-spacing:0;color:#1B1917;">Njoftimet</span>
+        <button type="button" onClick="{{ onMarkAll }}" class="tap" style="border:0;background:transparent;padding:4px 2px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:#C23B31;">Shëno të gjitha si lexuar</button>
+      </div>
+      <div style="display:flex;border-bottom:1px solid #E4DFD6;padding:0 8px;">
+        <button type="button" onClick="{{ onTabAll }}" class="panel-tab {{ tabAllClass }}" style="border:0;background:transparent;">Të gjitha</button>
+        <button type="button" onClick="{{ onTabAction }}" class="panel-tab {{ tabActionClass }}" style="border:0;background:transparent;">Kërkojnë veprim</button>
+        <button type="button" onClick="{{ onTabUnread }}" class="panel-tab {{ tabUnreadClass }}" style="border:0;background:transparent;">Të palexuara</button>
+      </div>
+      <div style="overflow-y:auto;flex:1;">
+        <sc-for list="{{ rows }}" as="n" hint-placeholder-count="5">
+          <sc-if value="{{ n.linkable }}">
+            <a href="{{ n.href }}" onClick="{{ n.onClick }}" class="tap notif-row" style="display:flex;gap:10px;align-items:flex-start;padding:11px 16px;border-bottom:1px solid #E4DFD6;">
+              <sc-if value="{{ n.unread }}"><span class="notif-unread-dot" style="margin-top:5px;"></span></sc-if>
+              <sc-if value="{{ n.readAlready }}"><span style="width:7px;flex:0 0 auto;"></span></sc-if>
+              <div style="min-width:0;">
+                <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;line-height:1.35;">{{ n.title }}</div>
+                <div style="margin-top:2px;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;line-height:1.4;">{{ n.body }}</div>
+                <div style="margin-top:4px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">{{ n.timeLabel }} · {{ n.group }}</div>
+              </div>
+            </a>
+          </sc-if>
+          <sc-if value="{{ n.notLinkable }}">
+            <div class="notif-row" style="display:flex;gap:10px;align-items:flex-start;padding:11px 16px;border-bottom:1px solid #E4DFD6;">
+              <sc-if value="{{ n.unread }}"><span class="notif-unread-dot" style="margin-top:5px;"></span></sc-if>
+              <sc-if value="{{ n.readAlready }}"><span style="width:7px;flex:0 0 auto;"></span></sc-if>
+              <div style="min-width:0;">
+                <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;line-height:1.35;">{{ n.title }}</div>
+                <div style="margin-top:2px;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;line-height:1.4;">{{ n.body }}</div>
+                <div style="margin-top:4px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">{{ n.timeLabel }} · {{ n.group }}</div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+        <sc-if value="{{ emptyState }}">
+          <div style="padding:32px 16px;text-align:center;font-family:'Barlow',sans-serif;font-size:13px;color:#8A847C;">Asnjë njoftim në këtë kategori.</div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":40,"height":40}}'>
+class Component extends DCLogic {
+  state = { open: false, tab: 'all', readIds: {} };
+  componentDidMount() {
+    try {
+      const raw = window.localStorage.getItem('sinjal_notif_read');
+      const readIds = raw ? JSON.parse(raw) : {};
+      this.setState({ readIds: readIds });
+    } catch (e) {}
+  }
+  _persist(readIds) {
+    try { window.localStorage.setItem('sinjal_notif_read', JSON.stringify(readIds)); } catch (e) {}
+  }
+  _markRead(id) {
+    const readIds = Object.assign({}, this.state.readIds);
+    readIds[id] = true;
+    this._persist(readIds);
+    this.setState({ readIds: readIds });
+  }
+  renderVals() {
+    const data = window.SINJAL;
+    const all = (data && data.notifications) || [];
+    const readIds = this.state.readIds || {};
+    const withRead = all.map((n) => Object.assign({}, n, { effectiveRead: n.read || !!readIds[n.id] }));
+    const unreadCount = withRead.filter((n) => !n.effectiveRead).length;
+
+    const filtered = withRead.filter((n) => {
+      if (this.state.tab === 'action') return n.type === 'action';
+      if (this.state.tab === 'unread') return !n.effectiveRead;
+      return true;
+    });
+
+    const rows = filtered.map((n) => {
+      const hasTarget = !!(n.reportId || n.filter);
+      const onClickFn = () => {
+        this._markRead(n.id);
+        try {
+          if (n.reportId) window.localStorage.setItem('sinjal_selected_report', n.reportId);
+          if (n.filter) window.localStorage.setItem('sinjal_report_filter', JSON.stringify(n.filter));
+        } catch (e) {}
+        this.setState({ open: false });
+      };
+      return {
+        title: n.title,
+        body: n.body,
+        group: n.group,
+        timeLabel: data.fmtTime(n.time),
+        unread: !n.effectiveRead,
+        readAlready: n.effectiveRead,
+        linkable: hasTarget,
+        notLinkable: !hasTarget,
+        href: n.reportId ? 'Raporti.dc.html' : (n.filter ? 'Raportet.dc.html' : ''),
+        onClick: onClickFn,
+      };
+    });
+
+    return {
+      open: this.state.open,
+      isOpenAttr: this.state.open ? 'true' : 'false',
+      onToggle: () => this.setState({ open: !this.state.open }),
+      hasUnread: unreadCount > 0,
+      unreadCount: unreadCount > 9 ? '9+' : unreadCount,
+      onMarkAll: () => {
+        const readIds = {};
+        all.forEach((n) => { readIds[n.id] = true; });
+        this._persist(readIds);
+        this.setState({ readIds: readIds });
+      },
+      onTabAll: () => this.setState({ tab: 'all' }),
+      onTabAction: () => this.setState({ tab: 'action' }),
+      onTabUnread: () => this.setState({ tab: 'unread' }),
+      tabAllClass: this.state.tab === 'all' ? 'is-on' : '',
+      tabActionClass: this.state.tab === 'action' ? 'is-on' : '',
+      tabUnreadClass: this.state.tab === 'unread' ? 'is-on' : '',
+      rows: rows,
+      emptyState: rows.length === 0,
+    };
+  }
+}
+</script>
+</body>
+</html>

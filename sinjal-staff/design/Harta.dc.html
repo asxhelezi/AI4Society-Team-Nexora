@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<title>Sinjal — Nëpunësi — Harta</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="staff.css">
+<script src="mock-data.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;}</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;background:#F5F2ED;overflow:hidden;">
+
+<dc-import name="Sidebar" active="harta" hint-size="232px,900px"></dc-import>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;">
+
+  <header class="page-header">
+    <div class="page-header-main">
+      <h1 class="page-title">Harta</h1>
+      <div class="page-context">
+        <span>Elbasan, tani</span>
+        <span class="harta-stat-chip"><b class="tabular-nums">{{ summary.total }}</b> raporte</span>
+        <span class="harta-stat-chip"><b class="tabular-nums">{{ summary.progress }}</b> në punë</span>
+        <span class="harta-stat-chip"><b class="tabular-nums">{{ summary.urgent }}</b> urgjente</span>
+        <span class="harta-stat-chip"><b class="tabular-nums">{{ summary.slaRisk }}</b> SLA në rrezik</span>
+        <span class="harta-stat-chip"><b class="tabular-nums">{{ summary.resolved }}</b> zgjidhur</span>
+        <sc-if value="{{ compare.show }}" hint-placeholder-val="{{ false }}">
+          <span style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;color:{{ compare.color }};">{{ compare.text }}</span>
+        </sc-if>
+      </div>
+    </div>
+    <div style="flex:0 0 auto;display:flex;align-items:center;gap:10px;">
+      <dc-import name="NotificationBell" hint-size="40px,40px"></dc-import>
+    </div>
+  </header>
+
+  <div style="flex:1;min-height:0;display:flex;padding:16px 28px 18px;gap:14px;">
+
+    <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ true }}">
+      <div class="staff-card harta-filters-col" style="width:238px;flex:0 0 238px;padding:14px 14px 16px;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex:0 0 auto;">
+          <span style="font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;color:#8A847C;">Filtrat</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button type="button" onClick="{{ onClearAllFilters }}" class="tap" style="border:0;background:transparent;padding:2px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:#6B665F;">Pastro</button>
+            <button type="button" onClick="{{ onToggleFilters }}" class="tap" style="border:0;background:transparent;padding:2px;color:#6B665F;display:flex;" aria-label="Mbyll filtrat">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:13px;">
+          <div class="filter-group-title">Statusi</div>
+          <sc-for list="{{ statusItems }}" as="it" hint-placeholder-count="7">
+            <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+              <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+              {{ it.label }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="margin-bottom:13px;">
+          <div class="filter-group-title">Prioriteti</div>
+          <sc-for list="{{ priorityItems }}" as="it" hint-placeholder-count="4">
+            <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+              <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+              {{ it.label }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="margin-bottom:13px;">
+          <div class="filter-group-title">Departamenti</div>
+          <sc-for list="{{ departmentItems }}" as="it" hint-placeholder-count="5">
+            <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+              <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+              {{ it.label }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="margin-bottom:13px;">
+          <div class="filter-group-title">Kategoria</div>
+          <sc-for list="{{ categoryItems }}" as="it" hint-placeholder-count="5">
+            <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+              <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+              {{ it.label }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="margin-bottom:13px;">
+          <div class="filter-group-title">Koha (raportuar)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <sc-for list="{{ periodPresets }}" as="p" hint-placeholder-count="6">
+              <button type="button" onClick="{{ p.onClick }}" class="tap staff-chip {{ p.onClass }}" style="padding:5px 9px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;">{{ p.label }}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ periodCustomShow }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+              <input type="date" value="{{ periodFrom }}" onChange="{{ onPeriodFrom }}" class="staff-input" style="padding:6px 7px;font-size:11px;flex:1;min-width:0;">
+              <span style="color:#8A847C;font-size:11px;flex:0 0 auto;">deri</span>
+              <input type="date" value="{{ periodTo }}" onChange="{{ onPeriodTo }}" class="staff-input" style="padding:6px 7px;font-size:11px;flex:1;min-width:0;">
+            </div>
+          </sc-if>
+          <div style="margin-top:8px;">
+            <button type="button" onClick="{{ onToggleCompare }}" class="tap filter-check-row" style="width:auto;padding:2px;">
+              <span class="check-box {{ compareClass }}"><sc-if value="{{ comparePeriod }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+              Krahaso me periudhën e mëparshme
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:13px;">
+          <div class="filter-group-title">SLA</div>
+          <sc-for list="{{ slaItems }}" as="it" hint-placeholder-count="3">
+            <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+              <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+              {{ it.label }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="margin-bottom:13px;">
+          <div class="filter-group-title">Automatizimi</div>
+          <sc-for list="{{ automationItems }}" as="it" hint-placeholder-count="5">
+            <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+              <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+              {{ it.label }}
+            </button>
+          </sc-for>
+        </div>
+
+        <div>
+          <div class="filter-group-title">Zona</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <sc-for list="{{ zonaModes }}" as="z" hint-placeholder-count="3">
+              <button type="button" onClick="{{ z.onClick }}" class="tap staff-chip {{ z.onClass }}" style="padding:5px 9px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;">{{ z.label }}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ zonaListShow }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:8px;">
+              <sc-for list="{{ zoneItems }}" as="it" hint-placeholder-count="8">
+                <button type="button" onClick="{{ it.onClick }}" class="tap filter-check-row">
+                  <span class="check-box {{ it.onClass }}"><sc-if value="{{ it.isOn }}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F5F2ED" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></span>
+                  {{ it.label }}
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ zonaDrawShow }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:8px;padding:9px 10px;background:#F5F2ED;border-radius:10px;">
+              <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#4A4640;line-height:1.4;">{{ drawHint }}</div>
+              <div style="margin-top:8px;display:flex;gap:6px;">
+                <sc-if value="{{ drawMode }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ onFinishDraw }}" class="tap staff-btn-primary {{ finishDisabledClass }}" style="flex:1;padding:6px 8px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Përfundo zonën</button>
+                  <button type="button" onClick="{{ onCancelDraw }}" class="tap staff-btn-secondary" style="flex:0 0 auto;padding:6px 10px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Anulo</button>
+                </sc-if>
+                <sc-if value="{{ drawModeOff }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ onStartDraw }}" class="tap staff-btn-secondary" style="flex:1;padding:6px 8px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Vizato zonën në hartë</button>
+                </sc-if>
+              </div>
+              <sc-if value="{{ customZoneActiveShow }}" hint-placeholder-val="{{ false }}">
+                <button type="button" onClick="{{ onClearCustomZone }}" class="tap" style="margin-top:6px;border:0;background:transparent;padding:2px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:#C23B31;">Hiq zonën e vizatuar ×</button>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex:0 0 auto;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <sc-if value="{{ filtersClosed }}" hint-placeholder-val="{{ false }}">
+            <button type="button" onClick="{{ onToggleFilters }}" class="tap staff-btn-secondary" style="padding:7px 10px;display:inline-flex;align-items:center;gap:6px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              Filtra
+              <sc-if value="{{ activeFilterBadge.show }}">
+                <span class="tabular-nums" style="min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:#C23B31;color:#F5F2ED;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;">{{ activeFilterBadge.n }}</span>
+              </sc-if>
+            </button>
+          </sc-if>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <sc-for list="{{ legendItems }}" as="l" hint-placeholder-count="6">
+              <span class="harta-legend-chip"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:{{ l.color }};"></span>{{ l.label }} <span class="tabular-nums">({{ l.count }})</span></span>
+            </sc-for>
+          </div>
+        </div>
+        <div class="harta-layers-wrap">
+          <button type="button" onClick="{{ onToggleLayersMenu }}" class="tap harta-layers-btn {{ layersMenuBtnClass }}" aria-label="Shtresat e hartës">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </button>
+          <sc-if value="{{ layersMenuShow }}" hint-placeholder-val="{{ false }}">
+            <div class="harta-layers-menu">
+              <sc-for list="{{ layers }}" as="ly" hint-placeholder-count="4">
+                <button type="button" onClick="{{ ly.onClick }}" class="tap harta-layers-menu-item {{ ly.onClass }}">
+                  <span class="harta-layers-menu-icon">
+                    <sc-if value="{{ ly.isRaporte }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></sc-if>
+                    <sc-if value="{{ ly.isIntensiteti }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17a2.5 2.5 0 0 0 2.5-2.5c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2 1z"/></svg></sc-if>
+                    <sc-if value="{{ ly.isDepartamentet }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><path d="M5 21V9l7-5 7 5v12"/><line x1="9" y1="21" x2="9" y2="13"/><line x1="15" y1="21" x2="15" y2="13"/></svg></sc-if>
+                    <sc-if value="{{ ly.isSla }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></sc-if>
+                  </span>
+                  {{ ly.label }}
+                  <sc-if value="{{ ly.isActive }}" hint-placeholder-val="{{ false }}">
+                    <span class="harta-layers-menu-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                  </sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div class="harta-map-frame" onClick="{{ onMapClick }}" onWheel="{{ onMapWheel }}" onDoubleClick="{{ onMapDoubleClick }}">
+        <div class="harta-map-inner" style="transform:{{ mapTransform }};">
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;">
+            <ellipse cx="17" cy="19" rx="10" ry="8" fill="#C9D6BE" opacity=".5"></ellipse>
+            <ellipse cx="80" cy="16" rx="8" ry="6.5" fill="#C9D6BE" opacity=".45"></ellipse>
+            <ellipse cx="13" cy="79" rx="9" ry="7.5" fill="#C9D6BE" opacity=".45"></ellipse>
+            <path d="M -5 56 C 20 48, 34 66, 54 58 S 90 41, 108 49" fill="none" stroke="#B9CEDC" stroke-width="3.2" stroke-linecap="round" opacity=".6"></path>
+            <rect x="30" y="11" width="16" height="12" rx="2" fill="#1B1917" opacity=".045"></rect>
+            <rect x="59" y="65" width="19" height="17" rx="2" fill="#1B1917" opacity=".045"></rect>
+            <rect x="45" y="33" width="11" height="9" rx="2" fill="#1B1917" opacity=".045"></rect>
+            <path d="M -5 30 Q 35 21 60 33 T 108 25" fill="none" stroke="#D9D2C4" stroke-width="1.7" stroke-linecap="round"></path>
+            <path d="M 40 -5 Q 47 35 38 64 T 45 108" fill="none" stroke="#D9D2C4" stroke-width="1.7" stroke-linecap="round"></path>
+            <path d="M -5 75 Q 40 83 70 72 T 108 79" fill="none" stroke="#D9D2C4" stroke-width="1.3" stroke-linecap="round"></path>
+          </svg>
+          <div aria-hidden="true" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,transparent 55%,rgba(27,25,23,.055) 100%);"></div>
+          <span aria-hidden="true" style="position:absolute;left:12px;top:10px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8A847C;">Elbasan</span>
+
+          <sc-if value="{{ heatLayerShow }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ heatBlobs }}" as="b" hint-placeholder-count="8">
+              <div class="harta-heat-blob" style="left:{{ b.left }};top:{{ b.top }};width:{{ b.size }};height:{{ b.size }};background:{{ b.bg }};"></div>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ pinsLayerShow }}" hint-placeholder-val="{{ true }}">
+            <sc-for list="{{ pins }}" as="p" hint-placeholder-count="24">
+              <button type="button" onClick="{{ p.onClick }}" class="tap harta-pin" style="left:{{ p.left }};top:{{ p.top }};" title="{{ p.title }}" aria-label="{{ p.title }}">
+                <svg width="22" height="28" viewBox="0 0 30 38" fill="none"><path d="M15 1c7.7 0 14 6.2 14 14 0 10-14 22-14 22S1 25 1 15C1 7.2 7.3 1 15 1z" fill="{{ p.color }}" stroke="#1B1917" stroke-width="1"></path><circle cx="15" cy="15" r="5" fill="#FBFAF8"></circle></svg>
+              </button>
+            </sc-for>
+            <sc-for list="{{ clusters }}" as="c" hint-placeholder-count="8">
+              <button type="button" onClick="{{ c.onClick }}" class="tap harta-cluster" style="left:{{ c.left }};top:{{ c.top }};" title="{{ c.title }}">
+                <span class="harta-cluster-badge" style="width:{{ c.size }};height:{{ c.size }};">
+                  <svg class="harta-cluster-ring" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="17" fill="#FBFAF8" stroke="#E4DFD6" stroke-width="2"></circle>
+                    <sc-for list="{{ c.ring }}" as="seg" hint-placeholder-count="6">
+                      <circle cx="20" cy="20" r="17" fill="none" stroke="{{ seg.color }}" stroke-width="4.5" pathLength="100" stroke-dasharray="{{ seg.dasharray }}" stroke-dashoffset="{{ seg.dashoffset }}" transform="rotate(-90 20 20)"></circle>
+                    </sc-for>
+                  </svg>
+                  <span class="harta-cluster-count" style="font-size:{{ c.fontSize }};">{{ c.count }}</span>
+                </span>
+                <span class="harta-cluster-label">{{ c.zoneLabel }}</span>
+              </button>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ drawOverlayShow }}" hint-placeholder-val="{{ false }}">
+            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;pointer-events:none;">
+              <sc-if value="{{ drawPolylineShow }}" hint-placeholder-val="{{ false }}">
+                <polyline points="{{ drawPointsStr }}" fill="none" stroke="#C23B31" stroke-width="0.6" vector-effect="non-scaling-stroke"></polyline>
+              </sc-if>
+              <sc-for list="{{ drawDots }}" as="d" hint-placeholder-count="8">
+                <circle cx="{{ d.cx }}" cy="{{ d.cy }}" r="0.9" fill="#C23B31"></circle>
+              </sc-for>
+            </svg>
+          </sc-if>
+
+          <sc-if value="{{ customPolygonShow }}" hint-placeholder-val="{{ false }}">
+            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;pointer-events:none;">
+              <polygon points="{{ customPolygonStr }}" fill="rgba(194,59,49,.12)" stroke="#C23B31" stroke-width="0.6" vector-effect="non-scaling-stroke"></polygon>
+            </svg>
+          </sc-if>
+        </div>
+
+        <div class="harta-zoom-float" onClick="{{ onZoomWrapClick }}">
+          <span class="harta-zoom-float-label">{{ zoomLabel }}</span>
+          <div class="harta-zoom-float-pill">
+            <button type="button" onClick="{{ onZoomIn }}" class="tap harta-zoom-float-btn {{ zoomInDisabledClass }}" aria-label="Zmadho">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <div class="harta-zoom-float-divider"></div>
+            <button type="button" onClick="{{ onZoomOut }}" class="tap harta-zoom-float-btn {{ zoomOutDisabledClass }}" aria-label="Largohu">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{ drawBannerShow }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:12px;top:12px;padding:7px 12px;background:#1B1917;color:#F5F2ED;border-radius:999px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;">Kliko në hartë për të shtuar pika ({{ drawPointCount }})</div>
+        </sc-if>
+
+        <sc-if value="{{ sidePanelShow }}" hint-placeholder-val="{{ false }}">
+          <div class="harta-side-panel">
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 10px 0;">
+              <button type="button" onClick="{{ onCloseSidePanel }}" class="tap" style="border:0;background:transparent;color:#8A847C;padding:4px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+              </button>
+            </div>
+
+            <sc-if value="{{ sidePanelIsReport }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:0 18px 18px;">
+                <span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:#6B665F;">{{ sidePanelReport.id }}</span>
+                <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:15px;color:#1B1917;line-height:1.3;">{{ sidePanelReport.title }}</div>
+                <div style="margin-top:4px;display:flex;align-items:center;gap:4px;font-family:'Barlow',sans-serif;font-size:12px;color:#6B665F;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{{ sidePanelReport.zone }} · {{ sidePanelReport.address }}</div>
+
+                <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">
+                  <span class="status-pill" style="background:{{ sidePanelReport.statusBg }};color:{{ sidePanelReport.statusInk }};"><span class="status-dot" style="background:{{ sidePanelReport.statusDot }};"></span>{{ sidePanelReport.status }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:{{ sidePanelReport.priorityColor }};"><span class="status-dot" style="background:{{ sidePanelReport.priorityColor }};"></span>{{ sidePanelReport.priority }}</span>
+                </div>
+
+                <div style="margin-top:12px;padding-top:10px;border-top:1px solid #EFEAE2;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">
+                  <div style="color:#8A847C;font-size:11px;font-weight:700;margin-bottom:3px;">Departamenti</div>
+                  {{ sidePanelReport.department }} · {{ sidePanelReport.responsible }}
+                </div>
+                <div style="margin-top:10px;font-family:'Barlow',sans-serif;font-size:13px;">
+                  <div style="color:#8A847C;font-size:11px;font-weight:700;margin-bottom:3px;">SLA</div>
+                  <span class="tabular-nums" style="font-weight:700;color:{{ sidePanelReport.slaColor }};">{{ sidePanelReport.sla }}</span>
+                </div>
+
+                <div style="margin-top:10px;padding-top:10px;border-top:1px solid #EFEAE2;font-family:'Barlow',sans-serif;font-size:12px;color:#4A4640;line-height:1.5;">"{{ sidePanelReport.description }}"</div>
+
+                <img src="{{ sidePanelReport.photo }}" alt="" style="margin-top:10px;width:100%;height:110px;object-fit:cover;border-radius:10px;display:block;">
+
+                <div style="margin-top:8px;font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">Raportuar: {{ sidePanelReport.submittedLabel }}</div>
+
+                <a href="Raporti.dc.html" onClick="{{ sidePanelReport.onOpen }}" class="tap staff-btn-primary" style="margin-top:12px;display:block;text-align:center;padding:9px 10px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;">Shiko raportin →</a>
+
+                <sc-if value="{{ nearbyShow }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #EFEAE2;">
+                    <div class="filter-group-title">Raporte pranë këtij problemi ({{ nearby.length }})</div>
+                    <sc-for list="{{ nearby }}" as="n" hint-placeholder-count="4">
+                      <a href="Raporti.dc.html" onClick="{{ n.onClick }}" class="tap harta-nearby-row">
+                        <span class="tabular-nums" style="flex:0 0 auto;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;color:#6B665F;">{{ n.id }}</span>
+                        <span style="min-width:0;font-family:'Barlow',sans-serif;font-size:12px;color:#1B1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.title }}</span>
+                      </a>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sidePanelIsCluster }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:0 18px 18px;">
+                <div class="tabular-nums" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;color:#1B1917;line-height:1;">{{ sidePanelCluster.count }} raporte</div>
+                <div style="margin-top:4px;font-family:'Barlow',sans-serif;font-size:13px;color:#6B665F;">{{ sidePanelCluster.label }}</div>
+
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid #EFEAE2;">
+                  <sc-for list="{{ sidePanelCluster.breakdown }}" as="b" hint-placeholder-count="6">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 2px;">
+                      <span style="display:flex;align-items:center;gap:7px;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:{{ b.color }};"></span>{{ b.label }}</span>
+                      <span class="tabular-nums" style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:#1B1917;">{{ b.count }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <a href="Raportet.dc.html" onClick="{{ sidePanelCluster.onViewList }}" class="tap staff-btn-primary" style="margin-top:14px;display:block;text-align:center;padding:9px 10px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;">Shiko listën →</a>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  state = {
+    filtersOpen: true,
+    filters: {
+      statuses: [], priorities: [], categories: [], departments: [], zones: [],
+      slaStates: [], flags: [], unassigned: false,
+      periodPreset: '', periodFrom: '', periodTo: '',
+    },
+    layer: 'raporte',
+    layersMenuOpen: false,
+    zoom: 2,
+    selectedId: null,
+    selectedClusterKey: null,
+    zonaMode: 'all',
+    drawMode: false,
+    drawPoints: [],
+    customPolygon: null,
+    comparePeriod: false,
+    overrides: {},
+  };
+
+  componentDidMount() {
+    let overrides = {};
+    try { overrides = JSON.parse(window.localStorage.getItem('sinjal_case_overrides') || '{}'); } catch (e) {}
+    const patch = { overrides: overrides };
+    // one-shot deep link from Performanca: { zones, categories, departments }
+    let focus = null;
+    try { focus = JSON.parse(window.localStorage.getItem('sinjal_harta_focus') || 'null'); window.localStorage.removeItem('sinjal_harta_focus'); } catch (e) {}
+    if (focus) {
+      patch.filters = Object.assign({}, this.state.filters, {
+        zones: focus.zones || [], categories: focus.categories || [], departments: focus.departments || [],
+      });
+      patch.filtersOpen = true;
+      if (focus.zones && focus.zones.length) patch.zoom = 3;
+    }
+    this.setState(patch);
+  }
+
+  _select(id) {
+    return () => { try { window.localStorage.setItem('sinjal_selected_report', id); } catch (e) {} };
+  }
+  _filterLink(f) {
+    return () => { try { window.localStorage.setItem('sinjal_incoming_filter', JSON.stringify(f)); } catch (e) {} };
+  }
+  _toggleFilters() { this.setState({ filtersOpen: !this.state.filtersOpen }); }
+  _setFilters(patch) { this.setState({ filters: Object.assign({}, this.state.filters, patch) }); }
+  _toggleInList(key, value) {
+    const cur = this.state.filters[key] || [];
+    const next = cur.indexOf(value) === -1 ? cur.concat([value]) : cur.filter((v) => v !== value);
+    this._setFilters({ [key]: next });
+  }
+  _toggleFlag(value) { this._toggleInList('flags', value); }
+  _clearAllFilters() {
+    this.setState({
+      filters: { statuses: [], priorities: [], categories: [], departments: [], zones: [], slaStates: [], flags: [], unassigned: false, periodPreset: '', periodFrom: '', periodTo: '' },
+      zonaMode: 'all', customPolygon: null, drawMode: false, drawPoints: [], comparePeriod: false,
+    });
+  }
+  _setLayer(l) { this.setState({ layer: l, layersMenuOpen: false }); }
+  _toggleLayersMenu() { this.setState({ layersMenuOpen: !this.state.layersMenuOpen }); }
+  _setZoom(z) { this.setState({ zoom: Math.max(1, Math.min(3, z)) }); }
+  _zoomIn() { this._setZoom(this.state.zoom + 1); }
+  _zoomOut() { this._setZoom(this.state.zoom - 1); }
+  _onWheel(e) {
+    e.preventDefault();
+    const now = Date.now();
+    if (this._lastWheelAt && now - this._lastWheelAt < 350) return;
+    this._lastWheelAt = now;
+    if (e.deltaY < 0) this._zoomIn(); else if (e.deltaY > 0) this._zoomOut();
+  }
+  _onMapDoubleClick() { if (!this.state.drawMode) this._zoomIn(); }
+  _selectReport(id) { this.setState({ selectedId: id, selectedClusterKey: null }); }
+  _selectCluster(key, zoomTo) { this.setState({ selectedClusterKey: key, selectedId: null, zoom: Math.max(this.state.zoom, zoomTo || this.state.zoom) }); }
+  _closeSidePanel() { this.setState({ selectedId: null, selectedClusterKey: null }); }
+  _setZonaMode(mode) {
+    if (mode === 'all') this.setState({ zonaMode: 'all', filters: Object.assign({}, this.state.filters, { zones: [] }), customPolygon: null, drawMode: false, drawPoints: [] });
+    else if (mode === 'lagje') this.setState({ zonaMode: 'lagje', customPolygon: null, drawMode: false, drawPoints: [] });
+    else this.setState({ zonaMode: 'custom' });
+  }
+  _startDraw() { this.setState({ drawMode: true, drawPoints: [], customPolygon: null }); }
+  _cancelDraw() { this.setState({ drawMode: false, drawPoints: [] }); }
+  _finishDraw() {
+    if (this.state.drawPoints.length < 3) return;
+    this.setState({ customPolygon: this.state.drawPoints.slice(), drawMode: false, drawPoints: [] });
+  }
+  _clearCustomZone() { this.setState({ customPolygon: null, zonaMode: 'all' }); }
+  _addVertex(e) {
+    if (!this.state.drawMode) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    this.setState({ drawPoints: this.state.drawPoints.concat([{ x: x, y: y }]) });
+  }
+  _toggleCompare() { this.setState({ comparePeriod: !this.state.comparePeriod }); }
+
+  renderVals() {
+    const S = window.SINJAL;
+    const reports = (S && S.reports) || [];
+    const NOW = (S && S.now) || new Date();
+    const f = this.state.filters;
+    const overrides = this.state.overrides;
+
+    const all = reports.map((r) => {
+      const ov = overrides[r.id] || {};
+      const eff = Object.assign({}, r, ov);
+      return Object.assign({}, eff, {
+        baseId: r.id,
+        departmentName: S.deptName(eff.department),
+        routingChanged: r.ai.suggestedDepartment !== S.deptName(eff.department),
+      });
+    });
+
+    const zoneCoords = S.zoneCoords || {};
+    const hashOf = (str) => { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; };
+    const pinXY = (r) => {
+      const base = zoneCoords[r.zone] || { x: 50, y: 50 };
+      const angle = (hashOf(r.id + 'a') % 360) * (Math.PI / 180);
+      const radius = 4 + (hashOf(r.id + 'r') % 100) / 100 * 6;
+      const x = Math.min(95, Math.max(5, base.x + Math.cos(angle) * radius));
+      const y = Math.min(93, Math.max(6, base.y + Math.sin(angle) * radius * 1.85));
+      return { x: x, y: y };
+    };
+
+    const autoAssigned = (r) => !!r.responsible && r.ai.confidence >= 80 && !r.routingChanged;
+    const flagTest = {
+      reappeared: (r) => r.reappeared,
+      duplicateCandidate: (r) => !!r.duplicateCandidateId,
+      lowConfidence: (r) => r.ai.confidence < 60,
+      routingChanged: (r) => r.routingChanged,
+      autoAssigned: autoAssigned,
+    };
+    const slaTest = {
+      onTrack: (r) => r.slaRemainingHours !== null && !r.slaAtRisk && !r.slaBreached,
+      atRisk: (r) => r.slaAtRisk,
+      breached: (r) => r.slaBreached,
+    };
+    const inPreset = (d, preset, fromStr, toStr) => {
+      if (!preset) return true;
+      if (preset === 'today') return d.getFullYear() === NOW.getFullYear() && d.getMonth() === NOW.getMonth() && d.getDate() === NOW.getDate();
+      if (preset === '7d') { const start = new Date(NOW); start.setDate(start.getDate() - 7); return d >= start; }
+      if (preset === '30d') { const start = new Date(NOW); start.setDate(start.getDate() - 30); return d >= start; }
+      if (preset === '3m') { const start = new Date(NOW); start.setMonth(start.getMonth() - 3); return d >= start; }
+      if (preset === 'custom') {
+        if (fromStr && d < new Date(fromStr + 'T00:00:00')) return false;
+        if (toStr && d > new Date(toStr + 'T23:59:59')) return false;
+        return true;
+      }
+      return true;
+    };
+
+    const customPolygon = this.state.customPolygon;
+    const pointInPolygon = (pt, poly) => {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i].x, yi = poly[i].y, xj = poly[j].x, yj = poly[j].y;
+        const intersect = ((yi > pt.y) !== (yj > pt.y)) && (pt.x < (xj - xi) * (pt.y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    };
+
+    const filtered = all.filter((r) => {
+      if (f.statuses.length && f.statuses.indexOf(r.status) === -1) return false;
+      if (f.priorities.length && f.priorities.indexOf(r.priority) === -1) return false;
+      if (f.categories.length && f.categories.indexOf(r.category) === -1) return false;
+      if (f.departments.length && f.departments.indexOf(r.department) === -1) return false;
+      if (f.zones.length && f.zones.indexOf(r.zone) === -1) return false;
+      if (f.slaStates.length && !f.slaStates.some((s) => slaTest[s] && slaTest[s](r))) return false;
+      if (f.flags.length && !f.flags.some((fl) => flagTest[fl] && flagTest[fl](r))) return false;
+      if (f.unassigned && (r.responsible || r.status === 'Dublikatë' || r.status === 'Refuzuar')) return false;
+      if (f.periodPreset && !inPreset(r.submittedAt, f.periodPreset, f.periodFrom, f.periodTo)) return false;
+      if (customPolygon && customPolygon.length >= 3 && !pointInPolygon(pinXY(r), customPolygon)) return false;
+      return true;
+    });
+
+    // Map tiers use the app-wide status vocabulary (S.tone / S.statusMeta),
+    // so a pin is the same colour as that case's status pill everywhere else.
+    const T = S.tone;
+    const TIER_COLORS = { reappeared: T.reappeared, urgent: T.critical, new: T.fresh, progress: T.warning, resolved: T.success, review: T.pending };
+    const TIER_LABELS = { urgent: 'Urgjente / SLA në rrezik', new: 'Të reja', progress: 'Në punë / në pritje', resolved: 'Zgjidhura', reappeared: 'Rishfaqur', review: 'Në shqyrtim / caktuar' };
+    const TIER_ORDER = ['urgent', 'progress', 'new', 'review', 'resolved', 'reappeared'];
+    const mapTierKey = (r) => {
+      if (r.reappeared) return 'reappeared';
+      if (r.slaBreached || r.priority === 'Urgjente') return 'urgent';
+      return (S.statusMeta[r.status] || {}).tier || 'review';
+    };
+    const DEPT_COLORS = { infra: '#B5533E', sherbime: '#3B6FA8', mjedis: '#4E8C5B', ndricim: '#C9932B', uje: '#6B5CA5' };
+    const layer = this.state.layer;
+    const pinColor = (r) => {
+      if (layer === 'departamentet') return DEPT_COLORS[r.department] || '#6B665F';
+      if (layer === 'sla') {
+        if (r.slaBreached) return '#C23B31';
+        if (r.slaAtRisk) return '#B8860B';
+        return r.slaRemainingHours === null ? '#8A847C' : '#2E7D4F';
+      }
+      return TIER_COLORS[mapTierKey(r)];
+    };
+
+    let legendItems = [];
+    if (layer === 'departamentet') {
+      legendItems = S.departments.map((d) => ({ color: DEPT_COLORS[d.id] || '#6B665F', label: d.name, count: filtered.filter((r) => r.department === d.id).length }));
+    } else if (layer === 'sla') {
+      legendItems = [
+        { color: '#C23B31', label: 'Tejkaluar', count: filtered.filter((r) => r.slaBreached).length },
+        { color: '#B8860B', label: 'Në rrezik', count: filtered.filter((r) => r.slaAtRisk).length },
+        { color: '#2E7D4F', label: 'Brenda afatit', count: filtered.filter((r) => r.slaRemainingHours !== null && !r.slaAtRisk && !r.slaBreached).length },
+      ];
+    } else if (layer !== 'intensiteti') {
+      legendItems = TIER_ORDER.map((k) => ({ color: TIER_COLORS[k], label: TIER_LABELS[k], count: filtered.filter((r) => mapTierKey(r) === k).length }));
+    }
+
+    const zoom = this.state.zoom;
+    const heatLayerShow = layer === 'intensiteti';
+    const pinsLayerShow = !heatLayerShow;
+
+    // A cluster marker is a small donut: one arc per color group present in
+    // the group, sized to that group's share — so "10 raporte" reads as,
+    // say, a mostly-red ring (urgent-heavy) at a glance, instead of a flat
+    // number that hides what's actually grouped there. It groups by
+    // pinColor(r), the same function that colors individual pins, so the
+    // ring always matches whichever layer (status tier / department / SLA)
+    // is active rather than being locked to one scheme. Built with the SVG
+    // pathLength=100 trick (same points-string-through-a-hole pattern
+    // already used for the draw-a-zone polygon below).
+    const clusterRing = (list) => {
+      const byColor = {}; const order = [];
+      list.forEach((r) => { const c = pinColor(r); if (!byColor[c]) { byColor[c] = 0; order.push(c); } byColor[c]++; });
+      const total = list.length || 1;
+      let acc = 0;
+      return order.map((c) => {
+        const pct = (byColor[c] / total) * 100;
+        const seg = { color: c, dasharray: pct.toFixed(2) + ' 100', dashoffset: (-acc).toFixed(2) };
+        acc += pct;
+        return seg;
+      });
+    };
+    const clusterFontSize = (sizePx) => Math.max(12, Math.min(20, Math.round(sizePx * 0.32))) + 'px';
+
+    let pins = [];
+    let clusters = [];
+    if (pinsLayerShow) {
+      if (zoom >= 3) {
+        pins = filtered.map((r) => {
+          const xy = pinXY(r);
+          return { left: xy.x.toFixed(1) + '%', top: xy.y.toFixed(1) + '%', color: pinColor(r), title: r.displayId + ' · ' + r.title, onClick: () => this._selectReport(r.baseId) };
+        });
+      } else if (zoom === 2) {
+        const byZone = {};
+        filtered.forEach((r) => { (byZone[r.zone] = byZone[r.zone] || []).push(r); });
+        Object.keys(byZone).forEach((zone) => {
+          const list = byZone[zone];
+          if (list.length === 1) {
+            const r = list[0]; const xy = pinXY(r);
+            pins.push({ left: xy.x.toFixed(1) + '%', top: xy.y.toFixed(1) + '%', color: pinColor(r), title: r.displayId + ' · ' + r.title, onClick: () => this._selectReport(r.baseId) });
+          } else {
+            const coord = zoneCoords[zone] || { x: 50, y: 50 };
+            const size = Math.min(78, 46 + Math.round(Math.sqrt(list.length) * 7));
+            const key = 'zone:' + zone;
+            clusters.push({
+              key: key, left: coord.x + '%', top: coord.y + '%', size: size + 'px', fontSize: clusterFontSize(size),
+              count: list.length, zoneLabel: zone, title: list.length + ' raporte · ' + zone,
+              ring: clusterRing(list), onClick: () => this._selectCluster(key, 3),
+            });
+          }
+        });
+      } else {
+        if (filtered.length > 0) {
+          let sx = 0, sy = 0;
+          filtered.forEach((r) => { const c = zoneCoords[r.zone] || { x: 50, y: 50 }; sx += c.x; sy += c.y; });
+          const cx = sx / filtered.length, cy = sy / filtered.length;
+          const size = Math.min(96, 56 + Math.round(Math.sqrt(filtered.length) * 6));
+          clusters.push({
+            key: 'city', left: cx + '%', top: cy + '%', size: size + 'px', fontSize: clusterFontSize(size),
+            count: filtered.length, zoneLabel: 'Elbasan', title: filtered.length + ' raporte · Elbasan',
+            ring: clusterRing(filtered), onClick: () => this._selectCluster('city', 2),
+          });
+        }
+      }
+    }
+
+    let heatBlobs = [];
+    if (heatLayerShow) {
+      const severity = (r) => (S.priorityMeta[r.priority] ? S.priorityMeta[r.priority].weight : 0) + (r.slaBreached ? 2 : 0) + (r.slaAtRisk ? 1 : 0) + 1;
+      const scores = {};
+      S.zones.forEach((z) => { scores[z] = 0; });
+      filtered.forEach((r) => { scores[r.zone] = (scores[r.zone] || 0) + severity(r); });
+      const maxScore = Math.max(1, Math.max.apply(null, S.zones.map((z) => scores[z])));
+      heatBlobs = S.zones.filter((z) => scores[z] > 0).map((z) => {
+        const t = scores[z] / maxScore;
+        const coord = zoneCoords[z] || { x: 50, y: 50 };
+        const size = Math.round(20 + t * 36);
+        const alpha = (0.18 + t * 0.5).toFixed(2);
+        return { left: coord.x + '%', top: coord.y + '%', size: size + '%', bg: 'radial-gradient(circle, rgba(194,59,49,' + alpha + ') 0%, rgba(194,59,49,0) 70%)' };
+      });
+    }
+
+    const zoomLabels = { 1: 'Qyteti', 2: 'Zonat', 3: 'Detaje' };
+    const zoomLabel = zoomLabels[zoom] || '';
+    const zoomInDisabledClass = zoom >= 3 ? 'is-disabled' : '';
+    const zoomOutDisabledClass = zoom <= 1 ? 'is-disabled' : '';
+    const mapScale = zoom === 1 ? 1 : (zoom === 2 ? 1.05 : 1.1);
+    const mapTransform = 'scale(' + mapScale + ')';
+
+    const mkGroup = (key, options) => options.map((o) => {
+      const isOn = (f[key] || []).indexOf(o.value) !== -1;
+      return { value: o.value, label: o.label, isOn: isOn, onClass: isOn ? 'is-on' : '', onClick: () => this._toggleInList(key, o.value) };
+    });
+
+    const statusItems = [
+      { value: 'I ri', label: 'Të reja' },
+      { value: 'Në shqyrtim', label: 'Në shqyrtim' },
+      { value: 'Në punë', label: 'Në punë' },
+      { value: 'Zgjidhur', label: 'Zgjidhur' },
+      { value: 'Mbyllur', label: 'Mbyllur' },
+    ].map((o) => { const isOn = f.statuses.indexOf(o.value) !== -1; return { value: o.value, label: o.label, isOn: isOn, onClass: isOn ? 'is-on' : '', onClick: () => this._toggleInList('statuses', o.value) }; });
+    const reappearedOn = f.flags.indexOf('reappeared') !== -1;
+    statusItems.push({ value: 'reappeared', label: 'Rishfaqur', isOn: reappearedOn, onClass: reappearedOn ? 'is-on' : '', onClick: () => this._toggleFlag('reappeared') });
+    statusItems.push({ value: 'unassigned', label: 'Pa caktuar', isOn: f.unassigned, onClass: f.unassigned ? 'is-on' : '', onClick: () => this._setFilters({ unassigned: !f.unassigned }) });
+
+    const priorityItems = mkGroup('priorities', S.priorityOrder.map((p) => ({ value: p, label: p })));
+    const departmentItems = mkGroup('departments', S.departments.map((d) => ({ value: d.id, label: d.name })));
+    const catSource = f.departments.length ? S.categories.filter((c) => f.departments.indexOf(c.dept) !== -1) : S.categories;
+    const categoryItems = mkGroup('categories', catSource.map((c) => ({ value: c.id, label: c.label })));
+    const slaItems = mkGroup('slaStates', [{ value: 'onTrack', label: 'Brenda afatit' }, { value: 'atRisk', label: 'Në rrezik' }, { value: 'breached', label: 'Tejkaluar' }]);
+
+    const automationDefs = [
+      { value: 'autoAssigned', label: 'Caktuar automatikisht' },
+      { value: 'routingChanged', label: 'Rishpërndarë nga stafi' },
+      { value: 'duplicateCandidate', label: 'Dublikatë e mundshme' },
+      { value: 'lowConfidence', label: 'Kërkon shqyrtim njerëzor' },
+      { value: 'reappeared', label: 'Rishfaqur' },
+    ];
+    const automationItems = automationDefs.map((o) => { const isOn = f.flags.indexOf(o.value) !== -1; return { value: o.value, label: o.label, isOn: isOn, onClass: isOn ? 'is-on' : '', onClick: () => this._toggleFlag(o.value) }; });
+
+    const periodPresets = [
+      { value: '', label: 'Gjithmonë' },
+      { value: 'today', label: 'Sot' },
+      { value: '7d', label: '7 ditë' },
+      { value: '30d', label: '30 ditë' },
+      { value: '3m', label: '3 muaj' },
+      { value: 'custom', label: 'Personalizuar' },
+    ].map((o) => ({ value: o.value, label: o.label, onClass: f.periodPreset === o.value ? 'is-on' : '', onClick: () => this._setFilters({ periodPreset: o.value }) }));
+
+    const zonaModes = [
+      { value: 'all', label: 'Gjithë qyteti' },
+      { value: 'lagje', label: 'Lagjja' },
+      { value: 'custom', label: 'Zonë e personalizuar' },
+    ].map((o) => ({ value: o.value, label: o.label, onClass: this.state.zonaMode === o.value ? 'is-on' : '', onClick: () => this._setZonaMode(o.value) }));
+    const zoneItems = mkGroup('zones', S.zones.map((z) => ({ value: z, label: z })));
+
+    const drawMode = this.state.drawMode;
+    const drawPoints = this.state.drawPoints;
+    const drawPointsStr = drawPoints.map((p) => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    const drawDots = drawPoints.map((p) => ({ cx: p.x.toFixed(1), cy: p.y.toFixed(1) }));
+    const customPolygonStr = customPolygon ? customPolygon.map((p) => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ') : '';
+
+    const activeFilterN = f.statuses.length + f.priorities.length + f.categories.length + f.departments.length + f.zones.length + f.slaStates.length + f.flags.length + (f.unassigned ? 1 : 0) + (f.periodPreset ? 1 : 0) + (customPolygon ? 1 : 0);
+
+    const summary = {
+      total: filtered.length,
+      progress: filtered.filter((r) => r.status === 'Në punë' || r.status === 'Caktuar').length,
+      urgent: filtered.filter((r) => r.priority === 'Urgjente').length,
+      slaRisk: filtered.filter((r) => r.slaAtRisk || r.slaBreached).length,
+      resolved: filtered.filter((r) => r.status === 'Zgjidhur' || r.status === 'Mbyllur').length,
+    };
+
+    let compare = { show: false, hasData: false, text: '', color: '#8A847C' };
+    if (this.state.comparePeriod && f.periodPreset && f.periodPreset !== 'custom') {
+      const spanMs = { today: 86400000, '7d': 7 * 86400000, '30d': 30 * 86400000, '3m': 90 * 86400000 }[f.periodPreset] || 0;
+      if (spanMs) {
+        const curStart = new Date(NOW.getTime() - spanMs);
+        const prevStart = new Date(NOW.getTime() - spanMs * 2);
+        const curCount = all.filter((r) => r.submittedAt >= curStart && r.submittedAt <= NOW).length;
+        const prevCount = all.filter((r) => r.submittedAt >= prevStart && r.submittedAt < curStart).length;
+        if (prevCount > 0) {
+          const pct = Math.round(((curCount - prevCount) / prevCount) * 100);
+          compare = { show: true, hasData: true, text: (pct >= 0 ? '+' : '') + pct + '% raporte krahasuar me periudhën e mëparshme', color: pct > 0 ? '#C23B31' : (pct < 0 ? '#2E7D4F' : '#6B665F') };
+        } else {
+          compare = { show: true, hasData: false, text: 'S’ka mjaftueshëm të dhëna historike për krahasim.', color: '#8A847C' };
+        }
+      }
+    }
+
+    let sidePanelShow = false, sidePanelIsReport = false, sidePanelIsCluster = false;
+    let sidePanelReport = {
+      id: '', title: '', zone: '', address: '', statusBg: '', statusInk: '', statusDot: '', status: '',
+      priority: '', priorityColor: '', department: '', responsible: '', sla: '', slaColor: '',
+      description: '', photo: '', submittedLabel: '', onOpen: () => {},
+    };
+    let sidePanelCluster = { label: '', count: 0, breakdown: [], onViewList: () => {} };
+    let nearby = [];
+    if (this.state.selectedId) {
+      const r = all.filter((x) => x.baseId === this.state.selectedId)[0];
+      if (r) {
+        sidePanelShow = true; sidePanelIsReport = true;
+        const xy = pinXY(r);
+        const near = all.filter((x) => x.baseId !== r.baseId)
+          .map((x) => ({ r: x, d: Math.sqrt(Math.pow(pinXY(x).x - xy.x, 2) + Math.pow(pinXY(x).y - xy.y, 2)) }))
+          .filter((o) => o.d <= 12).sort((a, b) => a.d - b.d).slice(0, 4);
+        nearby = near.map((n) => ({ id: n.r.displayId, title: n.r.title, onClick: this._select(n.r.baseId) }));
+        sidePanelReport = {
+          id: r.displayId, title: r.title, zone: r.zone, address: r.address,
+          statusBg: S.statusMeta[r.status].bg, statusInk: S.statusMeta[r.status].ink, statusDot: S.statusMeta[r.status].dot, status: r.status,
+          priority: r.priority, priorityColor: S.priorityMeta[r.priority].color,
+          department: r.departmentName, responsible: r.responsibleName || 'Pa caktuar',
+          sla: r.slaLabel, slaColor: r.slaBreached ? '#C23B31' : (r.slaAtRisk ? '#B8860B' : '#6B665F'),
+          description: r.description, photo: r.photo, submittedLabel: r.submittedLabel,
+          onOpen: this._select(r.baseId),
+        };
+      }
+    } else if (this.state.selectedClusterKey) {
+      const key = this.state.selectedClusterKey;
+      let list = [], label = '';
+      if (key === 'city') { list = filtered; label = 'Elbasan'; }
+      else { const zone = key.slice(5); list = filtered.filter((r) => r.zone === zone); label = zone; }
+      if (list.length > 0) {
+        sidePanelShow = true; sidePanelIsCluster = true;
+        const breakdown = TIER_ORDER.map((k) => ({ color: TIER_COLORS[k], label: TIER_LABELS[k], count: list.filter((r) => mapTierKey(r) === k).length })).filter((b) => b.count > 0);
+        sidePanelCluster = { label: label, count: list.length, breakdown: breakdown, onViewList: this._filterLink(key === 'city' ? {} : { zone: label }) };
+      }
+    }
+
+    const layers = [
+      { value: 'raporte', label: 'Raporte' },
+      { value: 'intensiteti', label: 'Intensiteti' },
+      { value: 'departamentet', label: 'Departamentet' },
+      { value: 'sla', label: 'SLA' },
+    ].map((o) => ({
+      value: o.value, label: o.label, isActive: layer === o.value, onClass: layer === o.value ? 'is-on' : '',
+      isRaporte: o.value === 'raporte', isIntensiteti: o.value === 'intensiteti', isDepartamentet: o.value === 'departamentet', isSla: o.value === 'sla',
+      onClick: () => this._setLayer(o.value),
+    }));
+
+    return {
+      filtersOpen: this.state.filtersOpen,
+      filtersClosed: !this.state.filtersOpen,
+      onToggleFilters: () => this._toggleFilters(),
+      onClearAllFilters: () => this._clearAllFilters(),
+      activeFilterBadge: { show: activeFilterN > 0, n: activeFilterN },
+
+      statusItems: statusItems,
+      priorityItems: priorityItems,
+      departmentItems: departmentItems,
+      categoryItems: categoryItems,
+      slaItems: slaItems,
+      automationItems: automationItems,
+
+      periodPresets: periodPresets,
+      periodCustomShow: f.periodPreset === 'custom',
+      periodFrom: f.periodFrom, periodTo: f.periodTo,
+      onPeriodFrom: (e) => this._setFilters({ periodFrom: e.target.value }),
+      onPeriodTo: (e) => this._setFilters({ periodTo: e.target.value }),
+      comparePeriod: this.state.comparePeriod,
+      compareClass: this.state.comparePeriod ? 'is-on' : '',
+      onToggleCompare: () => this._toggleCompare(),
+
+      zonaModes: zonaModes,
+      zonaListShow: this.state.zonaMode === 'lagje',
+      zonaDrawShow: this.state.zonaMode === 'custom',
+      zoneItems: zoneItems,
+      drawMode: drawMode,
+      drawModeOff: !drawMode,
+      drawHint: drawMode ? 'Kliko në hartë për të shtuar pika, pastaj "Përfundo zonën".' : (customPolygon ? 'Zona e personalizuar është aktive.' : 'Vizato një zonë të lirë në hartë për të filtruar raportet brenda saj.'),
+      onStartDraw: () => this._startDraw(),
+      onCancelDraw: () => this._cancelDraw(),
+      onFinishDraw: () => this._finishDraw(),
+      finishDisabledClass: drawPoints.length < 3 ? 'is-disabled' : '',
+      customZoneActiveShow: !!customPolygon,
+      onClearCustomZone: () => this._clearCustomZone(),
+
+      legendItems: legendItems,
+      zoomLabel: zoomLabel,
+      zoomInDisabledClass: zoomInDisabledClass,
+      zoomOutDisabledClass: zoomOutDisabledClass,
+      onZoomIn: () => this._zoomIn(),
+      onZoomOut: () => this._zoomOut(),
+      onZoomWrapClick: (e) => e.stopPropagation(),
+
+      mapTransform: mapTransform,
+      onMapClick: (e) => this._addVertex(e),
+      onMapWheel: (e) => this._onWheel(e),
+      onMapDoubleClick: () => this._onMapDoubleClick(),
+      heatLayerShow: heatLayerShow,
+      heatBlobs: heatBlobs,
+      pinsLayerShow: pinsLayerShow,
+      pins: pins,
+      clusters: clusters,
+      drawOverlayShow: drawMode,
+      drawPolylineShow: drawPoints.length >= 2,
+      drawPointsStr: drawPointsStr,
+      drawDots: drawDots,
+      drawPointCount: drawPoints.length,
+      drawBannerShow: drawMode,
+      customPolygonShow: !!customPolygon && customPolygon.length >= 3,
+      customPolygonStr: customPolygonStr,
+
+      layers: layers,
+      layersMenuShow: this.state.layersMenuOpen,
+      layersMenuBtnClass: this.state.layersMenuOpen ? 'is-on' : '',
+      onToggleLayersMenu: () => this._toggleLayersMenu(),
+
+      sidePanelShow: sidePanelShow,
+      sidePanelIsReport: sidePanelIsReport,
+      sidePanelIsCluster: sidePanelIsCluster,
+      sidePanelReport: sidePanelReport,
+      sidePanelCluster: sidePanelCluster,
+      nearby: nearby,
+      nearbyShow: nearby.length > 0,
+      onCloseSidePanel: () => this._closeSidePanel(),
+
+      summary: summary,
+      compare: compare,
+    };
+  }
+}
+</script>
+</body>
+</html>

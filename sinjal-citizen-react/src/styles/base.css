@@ -1,0 +1,142 @@
+/*
+ * Global base styles — the <style> block every static page shared, plus the global
+ * helpers the React port needs. Page-specific rules live in src/pages/<Name>/<Name>.css.
+ * Load order (see main.tsx): tokens.css → base.css → components → pages → responsive.css.
+ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  font-family: 'Barlow', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+* {
+  box-sizing: border-box;
+}
+/* The phone look hides scrollbars everywhere (responsive.css restores the page one for mice). */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Link defaults. Wrapped in :where() (zero specificity) on purpose: in the static site
+ * every coloured link had an inline style, which always beat a:visited / a:active. With
+ * the colours now in classes, `a:visited` (0,1,1) would beat `.my-link` (0,1,0) and turn
+ * visited links red. :where() keeps "any class wins", exactly like the inline styles did.
+ */
+:where(a),
+:where(a:visited) {
+  color: var(--c-red);
+  text-decoration: none;
+}
+:where(a:active) {
+  color: var(--c-red-dark);
+}
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--c-red);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Press feedback for tappable things. */
+.tap {
+  transition:
+    transform 0.15s var(--ease-out),
+    background 0.2s var(--ease-out);
+}
+.tap:active {
+  transform: scale(0.97);
+}
+
+@keyframes sinjal-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes sinjal-photo-drift {
+  0% {
+    transform: scale(1.08) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.14) translate(-1.6%, -1.2%);
+  }
+  100% {
+    transform: scale(1.08) translate(0, 0);
+  }
+}
+@keyframes sinjal-glow-drift {
+  0% {
+    transform: translate(-8%, -4%);
+  }
+  50% {
+    transform: translate(6%, 5%);
+  }
+  100% {
+    transform: translate(-8%, -4%);
+  }
+}
+
+/*
+ * Scroll reveal — every page fades elements up as they scroll into view.
+ * Mark an element with data-reveal="<n>" (n = stagger index) and call useReveal()
+ * (src/hooks/useReveal.ts) in the page; the hook sets data-revealed and the stagger delay.
+ * The doubled selectors keep specificity at (0,2,0) so a page class can't accidentally
+ * override the hidden state (in the static site these were inline styles). Don't set
+ * opacity/transform/transition on [data-reveal] elements in page CSS.
+ */
+[data-reveal]:not([data-revealed]) {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
+}
+[data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
+}
+
+/*
+ * Hover helpers. responsive.css darkens buttons on hover by matching their *inline*
+ * style (a.tap[style*="background:#C23B31"]). Now that backgrounds live in classes, add
+ * one of these to an element that had that inline background (on a.tap / button.tap).
+ */
+@media (hover: hover) {
+  .u-hover-red:hover {
+    background: var(--c-red-dark) !important;
+  }
+  .u-hover-ink:hover {
+    background: var(--c-ink-hover) !important;
+  }
+}
+
+/* Visually hidden but readable by screen readers. */
+.u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

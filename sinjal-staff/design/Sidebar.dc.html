@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<title>Sinjal — Nëpunësi — Sidebar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="staff.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;}</style>
+</helmet>
+<aside style="width:232px;height:900px;flex:0 0 232px;background:#1B1917;display:flex;flex-direction:column;position:relative;">
+  <a href="Main.dc.html" class="tap" style="padding:24px 20px 18px;display:block;">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <img src="{{ logoUrl }}" alt="" style="display:block;height:20px;width:auto;flex:0 0 auto;">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;letter-spacing:.01em;text-transform:uppercase;color:#F5F2ED;">Sinjal</span>
+    </div>
+    <div style="margin-top:3px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:500;letter-spacing:0;color:rgba(245,242,237,.5);">Paneli i Nëpunësit</div>
+  </a>
+  <nav style="flex:1;padding:8px 12px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;" aria-label="Navigimi kryesor">
+    <a href="Main.dc.html" class="tap staff-nav-item" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;box-shadow:{{ navKreu.shadow }};background:{{ navKreu.bg }};color:{{ navKreu.color }};font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;letter-spacing:0;" aria-current="{{ navKreu.current }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h5v-5h2v5h5v-9"/></svg>
+      Kreu
+    </a>
+    <a href="Raportet.dc.html" class="tap staff-nav-item" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;box-shadow:{{ navRaportet.shadow }};background:{{ navRaportet.bg }};color:{{ navRaportet.color }};font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;letter-spacing:0;" aria-current="{{ navRaportet.current }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg>
+      Raportet
+    </a>
+    <a href="Harta.dc.html" class="tap staff-nav-item" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;box-shadow:{{ navHarta.shadow }};background:{{ navHarta.bg }};color:{{ navHarta.color }};font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;letter-spacing:0;" aria-current="{{ navHarta.current }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>
+      Harta
+    </a>
+    <a href="Departamentet.dc.html" class="tap staff-nav-item" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;box-shadow:{{ navDepartamentet.shadow }};background:{{ navDepartamentet.bg }};color:{{ navDepartamentet.color }};font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;letter-spacing:0;" aria-current="{{ navDepartamentet.current }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18"/><line x1="9" y1="8" x2="9" y2="8.01"/><line x1="15" y1="8" x2="15" y2="8.01"/><line x1="9" y1="13" x2="9" y2="13.01"/><line x1="15" y1="13" x2="15" y2="13.01"/></svg>
+      Departamentet
+    </a>
+    <a href="Automatizimet.dc.html" class="tap staff-nav-item" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;box-shadow:{{ navAutomatizimet.shadow }};background:{{ navAutomatizimet.bg }};color:{{ navAutomatizimet.color }};font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;letter-spacing:0;" aria-current="{{ navAutomatizimet.current }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 4 14h6l-1 7 9-11h-6l1-7z"/></svg>
+      Automatizimet
+    </a>
+    <a href="Performanca.dc.html" class="tap staff-nav-item" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;box-shadow:{{ navPerformanca.shadow }};background:{{ navPerformanca.bg }};color:{{ navPerformanca.color }};font-family:'Barlow',sans-serif;font-weight:600;font-size:13px;letter-spacing:0;" aria-current="{{ navPerformanca.current }}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="12" width="3" height="8"/><rect x="10.5" y="7" width="3" height="13"/><rect x="15" y="15" width="3" height="5"/></svg>
+      Performanca
+    </a>
+  </nav>
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="panel" role="menu" style="left:12px;right:12px;bottom:76px;top:auto;width:auto;padding:6px;">
+      <div style="padding:8px 10px 10px;border-bottom:1px solid #E4DFD6;margin-bottom:4px;">
+        <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#1B1917;">Drita Kastrati</div>
+        <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#8A847C;">Shërbime Publike · Nëpunëse</div>
+      </div>
+      <button type="button" role="menuitem" onClick="{{ onCloseMenu }}" class="tap menu-row" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:0;background:transparent;border-radius:6px;text-align:left;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B665F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+        Profili
+      </button>
+      <button type="button" role="menuitem" onClick="{{ onCloseMenu }}" class="tap menu-row" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:0;background:transparent;border-radius:6px;text-align:left;font-family:'Barlow',sans-serif;font-size:13px;color:#1B1917;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B665F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.4 7.4 0 0 0 0-2l2-1.5-2-3.5-2.3.9a7.6 7.6 0 0 0-1.8-1l-.3-2.4h-4l-.3 2.4a7.6 7.6 0 0 0-1.8 1l-2.3-.9-2 3.5L6.6 11a7.4 7.4 0 0 0 0 2l-2 1.5 2 3.5 2.3-.9a7.6 7.6 0 0 0 1.8 1l.3 2.4h4l.3-2.4a7.6 7.6 0 0 0 1.8-1l2.3.9 2-3.5-2-1.5z"/></svg>
+        Cilësimet
+      </button>
+      <div style="height:1px;background:#E4DFD6;margin:4px 2px;"></div>
+      <button type="button" role="menuitem" onClick="{{ onCloseMenu }}" class="tap menu-row" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:0;background:transparent;border-radius:6px;text-align:left;font-family:'Barlow',sans-serif;font-size:13px;color:#C23B31;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C23B31" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Dil
+      </button>
+    </div>
+  </sc-if>
+  <button type="button" onClick="{{ onToggleMenu }}" aria-label="Menuja e profilit" aria-expanded="{{ menuOpenAttr }}" class="tap sidebar-profile" style="border:0;border-top:1px solid rgba(245,242,237,.1);background:{{ profileBg }};padding:16px 20px;display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;">
+    <div class="avatar-chip">DK</div>
+    <div style="min-width:0;flex:1;">
+      <div style="font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;color:#F5F2ED;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Drita K.</div>
+      <div style="font-family:'Barlow',sans-serif;font-size:11px;color:rgba(245,242,237,.5);">Nëpunëse</div>
+    </div>
+    <svg width="12" height="12" viewBox="0 0 10 10" fill="none" aria-hidden="true" style="flex:0 0 auto;transform:{{ chevron }};transition:transform .15s ease;"><path d="M1 7L5 3L9 7" stroke="rgba(245,242,237,.55)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</aside>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","default":"kreu","options":["kreu","raportet","harta","departamentet","automatizimet","performanca"]},"$preview":{"width":232,"height":900}}'>
+class Component extends DCLogic {
+  state = { menuOpen: false };
+  _state(key, active) {
+    const isActive = key === active;
+    return { bg: isActive ? '#C23B31' : 'transparent', color: isActive ? '#F5F2ED' : 'rgba(245,242,237,.65)', current: isActive ? 'page' : 'false', shadow: isActive ? '0 4px 12px rgba(194,59,49,.35)' : 'none' };
+  }
+  renderVals() {
+    const active = this.props.active || 'kreu';
+    const open = !!this.state.menuOpen;
+    return {
+      menuOpen: open,
+      menuOpenAttr: open ? 'true' : 'false',
+      chevron: open ? 'rotate(180deg)' : 'rotate(0deg)',
+      profileBg: open ? 'rgba(245,242,237,.06)' : 'transparent',
+      onToggleMenu: () => this.setState({ menuOpen: !open }),
+      onCloseMenu: () => this.setState({ menuOpen: false }),
+      logoUrl: (window.SINJAL && window.SINJAL.assets.logo) || '',
+      navKreu: this._state('kreu', active),
+      navRaportet: this._state('raportet', active),
+      navHarta: this._state('harta', active),
+      navDepartamentet: this._state('departamentet', active),
+      navAutomatizimet: this._state('automatizimet', active),
+      navPerformanca: this._state('performanca', active),
+    };
+  }
+}
+</script>
+</body>
+</html>

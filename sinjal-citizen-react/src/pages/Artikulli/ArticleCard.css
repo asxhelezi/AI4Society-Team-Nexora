@@ -1,0 +1,54 @@
+/*
+ * Write-up card (Bulletini list + "Të tjera të zgjidhura"). Moved 1:1 from the static
+ * inline styles. Tablet/desktop caption padding and title size: `.r-cards .r-card` in
+ * responsive.css (!important, so no specificity fight). The `.r-card` hover zoom on the
+ * image also comes from responsive.css.
+ */
+.artikulli-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--c-ink);
+}
+.artikulli-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.artikulli-card__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--c-paper-rgb) / 0.25);
+}
+.artikulli-card__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(var(--c-ink-rgb) / 0.86) 0%, rgb(var(--c-ink-rgb) / 0.35) 50%, rgb(var(--c-ink-rgb) / 0) 78%);
+}
+.artikulli-card__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 14px;
+}
+.artikulli-card__label {
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgb(var(--c-paper-rgb) / 0.8);
+  margin-bottom: 5px;
+}
+.artikulli-card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.08;
+  color: var(--c-paper);
+}

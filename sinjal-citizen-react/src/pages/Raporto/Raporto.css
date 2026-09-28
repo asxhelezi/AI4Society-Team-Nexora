@@ -1,0 +1,908 @@
+/*
+ * Raporto (raporto.html) — the 4-step report form. Phone-first styles, moved 1:1 out of
+ * the static page's inline style="" attributes. Tablet/desktop overrides stay in
+ * responsive.css (.r-rap, .r-rap-head, .r-rap-step, .r-rap-done, .r-cat-grid, .r-main).
+ * State-driven looks are modifier classes (--on, --open, --error, --loading…).
+ */
+
+/* ---------- Page-only element rules (the static page's <style> block) ---------- */
+:where(.raporto) button {
+  font: inherit;
+}
+:where(.raporto) input::placeholder,
+:where(.raporto) textarea::placeholder {
+  color: var(--c-muted-2);
+}
+
+/* ---------- Layout ---------- */
+/*
+ * Two classes on purpose: from 1024px .r-rap sets `column-gap: 80px` (no !important). In
+ * the static page the inline `gap:32px` beat it, so the desktop column gap really is 32px.
+ */
+.raporto .raporto-main {
+  flex: 1;
+  width: 100%;
+  padding: 36px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ---------- Shared bits ---------- */
+/* Small uppercase caption ("Kategoria", "Numri i gjurmimit"…). */
+.raporto-caption {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+}
+/* Caption row with a right-hand slot (error or counter). */
+.raporto-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+}
+.raporto-label__error {
+  color: var(--c-red);
+  font-weight: 600;
+}
+.raporto-label__meta {
+  color: var(--c-muted);
+}
+.raporto-label__count {
+  font-weight: 400;
+}
+
+.raporto-arrow {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+/* Red full-width "Vazhdo" / "Dërgo raportimin" button. */
+.raporto-next {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  background: var(--c-red);
+  color: var(--c-paper);
+  padding: 20px 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.raporto-next--spaced {
+  margin-top: 22px;
+}
+.raporto-next--submit {
+  position: relative;
+  overflow: hidden;
+}
+.raporto-next--loading {
+  cursor: progress;
+}
+.raporto-next__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--c-paper);
+  width: 0%;
+  transition: width 1s var(--ease-out);
+}
+.raporto-next__progress--on {
+  width: 100%;
+}
+
+/* Underlined red "Ndrysho" link-button. */
+.raporto-edit {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--c-red);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Text inputs and the textarea. */
+.raporto-input {
+  border: 1px solid var(--c-ink);
+  background: var(--c-card);
+  padding: 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--c-ink);
+  outline: none;
+}
+.raporto-input--grow {
+  flex: 1;
+  min-width: 0;
+}
+.raporto-input--field {
+  width: 100%;
+  transition: border-color 0.3s var(--ease-out);
+}
+.raporto-input--area {
+  resize: vertical;
+  line-height: 1.5;
+}
+.raporto-input--error {
+  border-color: var(--c-red);
+}
+
+/* ---------- Head: eyebrow, step heading, progress, back ---------- */
+.raporto-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  margin-bottom: 16px;
+}
+.raporto-eyebrow__bar {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--c-red);
+}
+.raporto-head__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.raporto-progress {
+  display: flex;
+  gap: 6px;
+  margin-top: 24px;
+}
+.raporto-progress__seg {
+  flex: 1;
+  height: 3px;
+  background: var(--c-line);
+  transition: background 0.4s var(--ease-out);
+}
+.raporto-progress__seg--done {
+  background: var(--c-ink);
+}
+.raporto-progress__seg--current {
+  background: var(--c-red);
+}
+.raporto-head__step {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+}
+.raporto-back {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  color: var(--c-muted);
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------- Steps ---------- */
+.raporto-step {
+  display: flex;
+  flex-direction: column;
+}
+.raporto-step--category {
+  gap: 9px;
+}
+.raporto-step--location {
+  gap: 20px;
+}
+.raporto-step--details,
+.raporto-step--review {
+  gap: 24px;
+}
+
+/* ---------- Step 1: categories ---------- */
+.raporto-cats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.raporto-cat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid var(--c-stone);
+  background: transparent;
+  color: var(--c-ink);
+  padding: 14px;
+  min-height: 92px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+.raporto-cat--on {
+  background: var(--c-ink);
+  color: var(--c-paper);
+  border-color: var(--c-ink);
+}
+/*
+ * Material Symbols icon (the static page's .material-symbols-outlined rule + inline size).
+ * Two classes: Google's font stylesheet (added at runtime, after the bundle) has its own
+ * `.material-symbols-outlined { font-size: 24px }`, which the inline 26px used to beat.
+ */
+.raporto-cat .raporto-cat__icon {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  color: var(--c-red);
+  transition: color 0.3s var(--ease-out);
+}
+.raporto-cat--on .raporto-cat__icon {
+  color: var(--c-paper);
+}
+.raporto-cat__name {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.raporto-subcats {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 11px;
+}
+.raporto-subcats__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.raporto-subcat {
+  border: 1px solid var(--c-stone);
+  background: transparent;
+  color: var(--c-ink);
+  padding: 11px 14px;
+  min-height: 44px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background 0.3s var(--ease-out),
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+.raporto-subcat--on {
+  background: var(--c-ink);
+  color: var(--c-paper);
+  border-color: var(--c-ink);
+}
+
+/* "Tjetër": a main category shown as a full-width bar under the 2×4 grid, with a short free-text field when picked. */
+.raporto-cat.raporto-other {
+  flex-direction: row;
+  align-items: center;
+  min-height: 56px;
+  margin-top: 1px;
+}
+.raporto-other__input {
+  width: 100%;
+  border: 1px solid var(--c-stone);
+  background: var(--c-card);
+  color: var(--c-ink);
+  padding: 11px 14px;
+  min-height: 44px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline: none;
+}
+.raporto-other__input:focus {
+  border-color: var(--c-ink);
+}
+
+/* ---------- Step 2: location ---------- */
+.raporto-loc {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.raporto-search {
+  display: flex;
+  gap: 8px;
+}
+.raporto-search__btn {
+  border: 0;
+  cursor: pointer;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  padding: 0 18px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.raporto-gps {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 14px;
+  min-height: 44px;
+  border: 1px solid var(--c-ink);
+  background: transparent;
+  color: var(--c-ink);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+}
+.raporto-geo-error {
+  font-size: 13px;
+  color: var(--c-red);
+}
+.raporto-loc__or {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-muted-2);
+  text-align: center;
+}
+
+/* Satellite picker map (#reportMap). */
+.raporto-map {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  position: relative;
+  aspect-ratio: 4/3;
+  background: #26241f;
+  border: 1px solid var(--c-ink);
+  cursor: grab;
+  overflow: hidden;
+}
+.raporto-map--dragging {
+  cursor: grabbing;
+}
+.raporto-map__grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--c-line) 1px, transparent 1px), linear-gradient(90deg, var(--c-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.raporto-map__road {
+  position: absolute;
+  background: var(--c-line);
+}
+.raporto-map__road--h {
+  left: 0;
+  top: 38%;
+  right: 0;
+  height: 9px;
+}
+.raporto-map__road--v {
+  top: 0;
+  left: 57%;
+  bottom: 0;
+  width: 9px;
+}
+.raporto-map__tiles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.raporto-map__tile {
+  position: absolute;
+  width: 257px;
+  height: 257px;
+  background-color: #26241f;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.raporto-map__zoom {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-ink);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+.raporto-map__zoom-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--c-paper);
+  font:
+    700 19px/1 'Barlow Condensed',
+    sans-serif;
+  cursor: pointer;
+}
+.raporto-map__zoom-btn--in {
+  border-bottom: 1px solid rgb(var(--c-paper-rgb) / 0.2);
+}
+.raporto-map__pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+}
+.raporto-map__gps {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgb(var(--c-red-rgb) / 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.raporto-map__gps-core {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--c-red);
+  border: 2px solid var(--c-paper);
+}
+.raporto-map__hint {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--c-muted);
+  text-transform: uppercase;
+  background: rgb(var(--c-paper-rgb) / 0.85);
+  padding: 3px 6px;
+}
+
+.raporto-address {
+  border: 1px solid var(--c-ink);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.raporto-address__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.raporto-address__text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+/* ---------- Step 3: details ---------- */
+.raporto-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.raporto-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 7px;
+}
+.raporto-photo {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--c-ink);
+}
+.raporto-photo__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.raporto-photo__remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+.raporto-photo-add {
+  aspect-ratio: 1;
+  border: 1px dashed var(--c-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--c-card);
+  position: relative;
+  box-sizing: border-box;
+  line-height: 1;
+}
+.raporto-photo-add__plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 36px;
+  text-align: center;
+}
+.raporto-photo-add__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+/* ---------- Step 4: review & send ---------- */
+.raporto-review {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.raporto-review__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e4e0d8;
+}
+.raporto-review__row--last {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.raporto-review__body--shrink {
+  min-width: 0;
+}
+.raporto-review__caption {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.raporto-review__caption--photos {
+  margin-bottom: 8px;
+}
+.raporto-review__value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.2;
+}
+.raporto-review__text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--c-ink);
+}
+.raporto-review__thumbs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.raporto-review__thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  display: block;
+}
+.raporto-review__empty {
+  font-size: 14px;
+  color: var(--c-muted-2);
+}
+
+/* Custom checkbox (the real input is visually hidden but focusable). */
+.raporto-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-height: 44px;
+  user-select: none;
+  position: relative;
+}
+.raporto-check__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.raporto-check__box {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--c-ink);
+  position: relative;
+  flex: 0 0 auto;
+  background: transparent;
+  transition: background 0.3s var(--ease-out);
+}
+.raporto-check__box--on {
+  background: var(--c-ink);
+}
+.raporto-check__mark {
+  position: absolute;
+  left: 7px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border-right: 2px solid var(--c-paper);
+  border-bottom: 2px solid var(--c-paper);
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.35s var(--ease-spring);
+}
+.raporto-check__box--on .raporto-check__mark {
+  transform: rotate(45deg) scale(1);
+}
+.raporto-check__text {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.raporto-notify {
+  display: flex;
+  flex-direction: column;
+}
+.raporto-notify__panel {
+  overflow: hidden;
+  max-height: 0px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    max-height 0.5s var(--ease-out),
+    opacity 0.4s var(--ease-out),
+    transform 0.5s var(--ease-out);
+}
+.raporto-notify__panel--open {
+  max-height: 130px;
+  opacity: 1;
+  transform: translateY(0);
+}
+.raporto-notify__inner {
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.raporto-submit-error {
+  font-size: 13px;
+  color: var(--c-red);
+  font-weight: 500;
+}
+
+/* ---------- Success ---------- */
+.raporto-done {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.raporto-done__banner {
+  border-top: 2px solid var(--c-red);
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.raporto-done__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--c-green);
+  flex: 0 0 auto;
+}
+.raporto-done__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.raporto-done__lead {
+  margin: 6px 0 0;
+  font-size: 15px;
+  color: var(--c-muted);
+}
+.raporto-done__section {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.raporto-done__note {
+  font-size: 14px;
+  color: var(--c-muted);
+}
+.raporto-done__email {
+  color: var(--c-ink);
+  font-weight: 500;
+}
+.raporto-done__link {
+  color: var(--c-red);
+}
+.raporto-code {
+  display: flex;
+  border: 2px solid var(--c-ink);
+}
+.raporto-code__value {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.raporto-code__copy {
+  border: 0;
+  cursor: pointer;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  padding: 0 18px;
+  min-width: 92px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 0.3s var(--ease-out);
+}
+.raporto-code__copy--copied {
+  background: var(--c-green);
+}
+
+.raporto-status {
+  display: flex;
+  align-items: flex-start;
+}
+.raporto-status__stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.raporto-status__track {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.raporto-status__line {
+  flex: 1;
+  height: 2px;
+  background: var(--c-line);
+}
+.raporto-status__line--hidden {
+  background: transparent;
+}
+.raporto-status__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--c-line);
+  flex: 0 0 auto;
+}
+.raporto-status__dot--on {
+  background: var(--c-red);
+}
+.raporto-status__label {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: var(--c-muted-2);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.raporto-status__label--on {
+  color: var(--c-ink);
+  font-weight: 700;
+}
+
+.raporto-done__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.raporto-done__track {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.raporto-done__reset {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 18px;
+  border: 1px solid var(--c-ink);
+  background: transparent;
+  color: var(--c-ink);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

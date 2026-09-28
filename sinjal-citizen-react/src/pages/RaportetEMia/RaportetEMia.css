@@ -1,0 +1,215 @@
+/*
+ * Raportet e mia (raportet-e-mia.html). Phone-first styles, moved 1:1 out of the static
+ * page's inline style="" attributes. All selectors are scoped under .mia (the PageFrame
+ * root) or use .mia-* classes. The desktop two-column layout comes from the r-mia* hooks
+ * in responsive.css.
+ */
+
+/* The page's <style> block had `button { font: inherit }` (scoped so it doesn't leak). */
+:where(.mia) button {
+  font: inherit;
+}
+
+/*
+ * Scoped under .mia on purpose: responsive.css sets `column-gap: 56px` on .r-mia WITHOUT
+ * !important (desktop grid), which the static page's inline `gap: 34px` beat. A single
+ * class would lose to it (responsive.css loads last).
+ */
+.mia .mia-main {
+  flex: 1;
+  width: 100%;
+  padding: 34px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+/* ---------- Heading ---------- */
+.mia-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  margin-bottom: 14px;
+}
+.mia-eyebrow__bar {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--c-red);
+}
+.mia-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 44px;
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+/* ---------- Saved list ---------- */
+.mia-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mia-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--c-line);
+  background: var(--c-card);
+  padding: 14px;
+}
+/* Stripe + badge background = the stage colour, set inline. */
+.mia-item__stripe {
+  display: block;
+  width: 5px;
+  align-self: stretch;
+  flex: 0 0 auto;
+}
+.mia-item__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mia-item__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.1;
+  color: var(--c-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mia-item__meta {
+  font-size: 12px;
+  color: var(--c-muted);
+}
+.mia-item__code {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--c-red);
+}
+.mia-item__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  color: var(--c-paper);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+.mia-clear {
+  align-self: flex-start;
+  margin-top: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--c-muted);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+/* ---------- Empty state ---------- */
+.mia-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 20px;
+  border: 1px dashed var(--c-stone);
+  background: var(--c-card);
+  text-align: center;
+  align-items: center;
+}
+.mia-empty__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--c-muted);
+  max-width: 260px;
+}
+.mia-empty__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  background: var(--c-red);
+  color: var(--c-paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mia-arrow {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+/* ---------- Track by code ---------- */
+.mia-track {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid var(--c-line);
+  padding-top: 28px;
+}
+.mia-track__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 24px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.mia-track__text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--c-muted);
+}
+.mia-track__control {
+  display: flex;
+  width: 100%;
+  margin: 4px 0 0;
+  border: 2px solid var(--c-ink);
+}
+.mia-track__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: var(--c-card);
+  padding: 15px 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--c-ink);
+  text-transform: uppercase;
+}
+.mia-track__button {
+  border: 0;
+  cursor: pointer;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  padding: 0 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

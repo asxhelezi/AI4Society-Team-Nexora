@@ -1,0 +1,579 @@
+/*
+ * Kreu (index.html). Phone-first styles, moved 1:1 out of the static page's inline
+ * style="" attributes. Tablet/desktop overrides stay in responsive.css (r-* hooks).
+ * State-driven looks are modifier classes (--in, --shown, --visible, --animated…),
+ * toggled from the components.
+ */
+
+/* ---------- Shared bits ---------- */
+.kreu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 17px 24px;
+  background: var(--c-red);
+  color: var(--c-paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kreu-button__arrow {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+.kreu-heading {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 42px;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* ---------- Hero ---------- */
+.kreu-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  padding: 132px 20px 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+.kreu-hero__photo-wrap {
+  position: absolute;
+  inset: -5%;
+  overflow: hidden;
+}
+.kreu-hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 54% 42%;
+  filter: grayscale(1) contrast(1.08) brightness(0.96);
+  transition: filter 1.5s var(--ease-out);
+}
+.kreu-hero__photo--color {
+  filter: grayscale(0) contrast(1) brightness(1);
+}
+.kreu-hero__photo--animated {
+  animation: sinjal-photo-drift 19s ease-in-out infinite;
+}
+.kreu-hero__glow {
+  position: absolute;
+  inset: -15%;
+  background: radial-gradient(closest-side, rgb(var(--c-red-rgb) / 0.32), transparent 68%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 1.5s var(--ease-out);
+  pointer-events: none;
+}
+.kreu-hero__glow--on {
+  opacity: 1;
+}
+.kreu-hero__glow--animated {
+  animation: sinjal-glow-drift 23s ease-in-out infinite;
+}
+.kreu-hero__grain {
+  position: absolute;
+  inset: 0;
+  /* 120×120 SVG fractal-noise tile */
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC44NSIgbnVtT2N0YXZlcz0iMiIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWx0ZXI9InVybCgjbikiLz48L3N2Zz4K');
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.kreu-hero__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(125% 95% at 50% 36%, transparent 42%, rgb(var(--c-ink-rgb) / 0.58) 100%);
+  pointer-events: none;
+}
+.kreu-hero__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(var(--c-ink-rgb) / 0.62) 0%, rgb(var(--c-ink-rgb) / 0.4) 45%, rgb(var(--c-ink-rgb) / 0.88) 100%);
+}
+
+.kreu-hero__text {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+.kreu-hero__intro {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
+}
+.kreu-hero__intro--shown {
+  opacity: 1;
+  transform: none;
+}
+.kreu-hero__eyebrow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.kreu-hero__eyebrow-bar {
+  display: block;
+  width: 24px;
+  height: 4px;
+  background: var(--c-red);
+}
+.kreu-hero__headline {
+  min-height: 275px;
+}
+.kreu-hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 70px;
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  opacity: 0;
+  filter: blur(6px);
+  transform: translateY(10px) scale(0.95);
+  transition:
+    opacity 0.42s var(--ease-out),
+    filter 0.42s var(--ease-out),
+    transform 0.42s var(--ease-out);
+}
+.kreu-hero__title--in {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0) scale(1);
+}
+.kreu-hero__title-part {
+  color: var(--c-paper);
+  text-shadow: none;
+}
+.kreu-hero__title-part--highlight {
+  color: var(--c-red);
+  text-shadow:
+    0 2px 14px rgba(0, 0, 0, 0.65),
+    0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.kreu-hero__title-bar {
+  margin-top: 18px;
+  width: 72px;
+  height: 4px;
+  background: var(--c-paper);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.55s var(--ease-spring);
+}
+.kreu-hero__title-bar--in {
+  transform: scaleX(1);
+}
+
+.kreu-hero__cta {
+  position: relative;
+  z-index: 2;
+  padding: 0 0 24px;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s var(--ease-spring),
+    transform 0.6s var(--ease-spring);
+}
+.kreu-hero__cta--visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Partner marquee ---------- */
+.kreu-partners {
+  position: relative;
+  z-index: 2;
+  padding: 0 0 22px;
+}
+.kreu-partners__label-wrap {
+  padding: 0 20px 10px;
+  text-align: center;
+}
+.kreu-partners__label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--c-paper-rgb) / 0.65);
+  font-weight: 600;
+}
+.kreu-partners__viewport {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.kreu-partners__track {
+  display: flex;
+  width: max-content;
+  height: 36px;
+  gap: 40px;
+  align-items: center;
+  padding: 0 20px;
+}
+.kreu-partners__track--animated {
+  animation: sinjal-marquee 26s linear infinite;
+}
+.kreu-partners__logo {
+  flex: 0 0 auto;
+  width: auto;
+  display: block;
+  /* height comes from the partner data (inline style) */
+}
+/*
+ * Tablet and up: show the three logos once, centred, instead of the marquee.
+ * (responsive.css does this with [style*="width:max-content"], an inline-style match
+ * that no longer exists in the React markup.)
+ */
+@media (min-width: 768px) {
+  .r-hero-partners .kreu-partners__track {
+    width: auto !important;
+    justify-content: center;
+    gap: 56px !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .r-hero-partners .kreu-partners__track > img:nth-child(n + 4) {
+    display: none !important;
+  }
+  .r-hero-partners .kreu-partners__track > img {
+    transform: scale(1.15);
+  }
+}
+
+/* ---------- Resolved cases (bento) ---------- */
+.kreu-solved {
+  background: var(--c-paper);
+}
+.kreu-solved__wrap {
+  padding: 44px 20px 0;
+}
+.kreu-bento {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(150px, auto);
+  gap: 10px;
+  padding-bottom: 44px;
+}
+/* Phone arrangement; responsive.css (r-b-*) re-flows it on desktop. */
+.kreu-bento__item--a {
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+}
+.kreu-bento__item--b {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+.kreu-bento__item--c {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+}
+.kreu-bento__item--count {
+  grid-column: 1 / -1;
+  grid-row: 3 / 4;
+}
+.kreu-bento__item--d {
+  grid-column: 1 / 2;
+  grid-row: 4 / 6;
+}
+.kreu-bento__item--e {
+  grid-column: 2 / 3;
+  grid-row: 4 / 5;
+}
+.kreu-bento__item--f {
+  grid-column: 2 / 3;
+  grid-row: 5 / 6;
+}
+
+.kreu-card {
+  position: relative;
+  display: block;
+  min-height: 150px;
+  overflow: hidden;
+  background: var(--c-ink);
+}
+.kreu-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.kreu-card__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(var(--c-ink-rgb) / 0.86) 0%, rgb(var(--c-ink-rgb) / 0.35) 50%, rgb(var(--c-ink-rgb) / 0) 78%);
+}
+.kreu-card__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 10px 10px;
+}
+.kreu-card__caption--tall {
+  padding: 14px 12px 12px;
+}
+.kreu-card__category {
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgb(var(--c-paper-rgb) / 0.8);
+  margin-bottom: 5px;
+}
+.kreu-card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--c-paper);
+}
+
+.kreu-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 28px 0 18px;
+}
+.kreu-counter__value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 98px;
+  line-height: 0.85;
+  color: var(--c-red);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.kreu-counter__plus {
+  font-size: 0.5em;
+  vertical-align: top;
+  line-height: 1.3;
+}
+.kreu-counter__label {
+  margin: 12px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.kreu-bento__all {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  padding: 14px 12px;
+  background: var(--c-red);
+  color: var(--c-paper);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.kreu-arrow {
+  display: flex;
+  align-items: center;
+  height: 24px;
+}
+.kreu-arrow__line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--c-paper);
+}
+.kreu-arrow__head {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--c-paper);
+  border-right: 2px solid var(--c-paper);
+  transform: rotate(45deg);
+  margin-left: -7px;
+}
+
+/* ---------- How it works ---------- */
+.kreu-how {
+  position: relative;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  overflow: hidden;
+}
+.kreu-how__grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgb(var(--c-paper-rgb) / 0.06) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--c-paper-rgb) / 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.kreu-how__square {
+  position: absolute;
+  right: -20%;
+  top: -10%;
+  width: 70vw;
+  height: 70vw;
+  border: 1px solid rgb(var(--c-red-rgb) / 0.3);
+  transform: rotate(12deg);
+  pointer-events: none;
+}
+.kreu-how__inner {
+  position: relative;
+  padding: 52px 20px;
+}
+.kreu-how__title {
+  margin: 0 0 34px;
+}
+.kreu-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.kreu-step {
+  display: flex;
+  gap: 16px;
+  border-top: 2px solid var(--c-red);
+  padding-top: 18px;
+}
+.kreu-step__icon {
+  flex: 0 0 auto;
+  margin-top: 4px;
+}
+.kreu-step__number {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 60px;
+  line-height: 0.85;
+  color: var(--c-red);
+}
+.kreu-step__title {
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.kreu-step__text {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgb(var(--c-paper-rgb) / 0.75);
+}
+.kreu-how__cta {
+  margin-top: 34px;
+}
+
+/* ---------- Track a report ---------- */
+.kreu-track {
+  background: var(--c-paper);
+  position: relative;
+}
+.kreu-track__info {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid var(--c-ink);
+  background: var(--c-paper);
+  color: var(--c-ink);
+  display: block;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 30px;
+  text-align: center;
+}
+.kreu-track__inner {
+  padding: 52px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.kreu-track__title {
+  margin: 0 0 16px;
+}
+.kreu-track__hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--c-muted);
+  max-width: 280px;
+}
+.kreu-track__form {
+  display: flex;
+  width: 100%;
+  border: 2px solid var(--c-ink);
+}
+.kreu-track__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: var(--c-paper);
+  padding: 15px 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--c-ink);
+  text-transform: uppercase;
+}
+.kreu-track__button {
+  border: 0;
+  cursor: pointer;
+  background: var(--c-ink);
+  color: var(--c-paper);
+  padding: 0 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kreu-track__mine {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.kreu-track__mine-arrow {
+  font-weight: 400;
+  letter-spacing: 0;
+}

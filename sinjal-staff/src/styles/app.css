@@ -1,0 +1,29 @@
+/* App-level additions on top of staff.css (which is the design's shared
+   stylesheet, kept verbatim). The design is a 1440×900 artboard in fixed
+   pixel sizes, so the frame is laid out at --app-w × --app-h (close to design
+   size) and scaled to fill the window; see src/lib/viewportScale.ts. */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+.app-frame {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--app-w, 100vw);
+  height: var(--app-h, 100vh);
+  transform: scale(var(--app-scale, 1));
+  transform-origin: 0 0;
+  display: flex;
+  background: #f5f2ed;
+  overflow: hidden;
+}
+
+/* Fixes on top of the design. */
+/* Harta: the layers menu (z-index 30) opened underneath the report side
+   panel (z-index 45); lift its wrapper above the map. */
+.harta-layers-wrap {
+  z-index: 50;
+}
