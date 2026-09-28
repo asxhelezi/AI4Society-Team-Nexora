@@ -4,7 +4,7 @@ import { STORAGE_KEYS, remove } from '../lib/storage';
 
 const BASE = (import.meta.env.VITE_STAFF_API_URL || '').replace(/\/$/, '');
 // With VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set, staff sign in with Supabase Auth
-// and every table is read from Supabase (supabase/schema.sql) instead of the /v1 API.
+// and every table is read from Supabase (supabase/staff-access.sql) instead of the /v1 API.
 export const SUPABASE_STAFF = import.meta.env.MODE !== 'test' &&
   !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Keep the presentation dataset visible after staff authentication. Operators

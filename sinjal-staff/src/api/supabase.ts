@@ -2,7 +2,7 @@ import { createClient, type PostgrestError } from '@supabase/supabase-js';
 import { SUPABASE_SESSION_KEY, type ApiReport, type ApiUser, type StaffSource } from './staff';
 
 // The publishable key is safe in the browser: every table has RLS and only
-// signed-in staff linked in public.users can read (see supabase/schema.sql).
+// signed-in staff with an active public.profiles row can read (see supabase/staff-access.sql).
 // Only imported when both variables are set (SUPABASE_STAFF).
 const client = createClient(import.meta.env.VITE_SUPABASE_URL as string, import.meta.env.VITE_SUPABASE_ANON_KEY as string, {
   auth: { persistSession: true, autoRefreshToken: true, storageKey: SUPABASE_SESSION_KEY },
@@ -38,9 +38,9 @@ export const supabaseSource: StaffSource = {
   async me() {
     const { data: auth } = await client.auth.getUser();
     if (!auth.user) throw new Error('Nuk ka seancë stafi.');
-    const account = check<StaffAccount | null>(await client.from('users')
+    const account = check<StaffAccount | null>(await client.from('profiles')
       .select('id, full_name, email, role, department_id')
-      .eq('auth_user_id', auth.user.id).eq('active', true).maybeSingle());
+      .eq('id', auth.user.id).eq('active', true).maybeSingle());
     if (!account) throw new Error('Kjo llogari nuk ka qasje te stafi.');
     // The sidebar profile reads the same session record the /login/ page writes.
     window.sessionStorage.setItem('sinjal_session', JSON.stringify({
@@ -59,7 +59,7 @@ export const supabaseSource: StaffSource = {
   },
 
   async users(role) {
-    let query = client.from('users').select('id, full_name, department_id, role').eq('active', true).order('full_name');
+    let query = client.from('profiles').select('id, full_name, department_id, role').eq('active', true).order('full_name');
     if (role) query = query.eq('role', role);
     return check<ApiUser[]>(await query);
   },
