@@ -60,6 +60,40 @@ functions both apps call.
   desktop's presentation mode (demo reports shown next to real ones) stays on unless you
   set `VITE_STAFF_DEMO=false`.
 
+## AI analysis
+
+The backend's AI pipeline (`app/ai_worker.py`) runs on this same database, so staff see its
+results in the Raporti AI panel and the list updates live. For every new report it:
+
+- picks the category, department, severity and spam likelihood, with a confidence and a
+  one-line rationale for staff;
+- finds a duplicate open report within about 300 m, and warns when the same problem was
+  resolved at that spot before;
+- acts on its own only when it is very sure: accepts and routes the report (confidence ≥ 90
+  and it agrees with the citizen's category), links a clear duplicate to the original, or
+  rejects obvious spam (the citizen can appeal). Everything else stays a suggestion.
+
+Every automatic action writes `report_status_history` and `audit_logs`. The limits are
+the `AI_*` variables in `.env.example`; `AI_AUTO_ACTIONS=0` turns all automatic actions off.
+
+To run it:
+
+1. Run `migrations/20260928140000_ai_worker.sql` (it adds the columns and `audit_logs`
+   table the worker uses).
+2. Get the database connection string: **Connect** (top of the dashboard) → **Session
+   pooler**, with your database password. Use the session pooler (port 5432), not the
+   transaction pooler (6543).
+3. Start the worker on any always-on host, for example a Render **Background Worker**
+   from this repository:
+   - build command: `pip install -r requirements-ai.txt`
+   - start command: `python -m app.ai_loop`
+   - environment: `DATABASE_URL` (the connection string), `AI_API_KEY`, `AI_BASE_URL`,
+     `AI_MODEL`, `AI_MOCK=0`, plus any `AI_*` limits you want to change.
+
+The worker connects with the database password, so it bypasses row-level security. Keep
+that connection string on the server, never in a `VITE_` variable. With `AI_MOCK=1` it
+runs without an AI key and returns test answers.
+
 ## Not covered yet
 
 - **Spam protection.** Cloudflare Turnstile needs a server to verify tokens, so it is not
@@ -68,4 +102,6 @@ functions both apps call.
   enabled later under Authentication → Providers.
 - **Other roles.** Only clerks use the staff app, and the login page refuses every other
   role. The database still knows the other roles, ready for their own panels.
+- **AI photo checks.** The backend checked each uploaded photo (`app/photo_check.py`).
+  Photos now go straight to Supabase Storage, so that check does not run yet.
 - **Staff photo upload.** There is no "after" photo upload from the staff side yet.

@@ -294,8 +294,13 @@ function fromApi(row: ApiReport): Report {
     slaRemainingHours: terminal ? null : remaining, slaLabel: terminal ? '—' : SINJAL.fmtSLA(remaining),
     slaBreached: !terminal && remaining < 0, slaAtRisk: !terminal && remaining >= 0 && remaining <= 4,
     citizenInitials: '—', photo: files.find((f) => f.kind === 'citizen_photo')?.url || '',
-    ai: { suggestedPriority: priorityIn[row.priority] || 'E mesme', confidence: Number(ai.confidence ?? 100), risk: 'I ulët',
-      suggestedDepartment: row.department_name || '', rationale: typeof ai.rationale === 'string' ? ai.rationale : '' },
+    // ai_analysis is written by the AI worker (app/ai_worker.py); before it runs, show the case as it stands.
+    ai: { suggestedPriority: priorityIn[String(ai.suggested_priority)] || priorityIn[row.priority] || 'E mesme',
+      confidence: Number(ai.confidence ?? 100),
+      risk: Number(ai.severity) >= 4 ? 'I lartë' : Number(ai.severity) === 3 ? 'I mesëm' : 'I ulët',
+      suggestedDepartment: typeof (ai.routed_department ?? ai.department_code) === 'string'
+        ? SINJAL.deptName(String(ai.routed_department ?? ai.department_code)) : row.department_name || '',
+      rationale: [ai.rationale, ai.recurring_alert].filter((part) => typeof part === 'string' && part).join(' ') },
     assignment: { department: department as DeptId, team: row.department_name || '', responsible,
       priority: priorityIn[row.priority] || 'E mesme', deadline: due, approved: !!row.assigned_to },
     duplicateOf: row.duplicate_of, duplicateCandidateId: null, duplicateSimilarity: null,
