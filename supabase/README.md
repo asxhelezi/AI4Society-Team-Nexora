@@ -12,11 +12,11 @@ functions both apps call.
 | Submit a report | `create_report()` checks the input, creates the `SNJ-…` tracking code and the first history row. Limited to 10 an hour per IP address. |
 | Attach photos | Upload to the private `report-photos` bucket at `<report id>/…`, allowed for one hour after submitting, max 10. Then `register_report_photo()` records it, checked against the tracking code. |
 | Track by code | `track_report()` returns the report and its timeline. Citizens cannot read the `reports` table. |
-| Public map | `list_public_reports()` returns reports from *accepted* onwards, never *submitted* or *rejected*, and without private fields. The app signs the photo paths it returns. |
+| Public map | `list_public_reports()` returns only reports that are in progress (assigned, in progress, blocked) or resolved (resolved, published), without private fields. The app signs the photo paths it returns. |
 
 | Staff action | Supabase |
 |---|---|
-| Sign in | Supabase Auth (email and password) on `/login/`. The role and department come from `profiles`. |
+| Sign in | Supabase Auth (email and password) on `/login/`. Only accounts whose `profiles` role is `clerk` can use the staff app. |
 | See reports | The `staff_reports` view, filtered by RLS: admin, clerk and municipal_authority see everything; department_authority sees their department; operative_staff sees reports assigned to them. |
 | Review, assign, change status, publish | `staff_review()`, `staff_assign()`, `staff_set_status()` and `staff_publish()`. They apply the same transitions as the old API and write `report_status_history`. Direct table writes are blocked. |
 | Live updates | The staff app subscribes to Realtime changes on `reports`. A new citizen report appears on Kreu, Raportet, Harta and Departamentet without a reload. |
@@ -24,7 +24,7 @@ functions both apps call.
 ## Setup (once)
 
 1. **Run the schema.** In the Supabase dashboard, open **SQL Editor → New query**, paste
-   the whole of `migrations/20260928120000_sinjal_schema.sql` and click **Run**. Or, with
+   each file in `migrations/` in name order and click **Run**. Or, with
    the Supabase CLI: `supabase link --project-ref <ref>` then `supabase db push`.
 2. **Turn off public sign-ups.** Go to **Authentication → Sign In / Providers → Email** and switch off
    "Allow new users to sign up". Staff accounts are created by an admin.
@@ -66,7 +66,6 @@ functions both apps call.
   checked. The rate limits in `create_report()` are the only protection for now.
 - **Google and e-Albania sign-in.** In Supabase mode the Google button is hidden. It can be
   enabled later under Authentication → Providers.
-- **Role panels.** The admin, department, managerial and field panels are not in this
-  repo. With Supabase, the office roles sign in to the staff desktop, and field staff are
-  refused on the login page.
+- **Other roles.** Only clerks use the staff app, and the login page refuses every other
+  role. The database still knows the other roles, ready for their own panels.
 - **Staff photo upload.** There is no "after" photo upload from the staff side yet.

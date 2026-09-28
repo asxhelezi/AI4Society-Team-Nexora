@@ -10,8 +10,8 @@ const BASE = (import.meta.env.VITE_STAFF_API_URL || '').replace(/\/$/, '');
 export const AUTH_REQUIRED = import.meta.env.MODE !== 'test' && import.meta.env.VITE_STAFF_REAL !== 'false';
 export const DEMO_STAFF = AUTH_REQUIRED && import.meta.env.VITE_STAFF_DEMO !== 'false';
 export const REAL_STAFF = AUTH_REQUIRED && !DEMO_STAFF;
-/** Roles that may use this desktop. With Supabase the office roles all land here (their own panels are not in this repo). */
-export const DESKTOP_ROLES = USE_SUPABASE ? ['clerk', 'admin', 'municipal_authority', 'department_authority'] : ['clerk'];
+/** Roles that may use this desktop: clerks only. */
+export const DESKTOP_ROLES = ['clerk'];
 const TOKEN_KEY = 'sinjal_staff_access';
 const REFRESH_KEY = 'sinjal_staff_refresh';
 let token = typeof window === 'undefined' ? '' :
