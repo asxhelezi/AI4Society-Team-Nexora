@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="favicon.png">
+<title>Sinjal — Njoftimet (zile)</title>
+<!--
+  SHARED COMPONENT — source: shared/layout/NotificationBell.dc.html. Do not edit an app's copy;
+  edit the source and run `node shared/layout/sync.mjs`. Lists window.SINJAL_NOTIFICATIONS
+  (normalised by SinjalLayout.notifications(); item shape in shared/layout/README.md).
+  Pages import it as the LAST child of .page-actions:
+    <dc-import name="NotificationBell" hint-size="40px,40px"></dc-import>
+-->
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="staff.css">
+<link rel="stylesheet" href="sinjal-layout.css">
+<!-- sinjal:app-data -->
+<script src="sinjal-layout.js"></script>
+<script src="i18n-dict.js"></script>
+<script src="sinjal-i18n.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>body{margin:0;}</style>
+</helmet>
+<div class="sl-bell {{ openCls }}">
+  <button type="button" onClick="{{ onToggle }}" aria-label="Njoftimet" aria-haspopup="true" aria-expanded="{{ isOpenAttr }}" class="tap sl-bell-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M9.5 20a2.5 2.5 0 0 0 5 0"/></svg>
+    <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}">
+      <span class="sl-bell-badge" aria-label="{{ unreadAria }}">{{ unreadText }}</span>
+    </sc-if>
+  </button>
+  <sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+    <div class="sl-bell-panel" role="dialog" aria-label="Njoftimet">
+      <div class="sl-bell-head">
+        <span class="sl-bell-title">Njoftimet</span>
+        <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}">
+          <button type="button" class="tap sl-bell-link" onClick="{{ onMarkAll }}">Shëno të gjitha si lexuar</button>
+        </sc-if>
+      </div>
+      <div class="sl-bell-list">
+        <sc-for list="{{ rows }}" as="n" hint-placeholder-count="4">
+          <sc-if value="{{ n.linkable }}" hint-placeholder-val="{{ true }}">
+            <a href="{{ n.href }}" onClick="{{ n.onClick }}" class="tap sl-notif {{ n.cls }}">
+              <span class="sl-notif-dot" style="background:{{ n.color }};" aria-hidden="true"></span>
+              <span class="sl-notif-text">
+                <span class="sl-notif-title">{{ n.title }}</span>
+                <span class="sl-notif-body">{{ n.body }}</span>
+                <span class="sl-notif-meta">{{ n.meta }}</span>
+              </span>
+            </a>
+          </sc-if>
+          <sc-if value="{{ n.plain }}" hint-placeholder-val="{{ false }}">
+            <button type="button" onClick="{{ n.onClick }}" class="tap sl-notif {{ n.cls }}">
+              <span class="sl-notif-dot" style="background:{{ n.color }};" aria-hidden="true"></span>
+              <span class="sl-notif-text">
+                <span class="sl-notif-title">{{ n.title }}</span>
+                <span class="sl-notif-body">{{ n.body }}</span>
+                <span class="sl-notif-meta">{{ n.meta }}</span>
+              </span>
+            </button>
+          </sc-if>
+        </sc-for>
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div class="sl-bell-empty">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M9.5 20a2.5 2.5 0 0 0 5 0"/></svg>
+            <span>Nuk ka njoftime të reja.</span>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ hasInbox }}" hint-placeholder-val="{{ false }}">
+        <a href="{{ inboxHref }}" class="tap sl-bell-foot">Hap kutinë →</a>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":40,"height":40}}'>
+class Component extends DCLogic {
+  state = { open: false, tick: 0 };
+
+  componentDidMount() {
+    this._onKey = (e) => { if (e.key === 'Escape' && this.state.open) this.setState({ open: false }); };
+    this._onDoc = (e) => {
+      if (!this.state.open) return;
+      const t = e.target;
+      if (t && t.closest && t.closest('.sl-bell')) return;
+      this.setState({ open: false });
+    };
+    document.addEventListener('keydown', this._onKey);
+    document.addEventListener('click', this._onDoc, true);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this._onKey);
+    document.removeEventListener('click', this._onDoc, true);
+  }
+
+  renderVals() {
+    const L = window.SinjalLayout;
+    const data = L ? L.notifications() : { items: [], unread: 0, inboxHref: null };
+    const open = !!this.state.open;
+    const rows = data.items.slice(0, 8).map((n) => ({
+      title: n.title,
+      body: n.body,
+      meta: [n.time, n.label].filter(Boolean).join(' · '),
+      color: n.color,
+      cls: n.unread ? 'is-unread' : '',
+      href: n.href || '',
+      linkable: !!n.href,
+      plain: !n.href,
+      onClick: () => {
+        L.openNotification(n);
+        this.setState({ open: false, tick: this.state.tick + 1 });
+      },
+    }));
+    return {
+      open: open,
+      openCls: open ? 'is-open' : '',
+      isOpenAttr: open ? 'true' : 'false',
+      onToggle: () => this.setState({ open: !open }),
+      onMarkAll: () => { L.markAllRead(); this.setState({ tick: this.state.tick + 1 }); },
+      hasUnread: data.unread > 0,
+      unreadText: data.unread > 9 ? '9+' : String(data.unread),
+      unreadAria: data.unread + ' të palexuara',
+      rows: rows,
+      isEmpty: rows.length === 0,
+      hasInbox: !!data.inboxHref,
+      inboxHref: data.inboxHref || '',
+    };
+  }
+}
+</script>
+</body>
+</html>

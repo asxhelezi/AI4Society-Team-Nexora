@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="favicon.png">
+<title>Sinjal — Sidebar</title>
+<!--
+  SHARED COMPONENT — source: shared/layout/Sidebar.dc.html. Do not edit an app's copy; edit the
+  source and run `node shared/layout/sync.mjs`. Renders the whole sidebar from
+  window.SinjalLayout (sinjal-layout.js) for the app named by window.SINJAL_APP.
+  The <head> below is only used when this file is opened on its own (canvas artboard); a page that
+  imports it (<dc-import name="Sidebar" active="…">) must load sinjal-layout.css/.js itself.
+-->
+<script src="./support.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="staff.css">
+<link rel="stylesheet" href="sinjal-layout.css">
+<!-- sinjal:app-data -->
+<script src="sinjal-layout.js"></script>
+<script src="i18n-dict.js"></script>
+<script src="sinjal-i18n.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>body{margin:0;}</style>
+</helmet>
+<div class="sl-root {{ rootCls }}" data-sl-app="{{ appKey }}">
+  <header class="sl-topbar">
+    <button type="button" class="tap sl-burger" onClick="{{ onOpen }}" aria-label="Hap menunë" aria-expanded="{{ openAttr }}" aria-controls="sl-sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+    <a href="{{ home }}" class="tap sl-topbar-brand">
+      <sc-if value="{{ hasLogo }}" hint-placeholder-val="{{ true }}"><img src="{{ logo }}" alt=""></sc-if>
+      <span>Sinjal</span>
+    </a>
+  </header>
+  <div class="sl-backdrop" onClick="{{ onClose }}" aria-hidden="true"></div>
+  <aside id="sl-sidebar" class="sl-side">
+    <button type="button" class="tap sl-close" onClick="{{ onClose }}" aria-label="Mbyll menunë">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+    <a href="{{ home }}" class="tap sl-brand">
+      <span class="sl-brand-row">
+        <sc-if value="{{ hasLogo }}" hint-placeholder-val="{{ true }}"><img class="sl-logo" src="{{ logo }}" alt=""></sc-if>
+        <span class="sl-wordmark">Sinjal</span>
+      </span>
+      <span class="sl-subtitle">{{ subtitle }}</span>
+    </a>
+    <sc-if value="{{ hasOrg }}" hint-placeholder-val="{{ true }}">
+      <div class="sl-org">
+        <svg class="sl-org-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" dangerouslySetInnerHTML="{{ orgIcon }}"></svg>
+        <div class="sl-org-text">
+          <div class="sl-org-name">{{ orgName }}</div>
+          <div class="sl-org-sub">{{ orgSub }}</div>
+        </div>
+        <sc-if value="{{ hasOrgDot }}" hint-placeholder-val="{{ false }}"><span class="sl-org-dot" style="background:{{ orgDot }};" aria-hidden="true"></span></sc-if>
+      </div>
+    </sc-if>
+    <nav class="sl-nav" aria-label="{{ navLabel }}">
+      <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="3">
+        <div class="sl-section">
+          <sc-if value="{{ sec.hasLabel }}" hint-placeholder-val="{{ false }}"><div class="sl-sec-label">{{ sec.label }}</div></sc-if>
+          <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="4">
+            <a href="{{ it.href }}" class="tap sl-item {{ it.cls }}" aria-current="{{ it.current }}" title="{{ it.label }}">
+              <svg class="sl-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" dangerouslySetInnerHTML="{{ it.iconHtml }}"></svg>
+              <span class="sl-label">{{ it.label }}</span>
+              <sc-if value="{{ it.hasBadge }}" hint-placeholder-val="{{ false }}">
+                <span class="sl-badge {{ it.badgeCls }}" aria-label="{{ it.badgeAria }}">{{ it.badgeText }}</span>
+              </sc-if>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+    <div class="sj-lang sl-lang" role="group" aria-label="Gjuha">
+      <button type="button" data-lang="sq" lang="sq" aria-label="Shqip" title="Shqip">SQ</button>
+      <button type="button" data-lang="en" lang="en" aria-label="English" title="English">EN</button>
+      <button type="button" data-lang="sr" lang="sr-Latn" aria-label="Srpski" title="Srpski">SR</button>
+    </div>
+    <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+      <div class="sl-menu" role="menu" aria-label="Menuja e profilit">
+        <div class="sl-menu-head">
+          <div class="sl-menu-name">{{ userName }}</div>
+          <div class="sl-menu-sub">{{ userMenuTitle }}</div>
+        </div>
+        <sc-for list="{{ menu }}" as="m" hint-placeholder-count="3">
+          <sc-if value="{{ m.isDivider }}" hint-placeholder-val="{{ false }}"><div class="sl-menu-sep" role="separator"></div></sc-if>
+          <sc-if value="{{ m.isLink }}" hint-placeholder-val="{{ false }}">
+            <a href="{{ m.href }}" role="menuitem" class="tap sl-menu-row {{ m.cls }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" dangerouslySetInnerHTML="{{ m.iconHtml }}"></svg>
+              <span>{{ m.label }}</span>
+            </a>
+          </sc-if>
+          <sc-if value="{{ m.isButton }}" hint-placeholder-val="{{ false }}">
+            <button type="button" role="menuitem" class="tap sl-menu-row {{ m.cls }}" onClick="{{ m.onClick }}" data-sl-action="{{ m.action }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" dangerouslySetInnerHTML="{{ m.iconHtml }}"></svg>
+              <span>{{ m.label }}</span>
+            </button>
+          </sc-if>
+        </sc-for>
+      </div>
+    </sc-if>
+    <button type="button" class="tap sl-profile {{ profileCls }}" onClick="{{ onToggleMenu }}" aria-label="Menuja e profilit" aria-expanded="{{ menuOpenAttr }}" title="{{ userName }}">
+      <span class="sl-avatar">{{ userInitials }}</span>
+      <span class="sl-profile-text">
+        <span class="sl-profile-name">{{ userShort }}</span>
+        <span class="sl-profile-sub">{{ userTitle }}</span>
+      </span>
+      <svg class="sl-chevron" width="12" height="12" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 7L5 3L9 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","default":"none","options":["none","permbledhje","kreu","perdoruesit","rolet","departamentet","ekipet","ekipi","zonat","workflow","automatizimet","njoftimet","audit","siguria","integrimet","cilesimet","performanca","harta","indikatoret","raportet","asistenti","keshilli","caktimet","sla","nderhyrjet","raportetdep"]},"app":{"editor":"enum","default":"","options":["","admin","managerial","department","staff"]},"$preview":{"width":232,"height":900}}'>
+class Component extends DCLogic {
+  state = { open: false, menuOpen: false };
+
+  componentDidMount() {
+    this._onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      if (this.state.menuOpen) this.setState({ menuOpen: false });
+      else if (this.state.open) this.setState({ open: false });
+    };
+    // a click outside the profile block / menu closes the menu
+    this._onDoc = (e) => {
+      if (!this.state.menuOpen) return;
+      const t = e.target;
+      if (t && t.closest && (t.closest('.sl-menu') || t.closest('.sl-profile'))) return;
+      this.setState({ menuOpen: false });
+    };
+    document.addEventListener('keydown', this._onKey);
+    document.addEventListener('click', this._onDoc, true);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this._onKey);
+    document.removeEventListener('click', this._onDoc, true);
+    document.documentElement.classList.remove('sl-nav-open');
+  }
+
+  componentDidUpdate() {
+    const open = !!this.state.open;
+    if (open === !!this._wasOpen) return;
+    this._wasOpen = open;
+    // lock the page behind the open drawer, move focus into it and back to the burger on close
+    document.documentElement.classList.toggle('sl-nav-open', open);
+    const el = document.querySelector(open ? '.sl-side .sl-close' : '.sl-topbar .sl-burger');
+    if (el && el.offsetParent !== null) el.focus();
+  }
+
+  renderVals() {
+    const L = window.SinjalLayout;
+    const appKey = this.props.app || (L && L.app()) || 'admin';
+    const cfg = L ? L.config(appKey) : null;
+    if (!cfg) {
+      if (window.console) console.error('[Sidebar] window.SinjalLayout / SINJAL_APP missing — load sinjal-layout.js and set window.SINJAL_APP in the app data file.');
+      return { sections: [], menu: [], hasOrg: false, hasLogo: false };
+    }
+    const active = this.props.active || 'none';
+    const user = L.currentUser(appKey);
+    const open = !!this.state.open;
+    const menuOpen = !!this.state.menuOpen;
+    const html = (s) => ({ __html: s || '' });
+
+    const sections = L.nav(appKey, active).map((sec) => ({
+      label: sec.label,
+      hasLabel: !!sec.label,
+      items: sec.items.map((it) => ({
+        href: it.href,
+        label: it.label,
+        iconHtml: html(it.icon),
+        cls: it.active ? 'is-active' : '',
+        current: it.active ? 'page' : 'false',
+        hasBadge: !!it.badge,
+        badgeText: it.badge ? it.badge.text : '',
+        badgeCls: it.badge ? 'sl-badge--' + it.badge.tone : '',
+        badgeAria: it.badge ? (it.badge.count + (it.badge.label ? ' ' + it.badge.label : '')) : '',
+      })),
+    }));
+
+    const menu = L.profileMenu(appKey).map((m) => {
+      if (m.divider) return { isDivider: true, isLink: false, isButton: false };
+      const isLink = !!m.href && !m.action;
+      return {
+        isDivider: false, isLink: isLink, isButton: !isLink,
+        label: m.label, href: m.href || '', action: m.action || 'close',
+        iconHtml: html(m.icon), cls: m.tone === 'danger' ? 'is-danger' : '',
+        onClick: () => {
+          this.setState({ menuOpen: false });
+          if (m.action === 'logout') L.logout();
+        },
+      };
+    });
+
+    const org = cfg.org;
+    return {
+      appKey: appKey,
+      rootCls: open ? 'is-open' : '',
+      openAttr: open ? 'true' : 'false',
+      onOpen: () => this.setState({ open: true, menuOpen: false }),
+      onClose: () => this.setState({ open: false }),
+      home: cfg.home,
+      hasLogo: !!(window.SINJAL_LOGO || cfg.logo),
+      logo: window.SINJAL_LOGO || cfg.logo || '',
+      subtitle: cfg.subtitle,
+      hasOrg: !!org,
+      orgName: org ? org.name : '',
+      orgSub: org ? org.sub : '',
+      orgIcon: html(org ? org.icon : ''),
+      hasOrgDot: !!(org && org.dot),
+      orgDot: (org && org.dot) || 'transparent',
+      navLabel: cfg.navLabel || 'Navigimi kryesor',
+      sections: sections,
+      menu: menu,
+      menuOpen: menuOpen,
+      menuOpenAttr: menuOpen ? 'true' : 'false',
+      profileCls: menuOpen ? 'is-open' : '',
+      onToggleMenu: () => this.setState({ menuOpen: !menuOpen }),
+      userName: user.name,
+      userShort: user.short || user.name,
+      userInitials: user.initials,
+      userTitle: user.title,
+      userMenuTitle: user.menuTitle || user.title,
+    };
+  }
+}
+</script>
+</body>
+</html>
