@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sinjal Staff Login</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+  /* SINJAL tokens — from ds/sinjal/tokens.json. Single visual world (the product
+     doesn't switch light/dark), so every colour is painted explicitly. */
+  :root {
+    color-scheme: light;
+    --ink: #1B1917;
+    --ink-soft: #6B665F;
+    --ink-faint: #8A847C;
+    --surface: #F5F2ED;
+    --surface-raised: #FBFAF8;
+    --card: #FFFFFF;
+    --border: #D9D4CC;
+    --border-card: #ECE7DE;
+    --action: #C23B31;
+    --action-pressed: #A8302A;
+    --on-action: #F5F2ED;
+    --resolved: #2E7D4F;
+    --display: 'Barlow Condensed', Helvetica, Arial, sans-serif;
+    --body: 'Barlow', Helvetica, Arial, sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  * { box-sizing: border-box; }
+  button, input { font: inherit; color: inherit; }
+  a { color: var(--action); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 2px; }
+  a:active { color: var(--action-pressed); }
+  :focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+
+  /* ---------- Background: looping water video over its still poster ---------- */
+  .bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--surface); }
+  .bg img, .bg video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: left bottom;
+  }
+  .bg video { opacity: 0; transition: opacity .8s var(--ease); }
+  .bg video.is-ready { opacity: 1; }
+  .bg .poster-m { display: none; }
+
+  /* ---------- Page layout ---------- */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100%;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 420px);
+    grid-template-rows: auto 1fr auto;
+    column-gap: 48px;
+    padding-block: 32px;
+    padding-inline: clamp(16px, 5vw, 88px);
+  }
+  .brand { grid-column: 1; grid-row: 1; display: flex; align-items: center; gap: 12px; }
+  .brand img { height: 34px; width: auto; display: block; }
+  .brand .logo-w { display: none; }
+  .brand-name {
+    font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1;
+    letter-spacing: .01em; text-transform: uppercase;
+  }
+  .brand-sub {
+    display: block; margin-top: 3px;
+    font-family: var(--body); font-weight: 600; font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+
+  .card-wrap { grid-column: 2; grid-row: 1 / 4; align-self: center; width: 100%; }
+
+  .foot {
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    grid-column: 1; grid-row: 3;
+    font-size: 12px; color: rgba(245,242,237,.78);
+  }
+
+  /* ---------- The card ---------- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border-card);
+    border-radius: 18px;
+    box-shadow: 0 2px 5px rgba(27,25,23,.04), 0 24px 48px rgba(27,25,23,.14);
+    padding: 36px 36px 32px;
+  }
+  .card h2 {
+    margin: 0 0 22px;
+    font-family: var(--display); font-weight: 800; font-size: 32px; line-height: 1;
+    text-transform: uppercase; letter-spacing: .005em;
+  }
+
+  form { display: grid; gap: 14px; }
+  .field { display: grid; gap: 6px; }
+  .field-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  label { font-size: 13px; font-weight: 600; }
+  .field-top a { font-size: 13px; font-weight: 500; }
+  .input {
+    position: relative; display: flex; align-items: center;
+    height: 48px; border-radius: 10px;
+    background: var(--surface-raised); border: 1px solid var(--border);
+    transition: border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease);
+  }
+  .input:focus-within { border-color: var(--ink); background: var(--card); box-shadow: 0 0 0 3px rgba(27,25,23,.07); }
+  .input svg.lead { flex: 0 0 auto; margin-left: 14px; color: var(--ink-faint); }
+  .input input {
+    flex: 1; min-width: 0; height: 100%;
+    border: 0; background: transparent; outline: none;
+    padding: 0 14px 0 10px; font-size: 15px;
+  }
+  .input input::placeholder { color: var(--ink-faint); }
+  .input.is-invalid { border-color: var(--action); }
+  .reveal {
+    flex: 0 0 auto; height: 36px; margin-right: 6px; padding: 0 10px;
+    border: 0; border-radius: 8px; background: transparent; cursor: pointer;
+    font-size: 12px; font-weight: 600; color: var(--ink-soft);
+  }
+  .reveal:hover { background: var(--surface); color: var(--ink); }
+  .field-error { margin: 0; font-size: 12.5px; color: var(--action); }
+  .field-hint { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 2px; }
+  .check { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500; cursor: pointer; }
+  .check input { width: 17px; height: 17px; margin: 0; accent-color: var(--action); }
+
+  .alert {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 11px 12px; border-radius: 10px;
+    background: #FBEDEB; color: #7E231D; font-size: 13px; line-height: 1.4;
+  }
+  .alert svg { flex: 0 0 auto; margin-top: 1px; }
+
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; height: 48px; border-radius: 10px; cursor: pointer;
+    font-weight: 600; font-size: 15px;
+    transition: background .15s var(--ease), border-color .15s var(--ease), opacity .15s var(--ease);
+  }
+  .btn:active { opacity: .85; }
+  .btn-primary {
+    margin-top: 4px; border: 0; background: var(--action); color: var(--on-action);
+    font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .btn-primary:hover { background: var(--action-pressed); }
+  .btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--ink); }
+  .btn-secondary:hover { background: var(--surface-raised); border-color: #C9C3B9; }
+  .btn-secondary img, .btn-secondary svg { width: 22px; height: 22px; flex: 0 0 auto; }
+  .btn[disabled] { cursor: progress; opacity: .7; }
+
+  .or {
+    display: flex; align-items: center; gap: 12px; margin: 18px 0 14px;
+    font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint);
+  }
+  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--border-card); }
+  .sso { display: grid; gap: 10px; }
+
+
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid currentColor; border-right-color: transparent;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Routing (post-auth) state ---------- */
+  .routing { text-align: left; }
+  .routing-badge {
+    width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+    background: #E6F1EA; color: var(--resolved); margin-bottom: 16px;
+  }
+  .role-card {
+    margin: 20px 0 18px; padding: 14px 16px; border-radius: 12px;
+    background: var(--surface); display: grid; gap: 4px;
+  }
+  .role-card .k { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+  .role-card .v { font-family: var(--display); font-weight: 700; font-size: 22px; text-transform: uppercase; line-height: 1.05; }
+  .role-card .s { font-size: 13px; color: var(--ink-soft); }
+  .bar { height: 4px; border-radius: 4px; background: var(--border-card); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--action); border-radius: 4px; }
+  .bar.go i { transition: width 2.4s var(--ease); width: 100%; }
+  .routing-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 13px; color: var(--ink-soft); }
+  .linkbtn { border: 0; background: none; padding: 0; color: var(--action); font-weight: 600; font-size: 13px; cursor: pointer; }
+  .linkbtn:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+
+  /* ---------- Mobile: centred card in the ivory sky, city along the bottom ---------- */
+  @media (max-width: 899px) {
+    .bg .poster-d { display: none; }
+    .bg .poster-m { display: block; }
+    .bg img, .bg video { object-position: center bottom; }
+    .page {
+      grid-template-columns: minmax(0, 400px);
+      grid-template-rows: auto 1fr auto;
+      justify-content: center;
+      /* card floats a little below the top edge (optical centre of the sky),
+         letting its lower edge overlap the skyline for depth */
+      padding-block: clamp(24px, 10vh, 96px) 16px;
+      padding-inline: 20px;
+      row-gap: 12px;
+    }
+    .brand { grid-column: 1; grid-row: 2; align-self: end; padding-top: 24px; justify-content: center; color: var(--on-action); }
+    .brand img { height: 30px; }
+    .brand .logo-r { display: none; }
+    .brand .logo-w { display: block; }
+    .brand-name { font-size: 22px; }
+    .brand-sub { color: rgba(245,242,237,.72); }
+    .card-wrap { grid-column: 1; grid-row: 1; align-self: start; }
+    .card { padding: 20px 18px 18px; border-radius: 16px; box-shadow: 0 2px 5px rgba(27,25,23,.04), 0 14px 32px rgba(27,25,23,.12); }
+    .card h2 { font-size: 26px; margin-bottom: 16px; }
+    form { gap: 11px; }
+    label, .field-top a { font-size: 12.5px; }
+    .field { gap: 5px; }
+    .input, .btn { height: 44px; }
+    .btn { font-size: 14px; }
+    .btn-primary { font-size: 17px; }
+    .check { font-size: 13px; }
+    .or { margin: 14px 0 11px; }
+    .sso { gap: 8px; }
+    .foot { grid-column: 1; grid-row: 3; text-align: center; align-self: end; }
+    .brand { text-shadow: 0 1px 3px rgba(0,0,0,.35); }
+    .input input { font-size: 16px; } /* 16px stops iOS zooming on focus */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg video { display: none; }
+    .bar.go i { transition: none; }
+    .spinner { animation-duration: 2s; }
+  }
+  [hidden] { display: none !important; }
+  :root { padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <img class="poster-d" src="assets/bg-desktop.webp" alt="">
+  <img class="poster-m" src="assets/bg-mobile.webp" alt="">
+  <video id="bgv" muted loop playsinline preload="auto"></video>
+</div>
+
+<div class="page">
+  <header class="brand">
+    <img class="logo-r" src="assets/logo.png" alt="">
+    <img class="logo-w" src="assets/logo-white.png" alt="">
+    <div>
+      <span class="brand-name">Sinjal</span>
+      <span class="brand-sub">Portali i stafit</span>
+    </div>
+  </header>
+
+  <main class="card-wrap">
+    <div class="card" id="card">
+      <!-- Sign-in view -->
+      <div id="view-login">
+        <h2>Hyr në llogari</h2>
+
+        <form id="login" novalidate>
+          <div class="alert" id="alert" hidden role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>
+            <span>Emri i përdoruesit ose fjalëkalimi është i gabuar.</span>
+          </div>
+
+          <div class="field">
+            <label for="username">Emri i përdoruesit</label>
+            <div class="input" id="u-wrap">
+              <svg class="lead" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+              <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required aria-describedby="u-err">
+            </div>
+            <p class="field-error" id="u-err" hidden>Shkruani emrin e përdoruesit.</p>
+          </div>
+
+          <div class="field">
+            <div class="field-top">
+              <label for="password">Fjalëkalimi</label>
+              <a href="#" id="forgot" aria-controls="forgot-msg" aria-expanded="false">Keni harruar fjalëkalimin?</a>
+            </div>
+            <div class="input" id="p-wrap">
+              <svg class="lead" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              <input id="password" name="password" type="password" autocomplete="current-password" required aria-describedby="p-err p-caps">
+              <button type="button" class="reveal" id="reveal" aria-controls="password" aria-pressed="false">Shfaq</button>
+            </div>
+            <p class="field-error" id="p-err" hidden>Shkruani fjalëkalimin.</p>
+            <p class="field-hint" id="p-caps" hidden>Caps Lock është aktiv.</p>
+            <p class="field-hint" id="forgot-msg" hidden role="status">Fjalëkalimin e rivendos administratori i bashkisë.</p>
+          </div>
+
+          <div class="row">
+            <label class="check" for="remember"><input type="checkbox" id="remember" checked> Më mbaj të kyçur</label>
+          </div>
+
+          <button class="btn btn-primary" type="submit" id="submit">Hyr</button>
+        </form>
+
+        <div class="or">ose</div>
+
+        <div class="sso">
+          <button class="btn btn-secondary" type="button" data-sso="Google">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+            Vazhdo me Google
+          </button>
+          <button class="btn btn-secondary" type="button" data-sso="e-Albania">
+            <img src="assets/e-albania.png" alt="">
+            Identifikohu me e-Albania
+          </button>
+        </div>
+      </div>
+
+      <!-- Post-auth routing view -->
+      <div id="view-route" class="routing" hidden aria-live="polite">
+        <div class="routing-badge">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </div>
+        <h2 id="r-hello">Mirë se erdhe</h2>
+        <div class="role-card">
+          <span class="v" id="r-role">Nëpunës</span>
+          <span class="s" id="r-dest">Paneli i punës</span>
+        </div>
+        <div class="bar" id="r-bar"><i></i></div>
+        <div class="routing-foot">
+          <button class="linkbtn" type="button" id="back">Kthehu</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">© 2026 Sinjal</footer>
+</div>
+
+<script>
+(function () {
+  // ---- Background video: pick the cut that matches the layout, keep the still poster underneath ----
+  var v = document.getElementById('bgv');
+  var mq = window.matchMedia('(max-width: 899px)');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function pickVideo() {
+    if (reduce.matches) { v.removeAttribute('src'); return; }
+    var src = mq.matches ? 'assets/bg-mobile.mp4' : 'assets/bg-desktop.mp4';
+    if (v.getAttribute('src') === src) return;
+    v.classList.remove('is-ready');
+    v.setAttribute('src', src);
+    var p = v.play(); if (p && p.catch) p.catch(function () {});
+  }
+  v.addEventListener('playing', function () { v.classList.add('is-ready'); });
+  (mq.addEventListener ? mq.addEventListener('change', pickVideo) : mq.addListener(pickVideo));
+  pickVideo();
+
+  // ---- Backend role codes (users.role) → destination panel ----
+  var ROLE_ROUTES = {
+    admin:                { role: 'Admin / IT',            dest: 'Paneli i Administrimit', path: '/admin/', app: 'admin' },
+    clerk:                { role: 'Nëpunës',               dest: 'Paneli i punës', path: '/', app: 'staff' },
+    department_authority: { role: 'Menaxher departamenti', dest: 'Paneli i Departamentit', path: '/department/', app: 'department' },
+    municipal_authority:  { role: 'Zyrtar i bashkisë',     dest: 'Paneli i Menaxhimit', path: '/managerial/', app: 'managerial' },
+    operative_staff:      { role: 'Operativ në terren',    dest: 'Aplikacioni Operativ', path: '/field/', app: 'field' }
+  };
+
+  var form = document.getElementById('login');
+  var u = document.getElementById('username'), p = document.getElementById('password');
+  var uW = document.getElementById('u-wrap'), pW = document.getElementById('p-wrap');
+  var uE = document.getElementById('u-err'), pE = document.getElementById('p-err');
+  var alertBox = document.getElementById('alert');
+  var submit = document.getElementById('submit');
+  var viewLogin = document.getElementById('view-login'), viewRoute = document.getElementById('view-route');
+
+  document.getElementById('reveal').addEventListener('click', function () {
+    var show = p.type === 'password';
+    p.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Fshih' : 'Shfaq';
+    this.setAttribute('aria-pressed', String(show));
+  });
+  document.getElementById('forgot').addEventListener('click', function (e) {
+    e.preventDefault();
+    var m = document.getElementById('forgot-msg');
+    m.hidden = !m.hidden;
+    this.setAttribute('aria-expanded', String(!m.hidden));
+  });
+  var caps = document.getElementById('p-caps');
+  ['keydown', 'keyup'].forEach(function (ev) {
+    document.getElementById('password').addEventListener(ev, function (e) {
+      if (e.getModifierState) caps.hidden = !e.getModifierState('CapsLock');
+    });
+  });
+  document.getElementById('password').addEventListener('blur', function () { caps.hidden = true; });
+  if (!mq.matches) document.getElementById('username').focus({ preventScroll: true });
+
+  var authBtns = document.querySelectorAll('#submit, [data-sso]');
+  function lockAll(on) { Array.prototype.forEach.call(authBtns, function (b) { b.disabled = on; }); }
+  function setBusy(btn, label) {
+    lockAll(true);
+    btn.dataset.label = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>' + label;
+  }
+  function clearBusy(btn) { lockAll(false); if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
+
+  function route(method, name, info) {
+    document.getElementById('r-hello').textContent = 'Mirë se erdhe' + (name ? ', ' + name : '');
+    document.getElementById('r-role').textContent = info.role;
+    document.getElementById('r-dest').textContent = info.dest;
+    viewLogin.hidden = true; viewRoute.hidden = false;
+    var bar = document.getElementById('r-bar');
+    bar.classList.remove('go'); void bar.offsetWidth; bar.classList.add('go');
+    window.setTimeout(function () { window.location.assign(info.path); }, 1100);
+  }
+
+  function finishLogin(result, method, remember) {
+    var user = result.user;
+    if (!result.access_token || !user || !ROLE_ROUTES[user.role]) throw new Error('invalid_role');
+    var storage = remember ? window.localStorage : window.sessionStorage;
+    window.localStorage.removeItem('sinjal_staff_access');
+    window.sessionStorage.removeItem('sinjal_staff_access');
+    window.localStorage.removeItem('sinjal_session');
+    window.sessionStorage.removeItem('sinjal_session');
+    storage.setItem('sinjal_staff_access', result.access_token);
+    storage.setItem('sinjal_session', JSON.stringify({
+      app: ROLE_ROUTES[user.role].app, user: {
+        id: user.id, name: user.full_name, email: user.email,
+        department_id: user.department_id, roles: [user.role]
+      }
+    }));
+    route(method, user.full_name, ROLE_ROUTES[user.role]);
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    alertBox.hidden = true;
+    var okU = u.value.trim() !== '', okP = p.value !== '';
+    uW.classList.toggle('is-invalid', !okU); uE.hidden = okU;
+    pW.classList.toggle('is-invalid', !okP); pE.hidden = okP;
+    if (!okU) { u.focus(); return; }
+    if (!okP) { p.focus(); return; }
+    setBusy(submit, 'Po verifikohet');
+    try {
+      var response = await fetch('/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u.value.trim(), password: p.value }),
+        cache: 'no-store'
+      });
+      if (response.status === 401) throw new Error('invalid_credentials');
+      if (!response.ok) throw new Error('service_unavailable');
+      var result = await response.json();
+      finishLogin(result, 'password', document.getElementById('remember').checked);
+      clearBusy(submit);
+    } catch (err) {
+      clearBusy(submit);
+      alertBox.querySelector('span').textContent = err.message === 'invalid_credentials'
+        ? 'Emri i përdoruesit ose fjalëkalimi është i gabuar.'
+        : 'Hyrja nuk u krye. Ju lutemi provoni përsëri.';
+      alertBox.hidden = false; pW.classList.add('is-invalid'); p.value = ''; p.focus();
+    }
+  });
+  [u, p].forEach(function (el) {
+    el.addEventListener('input', function () {
+      el.parentNode.classList.remove('is-invalid');
+      (el === u ? uE : pE).hidden = true;
+    });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-sso]'), function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-sso') === 'e-Albania') {
+        window.location.assign('https://e-albania.al/');
+        return;
+      }
+      window.sessionStorage.setItem('sinjal_google_remember', document.getElementById('remember').checked ? '1' : '0');
+      window.location.assign('/v1/auth/google/start');
+    });
+  });
+
+  var googleStatus = new URLSearchParams(window.location.search);
+  if (googleStatus.get('google') === 'complete') {
+    (async function () {
+      try {
+        var response = await fetch('/v1/auth/google/complete', { cache: 'no-store' });
+        if (!response.ok) throw new Error('google_failed');
+        var result = await response.json();
+        window.history.replaceState(null, '', '/login/');
+        finishLogin(result, 'Google', window.sessionStorage.getItem('sinjal_google_remember') !== '0');
+      } catch (err) {
+        alertBox.querySelector('span').textContent = 'Hyrja me Google nuk u krye. Provoni përsëri.';
+        alertBox.hidden = false;
+      } finally {
+        window.sessionStorage.removeItem('sinjal_google_remember');
+      }
+    })();
+  } else if (googleStatus.has('google_error')) {
+    alertBox.querySelector('span').textContent = googleStatus.get('google_error') === 'unavailable'
+      ? 'Hyrja me Google kërkon konfigurim nga administratori.'
+      : 'Hyrja me Google nuk u krye. Provoni përsëri.';
+    alertBox.hidden = false;
+    window.history.replaceState(null, '', '/login/');
+  }
+
+  document.getElementById('back').addEventListener('click', function () {
+    viewRoute.hidden = true; viewLogin.hidden = false; u.focus();
+  });
+})();
+</script>
+</body>
+</html>
