@@ -1,4 +1,5 @@
 -- SINJAL on Supabase: tables, row-level security, storage and the functions the two
+-- (Safe to run again: existing tables are kept, functions and policies are replaced.)
 -- frontends call. There is no application server: the citizen site and the staff
 -- desktop talk to Supabase directly with the publishable key, and every rule the old
 -- FastAPI backend enforced (who may read what, which status transitions are allowed)
@@ -21,14 +22,14 @@
 -- Reference tables
 -- ---------------------------------------------------------------------------------------
 
-create table public.departments (
+create table if not exists public.departments (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
   name text not null,
   created_at timestamptz not null default now()
 );
 
-create table public.zones (
+create table if not exists public.zones (
   id uuid primary key default gen_random_uuid(),
   code text not null unique,
   name text not null unique,
@@ -36,7 +37,7 @@ create table public.zones (
 );
 
 -- Citizen categories (app/citizen_catalog.py). department_code is the default routing.
-create table public.categories (
+create table if not exists public.categories (
   code text primary key,
   label text not null unique,
   subcategories text[] not null default '{}',
@@ -44,7 +45,7 @@ create table public.categories (
   sort_order int not null default 0
 );
 
-create table public.profiles (
+create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text not null,
   email text,
@@ -58,7 +59,7 @@ create table public.profiles (
 -- Reports
 -- ---------------------------------------------------------------------------------------
 
-create table public.reports (
+create table if not exists public.reports (
   id uuid primary key default gen_random_uuid(),
   tracking_code text not null unique,
   anonymous boolean not null default true,
@@ -97,13 +98,13 @@ create table public.reports (
   updated_at timestamptz not null default now()
 );
 
-create index reports_submitted_at_idx on public.reports (submitted_at desc);
-create index reports_status_idx on public.reports (status);
-create index reports_department_idx on public.reports (department_id);
-create index reports_assigned_to_idx on public.reports (assigned_to);
-create index reports_client_hash_idx on public.reports (client_hash, submitted_at);
+create index if not exists reports_submitted_at_idx on public.reports (submitted_at desc);
+create index if not exists reports_status_idx on public.reports (status);
+create index if not exists reports_department_idx on public.reports (department_id);
+create index if not exists reports_assigned_to_idx on public.reports (assigned_to);
+create index if not exists reports_client_hash_idx on public.reports (client_hash, submitted_at);
 
-create table public.report_files (
+create table if not exists public.report_files (
   id uuid primary key default gen_random_uuid(),
   report_id uuid not null references public.reports (id) on delete cascade,
   kind text not null check (kind in ('citizen_photo', 'before_photo', 'after_photo', 'attachment')),
@@ -115,9 +116,9 @@ create table public.report_files (
   created_at timestamptz not null default now()
 );
 
-create index report_files_report_idx on public.report_files (report_id);
+create index if not exists report_files_report_idx on public.report_files (report_id);
 
-create table public.report_status_history (
+create table if not exists public.report_status_history (
   id bigint generated always as identity primary key,
   report_id uuid not null references public.reports (id) on delete cascade,
   old_status text,
@@ -127,7 +128,7 @@ create table public.report_status_history (
   created_at timestamptz not null default now()
 );
 
-create index report_status_history_report_idx on public.report_status_history (report_id, created_at);
+create index if not exists report_status_history_report_idx on public.report_status_history (report_id, created_at);
 
 -- ---------------------------------------------------------------------------------------
 -- Who is calling (security definer so RLS policies can use them without recursion)
@@ -184,24 +185,33 @@ revoke insert, update, delete, truncate on public.reports, public.report_files, 
   from anon, authenticated;
 revoke all on public.reports, public.report_files, public.report_status_history, public.profiles from anon;
 
+drop policy if exists "reference data is public" on public.departments;
 create policy "reference data is public" on public.departments for select using (true);
+drop policy if exists "reference data is public" on public.zones;
 create policy "reference data is public" on public.zones for select using (true);
+drop policy if exists "reference data is public" on public.categories;
 create policy "reference data is public" on public.categories for select using (true);
+drop policy if exists "admins manage departments" on public.departments;
 create policy "admins manage departments" on public.departments for all to authenticated
   using (public.staff_role() = 'admin') with check (public.staff_role() = 'admin');
+drop policy if exists "admins manage zones" on public.zones;
 create policy "admins manage zones" on public.zones for all to authenticated
   using (public.staff_role() = 'admin') with check (public.staff_role() = 'admin');
+drop policy if exists "admins manage categories" on public.categories;
 create policy "admins manage categories" on public.categories for all to authenticated
   using (public.staff_role() = 'admin') with check (public.staff_role() = 'admin');
 
+drop policy if exists "staff read profiles" on public.profiles;
 create policy "staff read profiles" on public.profiles for select to authenticated using (
   id = auth.uid()
   or public.staff_role() in ('admin', 'clerk', 'municipal_authority')
   or (public.staff_role() = 'department_authority' and department_id = public.staff_department())
 );
+drop policy if exists "admins manage profiles" on public.profiles;
 create policy "admins manage profiles" on public.profiles for all to authenticated
   using (public.staff_role() = 'admin') with check (public.staff_role() = 'admin');
 
+drop policy if exists "staff read reports" on public.reports;
 create policy "staff read reports" on public.reports for select to authenticated using (
   case public.staff_role()
     when 'admin' then true
@@ -212,8 +222,10 @@ create policy "staff read reports" on public.reports for select to authenticated
     else false
   end
 );
+drop policy if exists "staff read report files" on public.report_files;
 create policy "staff read report files" on public.report_files for select to authenticated
   using (public.can_see_report(report_id));
+drop policy if exists "staff read report history" on public.report_status_history;
 create policy "staff read report history" on public.report_status_history for select to authenticated
   using (public.can_see_report(report_id));
 
@@ -601,12 +613,15 @@ values ('report-photos', 'report-photos', false, 10485760, array['image/jpeg', '
 on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+drop policy if exists "citizens upload photos to a new report" on storage.objects;
 create policy "citizens upload photos to a new report" on storage.objects for insert to anon, authenticated
   with check (bucket_id = 'report-photos' and public.report_accepts_uploads((storage.foldername(name))[1]));
 
+drop policy if exists "staff read report photos" on storage.objects;
 create policy "staff read report photos" on storage.objects for select to authenticated
   using (bucket_id = 'report-photos' and public.can_see_report(((storage.foldername(name))[1])::uuid));
 
+drop policy if exists "public map photos" on storage.objects;
 create policy "public map photos" on storage.objects for select to anon, authenticated
   using (bucket_id = 'report-photos' and public.photo_is_public(name));
 
@@ -619,7 +634,16 @@ begin
   if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
     create publication supabase_realtime;
   end if;
-  alter publication supabase_realtime add table public.reports, public.report_status_history, public.report_files;
+  -- Only add the tables that are not in the publication yet, so this can run twice.
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'reports') then
+    alter publication supabase_realtime add table public.reports;
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'report_status_history') then
+    alter publication supabase_realtime add table public.report_status_history;
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'report_files') then
+    alter publication supabase_realtime add table public.report_files;
+  end if;
 end $$;
 
 -- ---------------------------------------------------------------------------------------
