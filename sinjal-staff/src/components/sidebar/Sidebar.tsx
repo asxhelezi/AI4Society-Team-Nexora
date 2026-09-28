@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useLogic } from '../../lib/dc';
 import { ROUTES } from '../../lib/routes';
 import { DcLink } from '../DcLink';
-import { LOGIN_URL, logout, signedInUser } from '../../api/staff';
+import { logout, signedInUser } from '../../api/staff';
 import { type NavKey, SidebarLogic } from './SidebarLogic';
 
 type NavStateKey = 'navKreu' | 'navRaportet' | 'navHarta' | 'navDepartamentet' | 'navAutomatizimet' | 'navPerformanca';
@@ -201,7 +201,7 @@ export function Sidebar({ active, onClose }: { active: NavKey; onClose?: () => v
             Cilësimet
           </button>
           <div style={{ height: '1px', background: '#E4DFD6', margin: '4px 2px' }} />
-          <button type="button" role="menuitem" onClick={() => { logout(); window.location.assign(LOGIN_URL); }} className="tap menu-row" style={{ ...MENU_ROW_STYLE, color: '#C23B31' }}>
+          <button type="button" role="menuitem" onClick={() => { logout(); window.location.assign('/login/'); }} className="tap menu-row" style={{ ...MENU_ROW_STYLE, color: '#C23B31' }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C23B31" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <path d="M16 17l5-5-5-5" />

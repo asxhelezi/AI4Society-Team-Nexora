@@ -1,8 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ROUTES } from '../lib/routes';
-import { AUTH_REQUIRED, LOGIN_URL, REAL_STAFF, SUPABASE_STAFF, loadDemoStaff, loadStaff, logout, staffSessionReady } from '../api/staff';
-import { SupabaseSignIn } from './SupabaseSignIn';
+import { AUTH_REQUIRED, DESKTOP_ROLES, REAL_STAFF, hasStaffSession, loadDemoStaff, loadStaff, logout, restoreSession, subscribeToReports } from '../api/staff';
 
 const ROLE_DESTINATIONS: Record<string, string> = {
   admin: '/admin/', department_authority: '/department/',
@@ -44,35 +43,34 @@ function StaffRoutes() {
 
 export function App() {
   const [ready, setReady] = useState(!AUTH_REQUIRED);
-  const [signIn, setSignIn] = useState(false);
-  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!AUTH_REQUIRED) return;
     if (window.SinjalLayout) {
-      window.SinjalLayout.auth.loginUrl = LOGIN_URL;
+      window.SinjalLayout.auth.loginUrl = '/login/';
       window.SinjalLayout.auth.onLogout = () => logout();
     }
-    // Supabase mode signs in here; the API mode uses the shared /login/ page.
-    const signedOut = () => {
-      logout();
-      if (SUPABASE_STAFF) setSignIn(true);
-      else window.location.replace(LOGIN_URL);
-    };
+    if (!hasStaffSession()) {
+      window.location.replace('/login/');
+      return;
+    }
     let active = true;
-    staffSessionReady().then((session) => {
+    let unsubscribe = () => {};
+    restoreSession().then((ok) => {
+      if (!ok) throw new Error('No session');
+      return REAL_STAFF ? loadStaff() : loadDemoStaff();
+    }).then((role) => {
       if (!active) return;
-      if (!session) { signedOut(); return; }
-      return (REAL_STAFF ? loadStaff() : loadDemoStaff()).then((role) => {
-        if (!active) return;
-        if (role === 'clerk') setReady(true);
-        // The other role panels still sign in through the API, so Supabase mode only admits clerks.
-        else if (!SUPABASE_STAFF && ROLE_DESTINATIONS[role]) window.location.replace(ROLE_DESTINATIONS[role]);
-        else signedOut();
-      });
-    }).catch(() => { if (active) signedOut(); });
-    return () => { active = false; };
-  }, [attempt]);
-  if (signIn) return <SupabaseSignIn onSignedIn={() => { setSignIn(false); setAttempt((n) => n + 1); }} />;
+      if (DESKTOP_ROLES.includes(role)) {
+        unsubscribe = subscribeToReports();
+        setReady(true);
+      } else if (ROLE_DESTINATIONS[role]) window.location.replace(ROLE_DESTINATIONS[role]);
+      else { logout(); window.location.replace('/login/'); }
+    }).catch(() => {
+      logout();
+      window.location.replace('/login/');
+    });
+    return () => { active = false; unsubscribe(); };
+  }, []);
   if (!ready) return <div className="app-frame" />;
   return <StaffRoutes />;
 }
