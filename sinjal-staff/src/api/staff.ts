@@ -3,12 +3,20 @@ import type { CaseOverride, DeptId, Priority, Report, Status } from '../data/typ
 import { STORAGE_KEYS, remove } from '../lib/storage';
 
 const BASE = (import.meta.env.VITE_STAFF_API_URL || '').replace(/\/$/, '');
+// With VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set, staff sign in with Supabase Auth
+// and every table is read from Supabase (supabase/schema.sql) instead of the /v1 API.
+export const SUPABASE_STAFF = import.meta.env.MODE !== 'test' &&
+  !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Keep the presentation dataset visible after staff authentication. Operators
 // can opt into the original API-only dashboard with VITE_STAFF_DEMO=false.
-export const AUTH_REQUIRED = import.meta.env.MODE !== 'test' && import.meta.env.VITE_STAFF_REAL !== 'false';
-export const DEMO_STAFF = AUTH_REQUIRED && import.meta.env.VITE_STAFF_DEMO !== 'false';
+// Supabase mode shows only database rows unless VITE_STAFF_DEMO=true.
+export const AUTH_REQUIRED = SUPABASE_STAFF || (import.meta.env.MODE !== 'test' && import.meta.env.VITE_STAFF_REAL !== 'false');
+export const DEMO_STAFF = AUTH_REQUIRED && (SUPABASE_STAFF
+  ? import.meta.env.VITE_STAFF_DEMO === 'true' : import.meta.env.VITE_STAFF_DEMO !== 'false');
 export const REAL_STAFF = AUTH_REQUIRED && !DEMO_STAFF;
+export const LOGIN_URL = SUPABASE_STAFF ? '/' : '/login/';
 const TOKEN_KEY = 'sinjal_staff_access';
+export const SUPABASE_SESSION_KEY = 'sinjal_staff_supabase';
 let token = typeof window === 'undefined' ? '' :
   (window.sessionStorage.getItem(TOKEN_KEY) || window.localStorage.getItem(TOKEN_KEY) || '');
 export function hasStaffSession(): boolean { return !!token; }
@@ -24,7 +32,7 @@ let users = new Map<string, string>();
 const rawStatuses = new Map<string, string>();
 const photoUrls = new Map<string, string>();
 
-interface ApiReport {
+export interface ApiReport {
   id: string; tracking_code: string; title: string; description: string; category: string;
   category_code: string | null; subcategory: string | null; address: string;
   status: string; priority: string; department_id: string | null; department_name: string | null;
@@ -34,6 +42,25 @@ interface ApiReport {
   duplicate_of: string | null; ai_analysis: unknown;
   files?: { kind: string; url: string }[];
   status_history?: { new_status: string; note: string | null; created_at: string }[];
+}
+
+export interface ApiDepartment { id: string; code: string; name: string }
+export interface ApiUser { id: string; full_name: string; department_id: string | null; role?: string }
+
+/** Where the staff tables come from: the FastAPI /v1 API or Supabase. Both return backend-shaped rows. */
+export interface StaffSource {
+  me(): Promise<{ role: string }>;
+  departments(): Promise<ApiDepartment[]>;
+  zones(): Promise<{ name: string }[]>;
+  users(role?: string): Promise<ApiUser[]>;
+  reports(): Promise<ApiReport[]>;
+  report(id: string): Promise<ApiReport>;
+  /** A URL the browser can display for a report file, or null when it cannot be loaded. */
+  photo(url: string): Promise<string | null>;
+  review(id: string, body: { decision: string; priority: string; department_id?: string; note?: string }): Promise<void>;
+  assign(id: string, body: { department_id: string; assigned_to: string }): Promise<void>;
+  status(id: string, body: { status: string; note: string }): Promise<void>;
+  publish(id: string): Promise<void>;
 }
 
 async function request<T>(path: string, body?: object, method = 'GET'): Promise<T> {
@@ -50,7 +77,51 @@ async function request<T>(path: string, body?: object, method = 'GET'): Promise<
   return response.json() as Promise<T>;
 }
 
+const httpSource: StaffSource = {
+  me: () => request<{ role: string }>('/v1/auth/me'),
+  departments: async () => (await request<{ items: ApiDepartment[] }>('/v1/departments')).items,
+  zones: async () => (await request<{ items: { name: string }[] }>('/v1/zones')).items,
+  users: async (role) => (await request<{ items: ApiUser[] }>(role ? `/v1/users?role=${role}&active=true` : '/v1/users?active=true')).items,
+  async reports() {
+    const rows: ApiReport[] = [];
+    for (let offset = 0; ; offset += 200) {
+      const page = await request<{ items: ApiReport[] }>(`/v1/reports?limit=200&offset=${offset}`);
+      rows.push(...page.items);
+      if (page.items.length < 200) break;
+    }
+    return rows;
+  },
+  report: (id) => request<ApiReport>(`/v1/reports/${encodeURIComponent(id)}`),
+  async photo(url) {
+    const response = await fetch(`${BASE}${url}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
+    if (!response.ok) return null;
+    const previous = photoUrls.get(url);
+    if (previous) URL.revokeObjectURL(previous);
+    const shown = URL.createObjectURL(await response.blob());
+    photoUrls.set(url, shown);
+    return shown;
+  },
+  review: async (id, body) => { await request(`/v1/reports/${id}/review`, body, 'PATCH'); },
+  assign: async (id, body) => { await request(`/v1/reports/${id}/assign`, body, 'PATCH'); },
+  status: async (id, body) => { await request(`/v1/reports/${id}/status`, body, 'PATCH'); },
+  publish: async (id) => { await request(`/v1/reports/${id}/publish`, {}, 'POST'); },
+};
+
+let sourcePromise: Promise<StaffSource> | null = null;
+function source(): Promise<StaffSource> {
+  // Loaded on demand so the Supabase client is not bundled into the API-only path.
+  sourcePromise ||= SUPABASE_STAFF ? import('./supabase').then((m) => m.supabaseSource) : Promise.resolve(httpSource);
+  return sourcePromise;
+}
+
+/** Whether a staff session exists (a Supabase Auth session in Supabase mode). */
+export async function staffSessionReady(): Promise<boolean> {
+  if (!SUPABASE_STAFF) return hasStaffSession();
+  return (await import('./supabase')).hasSupabaseSession();
+}
+
 export async function login(email: string, password: string): Promise<void> {
+  if (SUPABASE_STAFF) { await (await import('./supabase')).supabaseSignIn(email, password); return; }
   const result = await request<{ access_token: string; user: { role: string } }>('/v1/auth/login', { email, password }, 'POST');
   if (!['admin', 'clerk', 'municipal_authority', 'department_authority', 'operative_staff'].includes(result.user.role)) {
     throw new Error('Kjo llogari nuk ka qasje te stafi.');
@@ -64,6 +135,10 @@ export function logout(): void {
   window.localStorage.removeItem(TOKEN_KEY);
   window.sessionStorage.removeItem('sinjal_session');
   window.localStorage.removeItem('sinjal_session');
+  if (SUPABASE_STAFF) {
+    window.localStorage.removeItem(SUPABASE_SESSION_KEY); // Signed out even if the page unloads first.
+    void import('./supabase').then((m) => m.supabaseSignOut()).catch(() => {});
+  }
   photoUrls.forEach((url) => URL.revokeObjectURL(url));
   photoUrls.clear();
 }
@@ -127,32 +202,25 @@ function fromApi(row: ApiReport): Report {
 }
 
 export async function loadStaff(): Promise<string> {
-  const account = await request<{ role: string }>('/v1/auth/me');
+  const api = await source();
+  const account = await api.me();
   // Direct navigation to the staff URL must respect the current database role.
   if (account.role !== 'clerk') return account.role;
-  const [deps, zones] = await Promise.all([
-    request<{ items: { id: string; code: string; name: string }[] }>('/v1/departments'),
-    request<{ items: { name: string }[] }>('/v1/zones'),
-  ]);
-  departments = new Map(deps.items.map((d) => [d.code, d.id]));
+  const [deps, zones] = await Promise.all([api.departments(), api.zones()]);
+  departments = new Map(deps.map((d) => [d.code, d.id]));
   SINJAL.departments.splice(0, SINJAL.departments.length,
-    ...deps.items.map((d) => ({ id: d.code as DeptId, name: d.name })),
+    ...deps.map((d) => ({ id: d.code as DeptId, name: d.name })),
     { id: 'unassigned', name: 'Pa departament' });
-  SINJAL.zones.splice(0, SINJAL.zones.length, ...zones.items.map((z) => z.name));
+  SINJAL.zones.splice(0, SINJAL.zones.length, ...zones.map((z) => z.name));
   try {
-    const people = await request<{ items: { id: string; full_name: string; department_id: string | null; role: string }[] }>('/v1/users?active=true');
-    users = new Map(people.items.map((u) => [u.id, u.id]));
-    SINJAL.employees.splice(0, SINJAL.employees.length, ...people.items.filter((u) => u.role === 'operative_staff').map((u) => ({
+    const people = await api.users();
+    users = new Map(people.map((u) => [u.id, u.id]));
+    SINJAL.employees.splice(0, SINJAL.employees.length, ...people.filter((u) => u.role === 'operative_staff').map((u) => ({
       id: u.id, full: u.full_name, name: u.full_name, dept: ([...departments].find(([, id]) => id === u.department_id)?.[0] || 'infra') as DeptId,
       coverageZones: [],
     })));
   } catch { SINJAL.employees.splice(0); } // Roles without user-directory access still see their own cases.
-  const rows: ApiReport[] = [];
-  for (let offset = 0; ; offset += 200) {
-    const page = await request<{ items: ApiReport[] }>(`/v1/reports?limit=200&offset=${offset}`);
-    rows.push(...page.items);
-    if (page.items.length < 200) break;
-  }
+  const rows = await api.reports();
   for (const row of rows) {
     if (!row.assigned_to || SINJAL.employees.some((e) => e.id === row.assigned_to)) continue;
     SINJAL.employees.push({ id: row.assigned_to, name: row.assigned_to_name || 'Staf',
@@ -184,25 +252,22 @@ export function isDatabaseCase(id: string): boolean {
  * Demo edits stay in the browser; real case transitions use the existing API.
  */
 export async function loadDemoStaff(): Promise<string> {
-  const account = await request<{ role: string }>('/v1/auth/me');
+  const api = await source();
+  const account = await api.me();
   if (account.role !== 'clerk') return account.role;
 
-  const [deps, zones] = await Promise.all([
-    request<{ items: { id: string; code: string; name: string }[] }>('/v1/departments'),
-    request<{ items: { name: string }[] }>('/v1/zones'),
-  ]);
-  departments = new Map(deps.items.map((d) => [d.code, d.id]));
-  for (const dept of deps.items) {
+  const [deps, zones] = await Promise.all([api.departments(), api.zones()]);
+  departments = new Map(deps.map((d) => [d.code, d.id]));
+  for (const dept of deps) {
     if (!SINJAL.departments.some((d) => d.id === dept.code))
       SINJAL.departments.push({ id: dept.code as DeptId, name: dept.name });
   }
-  for (const zone of zones.items) {
+  for (const zone of zones) {
     if (!SINJAL.zones.includes(zone.name)) SINJAL.zones.push(zone.name);
   }
   try {
-    const people = await request<{ items: { id: string; full_name: string; department_id: string | null }[] }>(
-      '/v1/users?role=operative_staff&active=true');
-    for (const person of people.items) {
+    const people = await api.users('operative_staff');
+    for (const person of people) {
       if (!SINJAL.employees.some((e) => e.id === person.id))
         SINJAL.employees.push({ id: person.id, full: person.full_name, name: person.full_name,
           dept: ([...departments].find(([, id]) => id === person.department_id)?.[0] || 'infra') as DeptId,
@@ -210,12 +275,7 @@ export async function loadDemoStaff(): Promise<string> {
     }
   } catch { /* The user directory is optional for clerk accounts. */ }
 
-  const rows: ApiReport[] = [];
-  for (let offset = 0; ; offset += 200) {
-    const page = await request<{ items: ApiReport[] }>(`/v1/reports?limit=200&offset=${offset}`);
-    rows.push(...page.items);
-    if (page.items.length < 200) break;
-  }
+  const rows = await api.reports();
   for (const row of rows) {
     rawStatuses.set(row.id, row.status);
     if (row.assigned_to && !SINJAL.employees.some((e) => e.id === row.assigned_to))
@@ -235,16 +295,12 @@ export async function loadDemoStaff(): Promise<string> {
 }
 
 export async function loadReportDetail(id: string): Promise<void> {
-  const row = await request<ApiReport>(`/v1/reports/${encodeURIComponent(id)}`);
+  const api = await source();
+  const row = await api.report(id);
   if (row.files?.length) {
     await Promise.all(row.files.filter((f) => ['citizen_photo', 'after_photo', 'before_photo'].includes(f.kind)).map(async (file) => {
-      const response = await fetch(`${BASE}${file.url}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' });
-      if (!response.ok) return;
-      const previous = photoUrls.get(file.url);
-      if (previous) URL.revokeObjectURL(previous);
-      const url = URL.createObjectURL(await response.blob());
-      photoUrls.set(file.url, url);
-      file.url = url;
+      const shown = await api.photo(file.url);
+      if (shown) file.url = shown;
     }));
   }
   rawStatuses.set(id, row.status);
@@ -254,6 +310,7 @@ export async function loadReportDetail(id: string): Promise<void> {
 
 /** Apply only transitions the backend actually supports. Never record an unsupported local-only edit. */
 export async function saveCase(id: string, patch: CaseOverride): Promise<void> {
+  const api = await source();
   const current = SINJAL.byId(id);
   if (!current) throw new Error('Raporti nuk u gjet.');
   const requested = patch.status && patch.status !== current.status ? statusOut[patch.status] : undefined;
@@ -264,23 +321,23 @@ export async function saveCase(id: string, patch: CaseOverride): Promise<void> {
   const lastNote = (patch.notes || []).at(-1);
   const note = String((patch.reopenLog || []).at(-1)?.reason || (lastNote && typeof lastNote !== 'string' ? lastNote.text : '') || '').trim();
   if (requested === 'under_review' && old === 'submitted') {
-    await request(`/v1/reports/${id}/review`, { decision: 'under_review', priority: priorityOut[patch.priority || current.priority] }, 'PATCH');
+    await api.review(id, { decision: 'under_review', priority: priorityOut[patch.priority || current.priority] });
   } else if (requested === 'rejected' && ['submitted', 'under_review'].includes(old || '')) {
-    await request(`/v1/reports/${id}/review`, { decision: 'rejected', priority: priorityOut[patch.priority || current.priority], note }, 'PATCH');
+    await api.review(id, { decision: 'rejected', priority: priorityOut[patch.priority || current.priority], note });
   } else if (requested === 'accepted' || ((patch.department || patch.responsible !== undefined) && ['submitted', 'under_review'].includes(old || ''))) {
     if (!deptId) throw new Error('Zgjidh departamentin përpara pranimit.');
-    await request(`/v1/reports/${id}/review`, { decision: 'accepted', department_id: deptId,
-      priority: priorityOut[patch.priority || current.priority] }, 'PATCH');
-    if (assignee) await request(`/v1/reports/${id}/assign`, { department_id: deptId, assigned_to: assignee }, 'PATCH');
+    await api.review(id, { decision: 'accepted', department_id: deptId,
+      priority: priorityOut[patch.priority || current.priority] });
+    if (assignee) await api.assign(id, { department_id: deptId, assigned_to: assignee });
   } else if (patch.department || patch.responsible !== undefined) {
     if (!deptId) throw new Error('Departamenti nuk u gjet.');
-    await request(`/v1/reports/${id}/assign`, { department_id: deptId, assigned_to: assignee || '' }, 'PATCH');
+    await api.assign(id, { department_id: deptId, assigned_to: assignee || '' });
   } else if (requested && ['in_progress', 'blocked', 'resolved'].includes(requested)) {
     const resolutionNote = requested === 'resolved' && !note ? window.prompt('Shënim për zgjidhjen:')?.trim() : note;
     if (requested === 'resolved' && !resolutionNote) throw new Error('Zgjidhja kërkon shënim.');
-    await request(`/v1/reports/${id}/status`, { status: requested, note: resolutionNote || '' }, 'PATCH');
+    await api.status(id, { status: requested, note: resolutionNote || '' });
   } else if (requested === 'published' && old === 'resolved') {
-    await request(`/v1/reports/${id}/publish`, {}, 'POST');
+    await api.publish(id);
   } else {
     throw new Error('Ky veprim nuk mbështetet ende nga API-ja e stafit.');
   }

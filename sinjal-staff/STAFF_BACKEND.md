@@ -6,6 +6,16 @@ Docker Compose builds the staff UI at `http://127.0.0.1:8013` and proxies `/v1/`
 
 The dashboard maps use the same Esri imagery service as the citizen map. The Kreu pins and Harta status rings are the authored ones; Harta's mouse wheel, buttons, drag and pinch move the satellite imagery and its overlays together. Imagery requires an internet connection.
 
+## Supabase mode
+
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` at build time (on Vercel: Config variables, then redeploy) and the staff app reads every table from Supabase instead of `/v1`:
+
+1. Run `supabase/schema.sql` once in the Supabase SQL editor. It creates `departments`, `zones`, `users`, `reports`, `report_status_history` and `report_files` with the backend's columns, the `staff_reports` view (the backend's `REPORT_SELECT` join), row level security, the private `report-files` storage bucket, and the `staff_review` / `staff_assign` / `staff_set_status` / `staff_publish` functions that replace the matching `/v1/reports/{id}/…` endpoints.
+2. Create each staff member under Authentication → Users and link them with a `public.users` row (example at the end of the SQL file). Only active `clerk` accounts can use this panel. Case changes are limited to `clerk` and `admin`.
+3. Open the staff app. With Supabase configured it shows its own sign-in form. The shared `/login/` page and the other role panels still use the API.
+
+The list, map, dashboard and department counts come from `staff_reports`. The detail view also reads `report_status_history` and `report_files` (photos are shown through short-lived signed URLs). Supabase mode shows database rows only; add `VITE_STAFF_DEMO=true` to also show the presentation data.
+
 ## Connected
 
 - Backend login and role authorization; real reports are loaded in pages of 200. In API-only mode, an API failure does not fall back to demo records.
