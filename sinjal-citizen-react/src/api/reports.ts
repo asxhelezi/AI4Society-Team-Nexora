@@ -1,10 +1,12 @@
 /*
  * The citizen-side API. Pages import these functions and nothing else — no fetch() or
- * localStorage "databases" in page code. Whether they hit the real backend or the
- * in-browser mocks is decided once, by VITE_USE_MOCKS (see client.ts).
+ * localStorage "databases" in page code. Which implementation they use is decided once:
+ * Supabase when VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set (supabaseReports.ts),
+ * otherwise the in-browser mocks or the FastAPI backend, by VITE_USE_MOCKS (see client.ts).
  */
 import { USE_MOCKS, apiRequest } from './client';
 import { mockReportsApi } from './mock/reportsMock';
+import { USE_SUPABASE, supabaseReportsApi } from './supabaseReports';
 import type { CreateReportResponse, FileKind, NominatimPlace, PublicReport, PublicReportList, ReportCreate, TrackedReport, UploadedFile } from './types';
 
 export interface ReportsApi {
@@ -50,7 +52,7 @@ const httpReportsApi: ReportsApi = {
   },
 };
 
-const api: ReportsApi = USE_MOCKS ? mockReportsApi : httpReportsApi;
+const api: ReportsApi = USE_SUPABASE ? supabaseReportsApi : USE_MOCKS ? mockReportsApi : httpReportsApi;
 
 /** Submit a new report. Returns its id and tracking code. */
 export const createReport = (payload: ReportCreate) => api.createReport(payload);

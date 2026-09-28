@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ROUTES } from '../lib/routes';
-import { AUTH_REQUIRED, REAL_STAFF, hasStaffSession, loadDemoStaff, loadStaff, logout } from '../api/staff';
+import { AUTH_REQUIRED, DESKTOP_ROLES, REAL_STAFF, hasStaffSession, loadDemoStaff, loadStaff, logout, restoreSession, subscribeToReports } from '../api/staff';
 
 const ROLE_DESTINATIONS: Record<string, string> = {
   admin: '/admin/', department_authority: '/department/',
@@ -54,16 +54,22 @@ export function App() {
       return;
     }
     let active = true;
-    (REAL_STAFF ? loadStaff() : loadDemoStaff()).then((role) => {
+    let unsubscribe = () => {};
+    restoreSession().then((ok) => {
+      if (!ok) throw new Error('No session');
+      return REAL_STAFF ? loadStaff() : loadDemoStaff();
+    }).then((role) => {
       if (!active) return;
-      if (role === 'clerk') setReady(true);
-      else if (ROLE_DESTINATIONS[role]) window.location.replace(ROLE_DESTINATIONS[role]);
+      if (DESKTOP_ROLES.includes(role)) {
+        unsubscribe = subscribeToReports();
+        setReady(true);
+      } else if (ROLE_DESTINATIONS[role]) window.location.replace(ROLE_DESTINATIONS[role]);
       else { logout(); window.location.replace('/login/'); }
     }).catch(() => {
       logout();
       window.location.replace('/login/');
     });
-    return () => { active = false; };
+    return () => { active = false; unsubscribe(); };
   }, []);
   if (!ready) return <div className="app-frame" />;
   return <StaffRoutes />;

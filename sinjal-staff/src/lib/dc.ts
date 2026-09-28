@@ -1,5 +1,8 @@
 import { useEffect, useReducer, useRef } from 'react';
 
+/** Dispatched on window when shared data (SINJAL.reports) changed outside a screen. */
+export const DATA_CHANGED_EVENT = 'sinjal:data-changed';
+
 /**
  * Base class for screen logic, matching the DCLogic contract the design files
  * were written against: `state`, `setState()` and a `renderVals()` that
@@ -52,7 +55,10 @@ export function useLogic<L extends AnyLogic>(Ctor: new (props: L['props']) => L,
 
   useEffect(() => {
     inst.onChange = forceRender;
+    // Live data (a report arriving through Supabase Realtime) re-renders every screen.
+    window.addEventListener(DATA_CHANGED_EVENT, forceRender);
     return () => {
+      window.removeEventListener(DATA_CHANGED_EVENT, forceRender);
       inst.onChange = null;
       inst.componentWillUnmount?.();
     };
